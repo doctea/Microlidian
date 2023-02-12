@@ -62,13 +62,17 @@ void setup() {
 
 
 void loop() {
-    if (millis() % (int)micros_per_tick == 0)
+    static unsigned long last_ticked = 0;
+    if (micros() - last_ticked > micros_per_tick) {
         ticks++;
-    
-    if (is_bpm_on_beat(ticks)) {
-        Serial.println("beat!");
+        last_ticked = micros();
+        if (is_bpm_on_beat(ticks)) {
+            Serial.printf("beat %i!\n", ticks / PPQN);
+            Serial.flush();
+        }
+        menu->update_ticks(ticks);
     }
-
+    
     #ifdef ENABLE_SCREEN
         /*if (debug_flag) { Serial.println(F("about to do menu->update_ticks(ticks)")); Serial_flush(); }
         menu->update_ticks(ticks);
