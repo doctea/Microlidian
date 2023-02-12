@@ -19,8 +19,8 @@
 /*#include "mymenu/menu_looper.h"
 #include "mymenu/menu_sequencer.h"*/
 #include "mymenu/menu_bpm.h"
-/*#include "mymenu/menu_clock_source.h"
-#include "mymenu/menu_midi_matrix.h"
+#include "mymenu/menu_clock_source.h"
+/*#include "mymenu/menu_midi_matrix.h"
 
 #include "menuitems_object_multitoggle.h"
 
@@ -68,8 +68,8 @@ Menu *menu = nullptr; // = Menu();
 LoopMarkerPanel top_loop_marker_panel = LoopMarkerPanel(LOOP_LENGTH_TICKS, PPQN, BEATS_PER_BAR, BARS_PER_PHRASE);
 
 BPMPositionIndicator posbar = BPMPositionIndicator();
-/*ClockSourceSelectorControl clock_source_selector = ClockSourceSelectorControl("Clock source", clock_mode);
-
+ClockSourceSelectorControl clock_source_selector = ClockSourceSelectorControl("Clock source", clock_mode);
+/*
 // make these global so that we can toggle it from input_keyboard
 ObjectMultiToggleControl *project_multi_recall_options = nullptr;
 ObjectMultiToggleControl *project_multi_autoadvance = nullptr;
@@ -102,6 +102,8 @@ extern FileViewerMenuItem *project_fileviewer;*/
 MenuItem test_item_1 = MenuItem("test 1");
 MenuItem test_item_2 = MenuItem("test 2");
 MenuItem test_item_3 = MenuItem("test 3");
+MenuItem test_item_4 = MenuItem("test 4");
+MenuItem test_item_5 = MenuItem("test 5");
 
 //DisplayTranslator_STeensy steensy = DisplayTranslator_STeensy();
 //DisplayTranslator_STeensy_Big steensy = DisplayTranslator_STeensy_Big();
@@ -115,7 +117,6 @@ void setup_menu() {
 
     //DisplayTranslator_Configured displaytranslator = DisplayTranslator_Configured();
     tft = &displaytranslator; //DisplayTranslator_STeensy();
-
     tft->init();
     //delay(50);
     //Serial.println(F("Finished  constructor"));
@@ -130,11 +131,13 @@ void setup_menu() {
 
     menu->add_pinned(&top_loop_marker_panel);  // pinned position indicator
     menu->add(&posbar);     // bpm and position indicator
-    //menu->add(&clock_source_selector);  // midi clock source (internal or from PC USB)
+    menu->add(&clock_source_selector);  // midi clock source (internal or from PC USB)
 
     menu->add(&test_item_1);
     menu->add(&test_item_2);
     menu->add(&test_item_3);
+    menu->add(&test_item_4);
+    menu->add(&test_item_5);
     
     #ifdef DISABLED_STUFF
     menu->add(new SeparatorMenuItem("Project"));

@@ -10,14 +10,10 @@
 
 #include "debug.h"
 
+#include "clock.h"
 #include "bpm.h"
 
 bool debug_flag = false;
-
-/*#include <Adafruit_GFX_Buffer.h>
-#include <Adafruit_GFX.h>    // Core graphics library
-#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
-#include <SPI.h>*/
 
 Adafruit_USBD_MIDI usb_midi;
 MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MIDI);
@@ -36,11 +32,17 @@ void setup() {
     Serial.println("setup() starting");
     Serial.flush();
 
-    pinMode(ENCODER_KNOB_L, INPUT_PULLUP);
-    pinMode(ENCODER_KNOB_R, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_A, INPUT_PULLDOWN);
+    #if defined(ARDUINO_ARCH_MBED) && defined(ARDUINO_ARCH_RP2040)
+        // Manual begin() is required on core without built-in support for TinyUSB such as mbed rp2040
+        TinyUSB_Device_Init(0);
+    #endif
 
     #ifdef ENABLE_SCREEN
+        pinMode(ENCODER_KNOB_L, INPUT_PULLUP);
+        pinMode(ENCODER_KNOB_R, INPUT_PULLUP);
+        pinMode(PIN_BUTTON_A, INPUT_PULLDOWN);
+        pinMode(PIN_BUTTON_B, INPUT_PULLDOWN);
+
         tft_print((char*)"Ready!"); 
         tft_clear();
 
@@ -56,6 +58,12 @@ void setup() {
         menu->select_page(0);
     #endif
 
+    MIDI.begin(MIDI_CHANNEL_OMNI);
+
+    while( !TinyUSBDevice.mounted() ) delay(1);
+
+    MIDI.setHandleClock(pc_usb_midi_handle_clock);
+
     Serial.println("setup() finished!");
     
 }
@@ -63,18 +71,18 @@ void setup() {
 
 void update_screen();
 
+
 void loop() {
-    static unsigned long last_ticked = 0;
-    if (micros() - last_ticked > micros_per_tick) {
-        ticks++;
-        last_ticked = micros();
-        if (is_bpm_on_beat(ticks)) {
-            Serial.printf("beat %i!\n", ticks / PPQN);
-            Serial.flush();
-        }
-        menu->update_ticks(ticks);
-    }
+    MIDI.read();
+
+    bool ticked = update_clock_ticks();
+
     //multicore_launch_core1(update_screen);
+    #ifdef ENABLE_SCREEN
+        if (ticked) {
+            menu->update_ticks(ticks);
+        }
+    #endif
     update_screen();
 }
 
