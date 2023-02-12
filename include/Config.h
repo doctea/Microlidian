@@ -1,3 +1,10 @@
+#ifndef FLASHMEM
+    #define FLASHMEM
+    //#define F(x) { x }
+#endif
+
+//#define ENABLE_DEBUG_SERIAL
+
 /*#ifndef ENABLE_SCREEN
     #define ENABLE_SCREEN       // tft
 #endif*/
@@ -16,9 +23,11 @@
 
 #ifdef ENABLE_SCREEN
     #define ENCODER_STEP_DIVISOR    4
-    #define PIN_BUTTON_A    4   // pin to receive encoder button
-    #define PIN_BUTTON_B    5   // pin to receive back button
-    #define PIN_BUTTON_C    26  // pin to receive right-hand / save button
-    #define ENCODER_KNOB_L  2   // pin to receive left-encoder pulses
-    #define ENCODER_KNOB_R  3   // pin to receive right-encoder pulses
+    #define PIN_BUTTON_A    D1   // pin to receive encoder button
+    //#define PIN_BUTTON_B    5   // pin to receive back button
+    //#define PIN_BUTTON_C    26  // pin to receive right-hand / save button
+    #define ENCODER_KNOB_L  D2   // pin to receive left-encoder pulses
+    #define ENCODER_KNOB_R  D3   // pin to receive right-encoder pulses
 #endif
+
+#define DEFAULT_CLOCK_MODE  CLOCK_INTERNAL      

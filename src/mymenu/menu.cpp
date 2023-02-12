@@ -1,6 +1,8 @@
 #include "Config.h"
 //#include "storage.h"
 
+#include "debug.h"
+
 #include <Arduino.h>
 
 #ifdef ENABLE_SCREEN
@@ -15,9 +17,9 @@
 #include "submenuitem.h"
 
 /*#include "mymenu/menu_looper.h"
-#include "mymenu/menu_sequencer.h"
+#include "mymenu/menu_sequencer.h"*/
 #include "mymenu/menu_bpm.h"
-#include "mymenu/menu_clock_source.h"
+/*#include "mymenu/menu_clock_source.h"
 #include "mymenu/menu_midi_matrix.h"
 
 #include "menuitems_object_multitoggle.h"
@@ -63,12 +65,10 @@ Menu *menu = nullptr; // = Menu();
     //extern Bounce pushButtonC;
 #endif
 
-/*LoopMarkerPanel top_loop_marker_panel = LoopMarkerPanel(LOOP_LENGTH_TICKS, PPQN, BEATS_PER_BAR, BARS_PER_PHRASE);
+LoopMarkerPanel top_loop_marker_panel = LoopMarkerPanel(LOOP_LENGTH_TICKS, PPQN, BEATS_PER_BAR, BARS_PER_PHRASE);
 
 BPMPositionIndicator posbar = BPMPositionIndicator();
-ClockSourceSelectorControl clock_source_selector = ClockSourceSelectorControl("Clock source", clock_mode);
-
-
+/*ClockSourceSelectorControl clock_source_selector = ClockSourceSelectorControl("Clock source", clock_mode);
 
 // make these global so that we can toggle it from input_keyboard
 ObjectMultiToggleControl *project_multi_recall_options = nullptr;
@@ -99,6 +99,10 @@ MidiMatrixSelectorControl midi_matrix_selector = MidiMatrixSelectorControl("MIDI
 extern FileViewerMenuItem *sequence_fileviewer;
 extern FileViewerMenuItem *project_fileviewer;*/
 
+MenuItem test_item_1 = MenuItem("test 1");
+MenuItem test_item_2 = MenuItem("test 2");
+MenuItem test_item_3 = MenuItem("test 3");
+
 //DisplayTranslator_STeensy steensy = DisplayTranslator_STeensy();
 //DisplayTranslator_STeensy_Big steensy = DisplayTranslator_STeensy_Big();
 DisplayTranslator_Configured displaytranslator = DisplayTranslator_Configured();
@@ -108,7 +112,11 @@ FLASHMEM
 #endif*/
 void setup_menu() {
     Serial.println(F("Starting setup_menu()..")); //Instantiating DisplayTranslator_STeensy.."));
+
+    //DisplayTranslator_Configured displaytranslator = DisplayTranslator_Configured();
     tft = &displaytranslator; //DisplayTranslator_STeensy();
+
+    tft->init();
     //delay(50);
     //Serial.println(F("Finished  constructor"));
     Serial_flush();
@@ -118,13 +126,16 @@ void setup_menu() {
     Serial.println(F("Created Menu object"));
     Serial_flush();
 
-    /*menu->set_messages_log(messages_log);
+    menu->set_messages_log(messages_log);
 
     menu->add_pinned(&top_loop_marker_panel);  // pinned position indicator
     menu->add(&posbar);     // bpm and position indicator
+    //menu->add(&clock_source_selector);  // midi clock source (internal or from PC USB)
 
-    menu->add(&clock_source_selector);  // midi clock source (internal or from PC USB)
-    */
+    menu->add(&test_item_1);
+    menu->add(&test_item_2);
+    menu->add(&test_item_3);
+    
     #ifdef DISABLED_STUFF
     menu->add(new SeparatorMenuItem("Project"));
 
@@ -266,9 +277,15 @@ void setup_menu() {
     #endif
 
     // enable encoder and separate buttons
-    pinMode(PIN_BUTTON_A, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_B, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_C, INPUT_PULLUP);
+    #ifdef PIN_BUTTON_A
+        pinMode(PIN_BUTTON_A, INPUT_PULLUP);
+    #endif
+    #ifdef PIN_BUTTON_B
+        pinMode(PIN_BUTTON_B, INPUT_PULLUP);
+    #endif
+    #ifdef PIN_BUTTON_C
+        pinMode(PIN_BUTTON_C, INPUT_PULLUP);
+    #endif
 
     Serial.println(F("Exiting setup_menu"));
     Serial_flush();
