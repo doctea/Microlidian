@@ -9,7 +9,7 @@
     #define ENABLE_SCREEN       // tft
 #endif*/
 #ifdef ENABLE_SCREEN
-    #define DisplayTranslator_Configured DisplayTranslator_ST7789
+    #define DisplayTranslator_Configured DisplayTranslator_Bodmer
     //#ifndef TFT_ST7789_T3
     //    #define TFT_ST7789_T3
     //    #define TFT_ST7789_T3_BIG
@@ -31,3 +31,10 @@
 #endif
 
 #define DEFAULT_CLOCK_MODE  CLOCK_INTERNAL      
+
+#define SCREEN_WIDTH 135
+#define SCREEN_HEIGHT 240
+#define SCREEN_ROTATION 3
+
+#define TFT_SCLK D8
+#define TFT_MOSI D10

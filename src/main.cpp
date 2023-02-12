@@ -41,8 +41,8 @@ void setup() {
     pinMode(PIN_BUTTON_A, INPUT_PULLDOWN);
 
     #ifdef ENABLE_SCREEN
-        //tft_print((char*)"Ready!"); 
-        //tft_clear();
+        tft_print((char*)"Ready!"); 
+        tft_clear();
 
         setup_menu();
 
@@ -61,6 +61,8 @@ void setup() {
 }
 
 
+void update_screen();
+
 void loop() {
     static unsigned long last_ticked = 0;
     if (micros() - last_ticked > micros_per_tick) {
@@ -72,7 +74,11 @@ void loop() {
         }
         menu->update_ticks(ticks);
     }
-    
+    //multicore_launch_core1(update_screen);
+    update_screen();
+}
+
+void update_screen() {
     #ifdef ENABLE_SCREEN
         /*if (debug_flag) { Serial.println(F("about to do menu->update_ticks(ticks)")); Serial_flush(); }
         menu->update_ticks(ticks);

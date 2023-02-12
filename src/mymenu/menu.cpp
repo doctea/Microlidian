@@ -7,10 +7,10 @@
 
 #ifdef ENABLE_SCREEN
 
-#include <Adafruit_GFX_Buffer.h>
+/*#include <Adafruit_GFX_Buffer.h>
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
-#include <SPI.h>
+#include <SPI.h>*/
 
 #include "mymenu.h"
 
@@ -45,7 +45,7 @@
 #include "profiler.h"*/
 
 //DisplayTranslator *tft;
-DisplayTranslator_ST7789 *tft = nullptr;
+DisplayTranslator_Bodmer *tft = nullptr;
 Menu *menu = nullptr; // = Menu();
 
 #ifdef ENCODER_KNOB_L
