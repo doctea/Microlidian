@@ -15,6 +15,8 @@
 #include "clock.h"
 #include "bpm.h"
 
+#include "sequencer/sequencing.h"
+
 bool debug_flag = false;
 
 Adafruit_USBD_MIDI usb_midi;
@@ -32,7 +34,7 @@ void setup() {
         while(!Serial) {};
     #endif
 
-    Serial.println("setup1() starting");
+    Serial.println("setup() starting");
 
     #ifdef ENABLE_SCREEN
         pinMode(ENCODER_KNOB_L, INPUT_PULLUP);
@@ -54,6 +56,9 @@ void setup() {
 
         menu->select_page(0);
     #endif
+
+    Serial.println("setting up sequencer..");
+    setup_sequencer();
 
     Serial.println("setup() finished!");
 }
@@ -109,6 +114,10 @@ void loop1() {*/
         }
         update_screen();
     #endif
+
+    if (ticked) {
+        sequencer.on_tick(ticks);
+    }
 }
 
 void update_screen() {
