@@ -45,7 +45,7 @@
 #include "profiler.h"*/
 
 //DisplayTranslator *tft;
-DisplayTranslator_Bodmer *tft = nullptr;
+DisplayTranslator_Configured *tft = nullptr;
 Menu *menu = nullptr; // = Menu();
 
 #ifdef ENCODER_KNOB_L

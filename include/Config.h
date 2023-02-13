@@ -5,11 +5,13 @@
 
 //#define ENABLE_DEBUG_SERIAL
 
-/*#ifndef ENABLE_SCREEN
-    #define ENABLE_SCREEN       // tft
-#endif*/
 #ifdef ENABLE_SCREEN
-    #define DisplayTranslator_Configured DisplayTranslator_Bodmer
+    #ifdef TFT_BODMER
+        #define DisplayTranslator_Configured DisplayTranslator_Bodmer
+    #endif
+    #ifdef TFT_ST7789
+        #define DisplayTranslator_Configured DisplayTranslator_ST7789
+    #endif
     //#ifndef TFT_ST7789_T3
     //    #define TFT_ST7789_T3
     //    #define TFT_ST7789_T3_BIG
