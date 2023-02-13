@@ -7,6 +7,8 @@
 #define DEFAULT_VELOCITY 127
 #define PPQN    24
 
+class BaseOutput;
+
 class BasePattern {
     public:
 
@@ -50,8 +52,14 @@ class SimplePattern : public BasePattern {
 
     event *events = nullptr;
 
+    BaseOutput *output = nullptr;
+
     SimplePattern() : BasePattern() {
         this->events = (event*)calloc(sizeof(event), steps);
+    }
+
+    virtual void set_output(BaseOutput *output) {
+        this->output = output;
     }
 
     virtual unsigned int get_step_for_tick(unsigned int tick) {
@@ -93,8 +101,8 @@ class SimplePattern : public BasePattern {
         Serial.println();
     };
 
-    virtual void trigger_on_for_step(int step) = 0;
-    virtual void trigger_off_for_step(int step) = 0;
+    virtual void trigger_on_for_step(int step);
+    virtual void trigger_off_for_step(int step);
 
 };
 

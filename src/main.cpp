@@ -29,6 +29,9 @@ MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MIDI);
 Encoder encoder(D2, D3);
 Bounce pushButton = Bounce(D1, 10); // 10ms debounce
 
+#include "outputs/output.h"
+MIDIOutputProcessor output_processer = MIDIOutputProcessor(&MIDI);
+
 void setup() {
     #ifdef WAIT_FOR_SERIAL
         while(!Serial) {};
@@ -59,6 +62,8 @@ void setup() {
 
     Serial.println("setting up sequencer..");
     setup_sequencer();
+
+    output_processer.configure_sequencer(&sequencer);
 
     Serial.println("setup() finished!");
 }
@@ -117,6 +122,10 @@ void loop1() {*/
 
     if (ticked) {
         sequencer.on_tick(ticks);
+
+        if (is_bpm_on_sixteenth(ticks)) {
+            output_processer.process();
+        }
     }
 }
 

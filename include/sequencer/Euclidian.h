@@ -75,14 +75,13 @@ class EuclidianPattern : public SimplePattern {
         Serial.println("todo: mutate the pattern");
     }
 
-    void trigger_on_for_step(int step) override {
+    /*void trigger_on_for_step(int step) override {
         Serial.printf("trigger_on_for_step(%i)\n", step);
     }
 
     void trigger_off_for_step(int step) override {
         Serial.printf("trigger_off_for_step(%i)\n", step);
-    }
-
+    }*/
 };
 
 class EuclidianSequencer : public BaseSequencer {

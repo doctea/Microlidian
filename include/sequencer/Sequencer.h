@@ -1,4 +1,8 @@
+#ifndef SEQUENCER__INCLUDED
+#define SEQUENCER__INCLUDED
+
 class SimplePattern;
+class BaseOutput;
 
 class BaseSequencer {
     public:
@@ -39,5 +43,10 @@ class BaseSequencer {
     virtual void on_beat(int beat) = 0;
     virtual void on_bar(int bar) = 0;
     virtual void on_phrase(int phrase) = 0;
+
+    virtual void configure_pattern_output(int index, BaseOutput *output);
     
 };
+
+
+#endif

@@ -1,4 +1,4 @@
 #include <Arduino.h>
 
-#include "sequencer/Patterns.h"
+#include "sequencer/Euclidian.h"
 
