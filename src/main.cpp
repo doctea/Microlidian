@@ -17,6 +17,8 @@
 
 #include "sequencer/sequencing.h"
 
+bool update_screen();
+
 bool debug_flag = false;
 
 Adafruit_USBD_MIDI usb_midi;
@@ -32,7 +34,7 @@ Bounce pushButton = Bounce(D1, 10); // 10ms debounce
 #include "outputs/output.h"
 MIDIOutputProcessor output_processer = MIDIOutputProcessor(&MIDI);
 
-void setup1() {
+void setup() {
     #ifdef WAIT_FOR_SERIAL
         while(!Serial) {};
     #endif
@@ -69,7 +71,7 @@ void setup1() {
 }
 
 
-void setup() {
+void setup1() {
     Serial.begin(115200);
     //delay(1000);
     #ifdef WAIT_FOR_SERIAL
@@ -95,9 +97,9 @@ void setup() {
     Serial.println("setup1() finished!");
 }
 
-void update_screen();
 
 void loop() {
+    //Serial.println("loop()");
     MIDI.read();
 
     bool ticked = update_clock_ticks();

@@ -35,7 +35,7 @@ class MIDIDrumOutput : public BaseOutput {
     virtual byte get_last_note_number() {
         return this->last_note_number;
     }
-    virtual byte set_last_note_number(byte note_number) {
+    virtual void set_last_note_number(byte note_number) {
         this->last_note_number = note_number;
     }
     virtual byte get_channel() {
