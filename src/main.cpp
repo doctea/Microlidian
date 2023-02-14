@@ -73,6 +73,7 @@ void setup() {
 
 void setup1() {
     Serial.begin(115200);
+    Serial.setTimeout(0);
     //delay(1000);
     #ifdef WAIT_FOR_SERIAL
         while(!Serial) {}
@@ -86,6 +87,7 @@ void setup1() {
     #endif
 
     MIDI.begin(MIDI_CHANNEL_OMNI);
+    MIDI.turnThruOff();
 
     while( !TinyUSBDevice.mounted() ) delay(1);
 
@@ -97,19 +99,24 @@ void setup1() {
     Serial.println("setup1() finished!");
 }
 
+volatile bool ticked = false;
 
 void loop() {
     //Serial.println("loop()");
     MIDI.read();
 
-    bool ticked = update_clock_ticks();
+    //bool
+    ticked = update_clock_ticks();
+    //queue_try_add()
 
     if (ticked) {
         sequencer.on_tick(ticks);
-
+        
         if (is_bpm_on_sixteenth(ticks)) {
             output_processer.process();
         }
+
+        //menu->update_ticks(ticks);
     }
 
 #ifdef DUALCORE
@@ -122,13 +129,14 @@ void loop1() {
     #ifdef ENABLE_SCREEN
         //if (ticked) {
         //uint32_t ticked = 0;
-        if (ticked) {
+        //if (ticked) {
             //if (multicore_fifo_pop_timeout_us(100, &ticked)) {
             //Serial.printf("second core received ticked, ticks is %i\n", ticks);
-            //if (ticked)
-            menu->update_ticks(ticks);
-            last_tick = ticks;
-        }
+            if (ticked) {
+                menu->update_ticks(ticks);
+                last_tick = ticks;
+            }
+        //}
         update_screen();
     #endif
 }

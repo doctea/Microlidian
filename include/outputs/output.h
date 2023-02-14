@@ -88,7 +88,7 @@ class MIDINoteOutput : public MIDIDrumOutput {
                 count += o->should_go_on() ? i : 0;
             }
             Serial.printf("get_note_number in MIDINoteOutput is %i\n", count);
-            return base_note + count;
+            return base_note + quantise_pitch(count);
         }
 };
 

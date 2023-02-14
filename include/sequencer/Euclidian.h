@@ -72,7 +72,25 @@ class EuclidianPattern : public SimplePattern {
     }  
 
     void mutate() {
-        Serial.println("todo: mutate the pattern");
+        //Serial.println("todo: mutate the pattern");
+        int r = random(0, 100);
+        if (r > 50) {
+            if (r > 75) {
+                this->pulses += 1;
+            } else {
+                this->pulses -= 1;
+            }
+        } else if (r < 25) {
+            this->rotation += 1;
+        } else if (r > 25) {
+            this->pulses *= 2;
+        } else {
+            this->pulses /= 2;
+        }
+        if (this->pulses >= this->maximum_steps || this->pulses <= 0) {
+            this->pulses = 1;
+        }
+        this->make_euclid();
     }
 
     /*void trigger_on_for_step(int step) override {
@@ -89,10 +107,10 @@ class EuclidianSequencer : public BaseSequencer {
     EuclidianPattern **patterns = nullptr;
 
     int mutate_minimum_pattern = 0, mutate_maximum_pattern = number_patterns;
-    bool reset_before_mutate, mutate_enabled, fills_enabled;
+    bool reset_before_mutate = true, mutate_enabled = true, fills_enabled = true;
 
     int get_euclidian_seed() {
-        return 0;
+        return BPM_CURRENT_PHRASE;
     }
 
     public:
@@ -135,9 +153,19 @@ class EuclidianSequencer : public BaseSequencer {
 
     virtual void on_loop(int tick) override {};
     virtual void on_tick(int tick) override {
-        if (is_bpm_on_sixteenth(tick))
+        if (is_bpm_on_phrase(tick)) {
+            this->on_phrase(BPM_CURRENT_PHRASE);
+        }
+        if (is_bpm_on_bar(tick)) {
+            this->on_bar(BPM_CURRENT_BAR_OF_PHRASE);
+        }
+        if (is_bpm_on_beat(tick)) {
+            this->on_bar(BPM_CURRENT_BEAT_OF_BAR);
+        }
+        if (is_bpm_on_sixteenth(tick)) {
             //this->on_step(this->get_step_for_tick(tick));
             this->on_step(tick / (PPQN/4));
+        }
     };
     virtual void on_step(int step) override {
         for (int i = 0 ; i < number_patterns ; i++) {
@@ -148,7 +176,7 @@ class EuclidianSequencer : public BaseSequencer {
 
     };
     virtual void on_bar (int bar) override {
-        if (bar == BARS_PER_PHRASE -1) {
+        if (bar == BARS_PER_PHRASE - 1) {
             // do fill
             for (int i = 0 ; i < 3 ; i++) {
                 int ran = random(0/*euclidian_mutate_minimum_pattern % NUM_PATTERNS*/, constrain(1 + mutate_maximum_pattern, 0, number_patterns));

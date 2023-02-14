@@ -1,1 +1,3 @@
-#define WAIT_FOR_SERIAL
+//#define WAIT_FOR_SERIAL
+
+//#define DUALCORE
