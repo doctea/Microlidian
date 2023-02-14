@@ -98,7 +98,7 @@ class SimplePattern : public BasePattern {
             //Serial.printf("query_note_on_for_step!,");
             this->trigger_on_for_step(step);
         }
-        Serial.println();
+        //Serial.println();
     };
 
     virtual void trigger_on_for_step(int step);
