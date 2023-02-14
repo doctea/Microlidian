@@ -21,7 +21,7 @@ class BaseOutput {
 class MIDIDrumOutput : public BaseOutput {
     public:
 
-    byte note_number = -1;
+    byte note_number = -1, last_note_number = -1;
     byte channel = 10;
     byte event_value_1, event_value_2, event_value_3;
 
@@ -31,6 +31,12 @@ class MIDIDrumOutput : public BaseOutput {
 
     virtual byte get_note_number() {
         return this->note_number;
+    }
+    virtual byte get_last_note_number() {
+        return this->last_note_number;
+    }
+    virtual byte set_last_note_number(byte note_number) {
+        this->last_note_number = note_number;
     }
     virtual byte get_channel() {
         return this->channel;
@@ -110,20 +116,20 @@ class MIDIOutputProcessor {
         midi->sendNoteOff(35 + count, 0, 1);
         count = 0;
         for (int i = 0 ; i < this->nodes.size() ; i++) {
+            MIDIDrumOutput *o = this->nodes.get(i);
             Serial.printf("\tnode %i\n", i);
-            if (this->nodes.get(i)->should_go_off()) {
-                MIDIDrumOutput *o = this->nodes.get(i);
-                int note_number = o->get_note_number();
+            if (o->should_go_off()) {
+                int note_number = o->get_last_note_number();
                 Serial.printf("\t\tgoes off note %i (%s), ", note_number, get_note_name_c(note_number));
                 //Serial.printf("Sending note off for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
                 midi->sendNoteOff(note_number, 0, o->get_channel());
                 //this->nodes.get(i)->went_off();
             }
-            if (this->nodes.get(i)->should_go_on()) {
-                MIDIDrumOutput *o = this->nodes.get(i);
+            if (o->should_go_on()) {
                 int note_number = o->get_note_number();
                 Serial.printf("\t\tgoes on note %i (%s), ", note_number, get_note_name_c(note_number));
                 //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
+                o->set_last_note_number(note_number);
                 midi->sendNoteOn(note_number, MIDI_MAX_VELOCITY, o->get_channel());
                 //this->nodes.get(i)->went_on();
                 //count += i;
