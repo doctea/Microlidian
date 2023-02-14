@@ -73,6 +73,7 @@ class MIDIDrumOutput : public BaseOutput {
 class MIDINoteOutput : public MIDIDrumOutput {
     public:
         LinkedList<MIDIDrumOutput*> *nodes = nullptr;
+        int base_note = 35;
 
         MIDINoteOutput(LinkedList<MIDIDrumOutput*> *nodes) : MIDIDrumOutput(0) {
             this->channel = 1;
@@ -87,7 +88,7 @@ class MIDINoteOutput : public MIDIDrumOutput {
                 count += o->should_go_on() ? i : 0;
             }
             Serial.printf("get_note_number in MIDINoteOutput is %i\n", count);
-            return count;
+            return base_note + count;
         }
 };
 
