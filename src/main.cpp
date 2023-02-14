@@ -32,7 +32,7 @@ Bounce pushButton = Bounce(D1, 10); // 10ms debounce
 #include "outputs/output.h"
 MIDIOutputProcessor output_processer = MIDIOutputProcessor(&MIDI);
 
-void setup() {
+void setup1() {
     #ifdef WAIT_FOR_SERIAL
         while(!Serial) {};
     #endif
@@ -69,7 +69,7 @@ void setup() {
 }
 
 
-void setup1() {
+void setup() {
     Serial.begin(115200);
     //delay(1000);
     #ifdef WAIT_FOR_SERIAL
@@ -97,28 +97,10 @@ void setup1() {
 
 void update_screen();
 
-
 void loop() {
     MIDI.read();
 
     bool ticked = update_clock_ticks();
-/* }
-
-void loop1() {*/
-
-    static uint32_t last_tick = -1;
-    #ifdef ENABLE_SCREEN
-        //if (ticked) {
-        //uint32_t ticked = 0;
-        if (ticks!=last_tick) {
-            //if (multicore_fifo_pop_timeout_us(100, &ticked)) {
-            //Serial.printf("second core received ticked, ticks is %i\n", ticks);
-            //if (ticked)
-            menu->update_ticks(ticks);
-            last_tick = ticks;
-        }
-        update_screen();
-    #endif
 
     if (ticked) {
         sequencer.on_tick(ticks);
@@ -127,9 +109,31 @@ void loop1() {*/
             output_processer.process();
         }
     }
+
+#ifdef DUALCORE
 }
 
-void update_screen() {
+void loop1() {
+#endif
+
+    static uint32_t last_tick = -1;
+    #ifdef ENABLE_SCREEN
+        //if (ticked) {
+        //uint32_t ticked = 0;
+        if (ticked) {
+            //if (multicore_fifo_pop_timeout_us(100, &ticked)) {
+            //Serial.printf("second core received ticked, ticks is %i\n", ticks);
+            //if (ticked)
+            menu->update_ticks(ticks);
+            last_tick = ticks;
+        }
+        update_screen();
+    #endif
+}
+
+
+bool update_screen() {
+    bool screen_was_drawn = false;
     #ifdef ENABLE_SCREEN
         /*if (debug_flag) { Serial.println(F("about to do menu->update_ticks(ticks)")); Serial_flush(); }
         menu->update_ticks(ticks);
@@ -139,7 +143,6 @@ void update_screen() {
         ///Serial.println("going into menu->display and then pausing 1000ms: "); Serial_flush();
         */
         static unsigned long last_drawn;
-        bool screen_was_drawn = false;
         if (menu!=nullptr) {
             menu->update_inputs();
         } else {
@@ -156,10 +159,11 @@ void update_screen() {
             //Serial.printf("display() took %ums..", millis()-before_display);
             last_drawn = millis();
             screen_was_drawn = true;
+        } else {
+            screen_was_drawn = false;
         }
       //delay(1000); Serial.println("exiting sleep after menu->display"); Serial_flush();
     #endif
-    /*Serial.println("looped");
-    Serial.flush();*/
-    //delay(1000);
+
+    return screen_was_drawn;
 }
