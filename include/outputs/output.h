@@ -16,7 +16,7 @@ class BaseOutput {
 
 #include "sequencer/Sequencer.h"
 
-#include "midihelpers.h"
+#include "midi_helpers.h"
 
 class MIDIDrumOutput : public BaseOutput {
     public:
