@@ -103,8 +103,8 @@ class MIDIOutputProcessor {
     MIDIOutputProcessor(midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi) {
         this->midi = midi;
 
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_ACOUSTIC_BASS_DRUM));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_ACOUSTIC_SNARE));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_BASS_DRUM));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_SNARE));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_OPEN_HI_HAT));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_PEDAL_HI_HAT));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_CLOSED_HI_HAT));
