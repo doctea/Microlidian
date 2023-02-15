@@ -9,6 +9,8 @@ class BaseOutput {
     virtual void reset() = 0;
 };
 
+#include "debug.h"
+
 #include <Adafruit_TinyUSB.h>
 #include "MIDI.h"
 #include "Drums.h"
@@ -87,7 +89,7 @@ class MIDINoteOutput : public MIDIDrumOutput {
                 if (o==this) continue;
                 count += o->should_go_on() ? i : 0;
             }
-            Serial.printf("get_note_number in MIDINoteOutput is %i\n", count);
+            Debug_printf("get_note_number in MIDINoteOutput is %i\n", count);
             return base_note + quantise_pitch(count);
         }
 };
@@ -112,30 +114,30 @@ class MIDIOutputProcessor {
     //virtual void on_tick(uint32_t ticks) {
         //if (is_bpm_on_sixteenth(ticks)) {
     virtual void process() {
-        Serial.println("process-->");
+        Debug_println("process-->");
         static int count = 0;
         midi->sendNoteOff(35 + count, 0, 1);
         count = 0;
         for (int i = 0 ; i < this->nodes.size() ; i++) {
             MIDIDrumOutput *o = this->nodes.get(i);
-            Serial.printf("\tnode %i\n", i);
+            Debug_printf("\tnode %i\n", i);
             if (o->should_go_off()) {
                 int note_number = o->get_last_note_number();
-                Serial.printf("\t\tgoes off note %i (%s), ", note_number, get_note_name_c(note_number));
+                Debug_printf("\t\tgoes off note %i (%s), ", note_number, get_note_name_c(note_number));
                 //Serial.printf("Sending note off for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
                 midi->sendNoteOff(note_number, 0, o->get_channel());
                 //this->nodes.get(i)->went_off();
             }
             if (o->should_go_on()) {
                 int note_number = o->get_note_number();
-                Serial.printf("\t\tgoes on note %i (%s), ", note_number, get_note_name_c(note_number));
+                Debug_printf("\t\tgoes on note %i (%s), ", note_number, get_note_name_c(note_number));
                 //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
                 o->set_last_note_number(note_number);
                 midi->sendNoteOn(note_number, MIDI_MAX_VELOCITY, o->get_channel());
                 //this->nodes.get(i)->went_on();
                 //count += i;
             }
-            Serial.println();
+            Debug_println();
         }
         /*if (count>0) {
             Serial.printf("sending combo note %i\n", count);
@@ -147,7 +149,7 @@ class MIDIOutputProcessor {
             this->nodes.get(i)->reset();
         }
 
-        Serial.println(".end.");
+        Debug_println(".end.");
     }
 
     virtual void configure_sequencer(BaseSequencer *sequencer) {

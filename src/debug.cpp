@@ -22,7 +22,7 @@ void messages_log_add(String msg) {
 
   void debug_free_ram() {
     //Serial.println(F("debug_free_ram() not implemented on Teensy"));
-    Serial.printf(F("debug_free_ram: %i\n"), freeRam());
+    if (Serial) Serial.printf(F("debug_free_ram: %i\n"), freeRam());
   }
 
   FLASHMEM void reset_teensy() {
@@ -30,7 +30,7 @@ void messages_log_add(String msg) {
       #define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
       #define CPU_RESTART_VAL 0x5FA0004
       #define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
-      Serial.println(F("Restarting!\n")); Serial_flush();
+      if (Serial) Serial.println(F("Restarting!\n")); Serial_flush();
       CPU_RESTART;
       //Serial.println(F("Restarted?!"); Serial_flush();
   }
@@ -42,15 +42,15 @@ void messages_log_add(String msg) {
     return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
   }
   void debug_free_ram() {
-    Serial.print(F("Free RAM is "));
-    Serial.println(freeRam());
+    if (Serial) Serial.print(F("Free RAM is "));
+    if (Serial) Serial.println(freeRam());
   }
 #else
   int freeRam () {  
     return 1337;
   }
   void debug_free_ram() {
-    Serial.print(F("Free RAM is not implemented: "));
-    Serial.println(freeRam());
+    if (Serial) Serial.print(F("Free RAM is not implemented: "));
+    if (Serial) Serial.println(freeRam());
   }
 #endif

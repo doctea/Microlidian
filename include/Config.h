@@ -40,3 +40,5 @@
 
 #define TFT_SCLK D8
 #define TFT_MOSI D10
+
+//#define Serial_println(X) { if (Serial) Serial.println(x); }

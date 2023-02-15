@@ -34,13 +34,35 @@ Bounce pushButton = Bounce(D1, 10); // 10ms debounce
 #include "outputs/output.h"
 MIDIOutputProcessor output_processer = MIDIOutputProcessor(&MIDI);
 
-void setup() {
+void setup_serial() {
+    Serial.begin(115200);
+    Serial.setTimeout(0);
+
     #ifdef WAIT_FOR_SERIAL
         while(!Serial) {};
     #endif
+}
 
-    Serial.println("setup() starting");
+void setup_usb() {
+    #if defined(ARDUINO_ARCH_MBED) && defined(ARDUINO_ARCH_RP2040)
+        // Manual begin() is required on core without built-in support for TinyUSB such as mbed rp2040
+        TinyUSB_Device_Init(0);
+    #endif
 
+    while( !TinyUSBDevice.mounted() ) delay(1);
+}
+
+void setup_midi() {
+    MIDI.begin(MIDI_CHANNEL_OMNI);
+    MIDI.turnThruOff();
+
+    MIDI.setHandleClock(pc_usb_midi_handle_clock);
+    MIDI.setHandleStart(pc_usb_midi_handle_start);
+    MIDI.setHandleStop(pc_usb_midi_handle_stop);
+    MIDI.setHandleContinue(pc_usb_midi_handle_continue);
+}
+
+void setup_screen() {
     #ifdef ENABLE_SCREEN
         pinMode(ENCODER_KNOB_L, INPUT_PULLUP);
         pinMode(ENCODER_KNOB_R, INPUT_PULLUP);
@@ -52,51 +74,32 @@ void setup() {
 
         setup_menu();
 
-        Serial.println("About to init menu.."); Serial_flush();
+        Debug_println("About to init menu.."); Serial_flush();
         menu->start();
-        Serial.printf("after menu->start(), free RAM is %u\n", freeRam());
+        Debug_printf("after menu->start(), free RAM is %u\n", freeRam());
 
         //setup_debug_menu();
         //Serial.printf(F("after setup_debug_menu()\n")); //, free RAM is %u\n"), freeRam());
 
         menu->select_page(0);
     #endif
-
-    Serial.println("setting up sequencer..");
-    setup_sequencer();
-
-    output_processer.configure_sequencer(&sequencer);
-
-    Serial.println("setup() finished!");
 }
 
+void setup() {
+    setup_serial();
+    Debug_println("setup() starting");
 
-void setup1() {
-    Serial.begin(115200);
-    Serial.setTimeout(0);
-    //delay(1000);
-    #ifdef WAIT_FOR_SERIAL
-        while(!Serial) {}
-    #endif
-    Serial.println("setup1() starting");
-    Serial.flush();
+    setup_midi();
 
-    #if defined(ARDUINO_ARCH_MBED) && defined(ARDUINO_ARCH_RP2040)
-        // Manual begin() is required on core without built-in support for TinyUSB such as mbed rp2040
-        TinyUSB_Device_Init(0);
-    #endif
+    setup_usb();
 
-    MIDI.begin(MIDI_CHANNEL_OMNI);
-    MIDI.turnThruOff();
+    setup_screen();
 
-    while( !TinyUSBDevice.mounted() ) delay(1);
+    Debug_println("setting up sequencer..");
+    setup_sequencer();
+    output_processer.configure_sequencer(&sequencer);
 
-    MIDI.setHandleClock(pc_usb_midi_handle_clock);
-    MIDI.setHandleStart(pc_usb_midi_handle_start);
-    MIDI.setHandleStop(pc_usb_midi_handle_stop);
-    MIDI.setHandleContinue(pc_usb_midi_handle_continue);
-
-    Serial.println("setup1() finished!");
+    Debug_println("setup() finished!");
 }
 
 volatile bool ticked = false;
@@ -105,39 +108,43 @@ void loop() {
     //Serial.println("loop()");
     MIDI.read();
 
+    if (Serial) {
+        Serial.read();
+        Serial.clearWriteError();
+    }
+
     //bool
     ticked = update_clock_ticks();
     //queue_try_add()
 
     if (ticked) {
         sequencer.on_tick(ticks);
-        
+        uint32_t interrupts = save_and_disable_interrupts();
         if (is_bpm_on_sixteenth(ticks)) {
             output_processer.process();
         }
+        restore_interrupts(interrupts);
 
         //menu->update_ticks(ticks);
     }
 
-#ifdef DUALCORE
+/*#ifdef DUALCORE
 }
 
 void loop1() {
-#endif
+#endif*/
 
     static uint32_t last_tick = -1;
     #ifdef ENABLE_SCREEN
-        //if (ticked) {
-        //uint32_t ticked = 0;
-        //if (ticked) {
-            //if (multicore_fifo_pop_timeout_us(100, &ticked)) {
-            //Serial.printf("second core received ticked, ticks is %i\n", ticks);
-            if (ticked) {
-                menu->update_ticks(ticks);
-                last_tick = ticks;
-            }
-        //}
+        if (ticked) {
+            uint32_t interrupts = save_and_disable_interrupts();
+            menu->update_ticks(ticks);
+            last_tick = ticks;
+            restore_interrupts(interrupts);
+        }
+        uint32_t interrupts = save_and_disable_interrupts();
         update_screen();
+        restore_interrupts(interrupts);
     #endif
 }
 
@@ -156,7 +163,7 @@ bool update_screen() {
         if (menu!=nullptr) {
             menu->update_inputs();
         } else {
-            Serial.println("menu is nullptr!");
+            Debug_println("menu is nullptr!");
         }
         if (millis() - last_drawn > MENU_MS_BETWEEN_REDRAW) {
             //menu->debug = true;

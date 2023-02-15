@@ -21,7 +21,7 @@ Clockwise starting from top-right:-
 - gnd
 - 5v
 - D10/MOSI -> ST7789 SPI
-- D9/MISO  -> ? back button
+- D9/MISO  -> back button
 - D8/SCK   -> ST7789 SCK
 - D7/CS    -> ST7789 CS
 
