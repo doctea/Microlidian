@@ -41,26 +41,30 @@ class PatternDisplay : public MenuItem {
             #define STEP_GAP 2*/
             #define COLUMNS 16
 
-            int width_per_cell = tft->width() / COLUMNS;
-            int STEP_GAP = 2; //width_per_cell - (width_per_cell/4);
-            int STEP_WIDTH = width_per_cell - STEP_GAP;
-            int STEP_HEIGHT = STEP_WIDTH;
+            static int width_per_cell = tft->width() / COLUMNS;
+            static int STEP_GAP = 2; //width_per_cell - (width_per_cell/4);
+            static int STEP_WIDTH = width_per_cell - STEP_GAP;
+            static int STEP_HEIGHT = STEP_WIDTH;
 
             for (int i = 0 ; i < target_pattern->steps ; i++) {
-                int row = ((i / COLUMNS));
+                int row = i / COLUMNS;
                 int col = i % COLUMNS;
 
                 int x = col * (STEP_WIDTH+STEP_GAP);
                 int y = base_row + (row*(STEP_HEIGHT+STEP_GAP));
 
+                int step_for_tick = target_pattern->get_step_for_tick(ticks);
+
                 bool step_on = target_pattern->query_note_on_for_step(i);
                 const uint16_t colour = step_on ? 
-                    (target_pattern->get_step_for_tick(ticks) == i ? RED : BLUE) :
-                    (target_pattern->get_step_for_tick(ticks) == i ? RED : GREY);
+                    (step_for_tick == i ? RED : BLUE) :     // current step active
+                    (step_for_tick == i ? RED : GREY);      // current step inactive
                 if (step_on) 
                     actual->fillRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
-                else
+                else {
                     actual->drawRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
+                    actual->fillRect(x + 1, y + 1, STEP_WIDTH-2, STEP_HEIGHT-2, BLACK);
+                }
             }
 
             base_row += (COLUMNS/STEP_HEIGHT) * (STEP_HEIGHT + STEP_GAP);

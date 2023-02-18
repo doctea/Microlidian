@@ -106,15 +106,21 @@ volatile bool ticked = false;
 
 void loop() {
     //Serial.println("loop()");
+    uint32_t interrupts = save_and_disable_interrupts();
     MIDI.read();
+    restore_interrupts(interrupts);
 
+    interrupts = save_and_disable_interrupts();
     if (Serial) {
         Serial.read();
         Serial.clearWriteError();
     }
+    restore_interrupts(interrupts);
 
     //bool
+    interrupts = save_and_disable_interrupts();
     ticked = update_clock_ticks();
+    restore_interrupts(interrupts);
     //queue_try_add()
 
     if (ticked) {
@@ -136,15 +142,13 @@ void loop1() {
 
     static uint32_t last_tick = -1;
     #ifdef ENABLE_SCREEN
-        if (ticked) {
+        if (ticked) {    
             uint32_t interrupts = save_and_disable_interrupts();
             menu->update_ticks(ticks);
             last_tick = ticks;
             restore_interrupts(interrupts);
         }
-        uint32_t interrupts = save_and_disable_interrupts();
         update_screen();
-        restore_interrupts(interrupts);
     #endif
 }
 
@@ -161,7 +165,9 @@ bool update_screen() {
         */
         static unsigned long last_drawn;
         if (menu!=nullptr) {
+            uint32_t interrupts = save_and_disable_interrupts();
             menu->update_inputs();
+            restore_interrupts(interrupts);
         } else {
             Debug_println("menu is nullptr!");
         }
@@ -171,7 +177,9 @@ bool update_screen() {
             //long before_display = millis();
             //if (debug_flag) { Serial.println("about to menu->display"); Serial_flush(); }
             if (debug_flag) menu->debug = true;
+            uint32_t interrupts = save_and_disable_interrupts();
             menu->display(); //update(ticks);
+            restore_interrupts(interrupts);
             //if (debug_flag) { Serial.println("just did menu->display"); Serial_flush(); }
             //Serial.printf("display() took %ums..", millis()-before_display);
             last_drawn = millis();
