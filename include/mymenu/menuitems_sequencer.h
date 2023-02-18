@@ -33,8 +33,13 @@ class PatternDisplay : public MenuItem {
             //static float ticks_per_pixel = (float)LOOP_LENGTH_TICKS / (float)tft->width();
 
             // we're going to use direct access to the underlying Adafruit library here
-            const DisplayTranslator_Bodmer *tft2 = (DisplayTranslator_Bodmer*)tft;
-            TFT_eSPI *actual = tft2->tft;
+            #ifdef TFT_BODMER
+                const DisplayTranslator_Bodmer *tft2 = (DisplayTranslator_Bodmer*)tft;
+                TFT_eSPI *actual = tft2->tft;
+            #else
+                const DisplayTranslator_ST7789 *tft2 = (DisplayTranslator_ST7789*)tft;
+                Adafruit_ST7789 *actual = tft2->tft;
+            #endif
 
             /*#define STEP_WIDTH 8
             #define STEP_HEIGHT 8

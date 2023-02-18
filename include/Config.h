@@ -32,7 +32,7 @@
     #define ENCODER_KNOB_R  D3   // pin to receive right-encoder pulses
 #endif
 
-#define DEFAULT_CLOCK_MODE  CLOCK_INTERNAL      
+#define DEFAULT_CLOCK_MODE  CLOCK_EXTERNAL_USB_HOST      
 
 #define SCREEN_WIDTH 135
 #define SCREEN_HEIGHT 240
