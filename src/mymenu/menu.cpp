@@ -72,41 +72,12 @@ LoopMarkerPanel top_loop_marker_panel = LoopMarkerPanel(LOOP_LENGTH_TICKS, PPQN,
 
 BPMPositionIndicator posbar = BPMPositionIndicator();
 ClockSourceSelectorControl clock_source_selector = ClockSourceSelectorControl("Clock source", clock_mode);
-/*
-// make these global so that we can toggle it from input_keyboard
-ObjectMultiToggleControl *project_multi_recall_options = nullptr;
-ObjectMultiToggleControl *project_multi_autoadvance = nullptr;
-
-#ifdef ENABLE_SEQUENCER
-    SequencerStatus sequencer_status =      SequencerStatus("Pattern");
-#endif
-
-#ifdef ENABLE_DRUM_LOOPER
-    LooperStatus            drum_looper_status  =   LooperStatus("Drum looper", &drums_loop_track);
-    LooperQuantizeControl   drum_loop_quantizer_setting = LooperQuantizeControl("Drum Loop quant",   &drums_loop_track);   // todo: make this part of the LooperStatus object
-#endif
-
-#if defined(ENABLE_CRAFTSYNTH_USB) && defined(ENABLE_CRAFTSYNTH_CLOCKTOGGLE)
-    ObjectToggleControl<ClockedBehaviour> craftsynth_clock_toggle = ObjectToggleControl<ClockedBehaviour> (
-        "CraftSynth clock enable",
-        behaviour_craftsynth,
-        &ClockedBehaviour::setClockEnabled,
-        &ClockedBehaviour::isClockEnabled,
-        nullptr
-    );
-#endif
-
-MidiMatrixSelectorControl midi_matrix_selector = MidiMatrixSelectorControl("MIDI Matrix");*/
 
 /*#include "menuitems_fileviewer.h"
 extern FileViewerMenuItem *sequence_fileviewer;
 extern FileViewerMenuItem *project_fileviewer;*/
 
 MenuItem test_item_1 = MenuItem("test 1");
-MenuItem test_item_2 = MenuItem("test 2");
-MenuItem test_item_3 = MenuItem("test 3");
-MenuItem test_item_4 = MenuItem("test 4");
-MenuItem test_item_5 = MenuItem("test 5");
 
 //DisplayTranslator_STeensy steensy = DisplayTranslator_STeensy();
 //DisplayTranslator_STeensy_Big steensy = DisplayTranslator_STeensy_Big();
