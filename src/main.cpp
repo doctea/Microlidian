@@ -153,6 +153,10 @@ void loop1() {
 }
 
 
+void update_display() {
+    menu->updateDisplay();
+}
+
 bool update_screen() {
     bool screen_was_drawn = false;
     #ifdef ENABLE_SCREEN
@@ -178,8 +182,11 @@ bool update_screen() {
             //if (debug_flag) { Serial.println("about to menu->display"); Serial_flush(); }
             if (debug_flag) menu->debug = true;
             uint32_t interrupts = save_and_disable_interrupts();
+            //menu->auto_update = false;
             menu->display(); //update(ticks);
             restore_interrupts(interrupts);
+            //multicore_launch_core1(update_display);
+            //update_display();
             //if (debug_flag) { Serial.println("just did menu->display"); Serial_flush(); }
             //Serial.printf("display() took %ums..", millis()-before_display);
             last_drawn = millis();

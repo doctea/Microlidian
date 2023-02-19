@@ -1,3 +1,6 @@
+#ifndef EUCLIDIAN__INCLUDED
+#define EUCLIDIAN__INCLUDED
+
 #include "Patterns.h"
 
 #include "Sequencer.h"
@@ -106,12 +109,9 @@ class EuclidianSequencer : public BaseSequencer {
     // todo: list of EuclidianPatterns...
     EuclidianPattern **patterns = nullptr;
 
+    int seed = 0;
     int mutate_minimum_pattern = 0, mutate_maximum_pattern = number_patterns;
-    bool reset_before_mutate = true, mutate_enabled = true, fills_enabled = true;
-
-    int get_euclidian_seed() {
-        return BPM_CURRENT_PHRASE;
-    }
+    bool reset_before_mutate = true, mutate_enabled = true, fills_enabled = true, add_phrase_to_seed = true;
 
     public:
     EuclidianSequencer() : BaseSequencer() {
@@ -121,6 +121,41 @@ class EuclidianSequencer : public BaseSequencer {
         }
     }
 
+    bool is_mutate_enabled() {
+        return this->mutate_enabled;
+    }
+    void set_mutated_enabled(bool v = true) {
+        this->mutate_enabled = v;
+    }
+
+    bool should_reset_before_mutate() {
+        return this->reset_before_mutate;
+    }
+    void set_reset_before_mutate(bool v = true) {
+        this->reset_before_mutate = v;
+    }
+
+    bool is_fills_enabled() {
+        return this->fills_enabled;
+    }
+    void set_fills_enabled(bool v = true) {
+        this->fills_enabled = v;
+    }
+
+    bool is_add_phrase_enabled() {
+        return this->add_phrase_to_seed;
+    }
+    void set_add_phrase_enabled(bool v = true) {
+        this->add_phrase_to_seed = v;
+    }
+    
+    int get_euclidian_seed() {
+        return seed + add_phrase_to_seed ? BPM_CURRENT_PHRASE : 0; //BPM_CURRENT_PHRASE;
+    }
+    void set_euclidian_seed(int seed) {
+        this->seed = seed;
+    }
+    
     SimplePattern *get_pattern(int pattern) {
         return this->patterns[pattern];
     }
@@ -160,7 +195,7 @@ class EuclidianSequencer : public BaseSequencer {
             this->on_bar(BPM_CURRENT_BAR_OF_PHRASE);
         }
         if (is_bpm_on_beat(tick)) {
-            this->on_bar(BPM_CURRENT_BEAT_OF_BAR);
+            this->on_beat(BPM_CURRENT_BEAT_OF_BAR);
         }
         if (is_bpm_on_sixteenth(tick)) {
             //this->on_step(this->get_step_for_tick(tick));
@@ -193,9 +228,9 @@ class EuclidianSequencer : public BaseSequencer {
         }
     };
     virtual void on_phrase(int phrase) override {
-        if (reset_before_mutate && (mutate_enabled || fills_enabled)) {
+        if (reset_before_mutate)
             reset_patterns();
-
+        if ((mutate_enabled || fills_enabled)) {
             if (mutate_enabled) {
               unsigned long seed = get_euclidian_seed();
               randomSeed(seed);
@@ -210,3 +245,5 @@ class EuclidianSequencer : public BaseSequencer {
     };
 
 };
+
+#endif
