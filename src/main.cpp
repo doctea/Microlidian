@@ -12,8 +12,8 @@
 
 #include "debug.h"
 
-#include "clock.h"
-#include "bpm.h"
+#include <clock.h>
+#include <bpm.h>
 
 #include "sequencer/sequencing.h"
 
