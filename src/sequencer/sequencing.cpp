@@ -2,9 +2,11 @@
 
 #include "mymenu.h"
 #include "mymenu/menuitems_sequencer.h"
+#include "mymenu/menuitems_sequencer_circle.h"
 
 EuclidianSequencer sequencer = EuclidianSequencer();
 
+// call this after the menu has already been set up
 void setup_sequencer() {
     sequencer.reset_patterns();
 
@@ -14,4 +16,9 @@ void setup_sequencer() {
         snprintf(label, MENU_C_MAX, "Pattern %i", i);
         menu->add(new PatternDisplay(label, sequencer.get_pattern(i)));
     }
+
+    menu->add_page("Circle");
+    menu->add(new CircleDisplay("Circle", &sequencer));
+
+    menu->select_page(0);
 }
