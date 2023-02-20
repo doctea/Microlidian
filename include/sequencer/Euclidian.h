@@ -27,6 +27,17 @@ class EuclidianPattern : public SimplePattern {
             make_euclid(steps, pulses, rotation, duration, tie_on);
         }
 
+
+    virtual char *get_summary() override {
+        static char summary[32];
+        snprintf(summary, 32, 
+            "%-2i %-2i %-2i", // [%c]",
+            steps, pulses, rotation
+            //this->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR) ? 'X' : ' '
+        );
+        return summary;
+    }
+
     void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1, float effective_euclidian_density = 0.75f) {
         if (steps > 0) this->steps = steps;
         if (tie_on >=0) this->tie_on = tie_on;

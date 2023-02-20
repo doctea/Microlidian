@@ -3,9 +3,15 @@
 
 #include <Arduino.h>
 
+#include "clock.h"
+
+#ifdef ENABLE_SCREEN
+    #include "menu.h"
+#endif
+
 #define NOTE_OFF -1
 #define DEFAULT_VELOCITY 127
-#define PPQN    24
+//#define PPQN    24
 
 class BaseOutput;
 
@@ -15,6 +21,12 @@ class BasePattern {
     int steps = 32;
     int steps_per_beat = 4;
     int ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
+
+    int16_t colour = C_WHITE;
+
+    virtual char *get_summary() {
+        return "??";
+    }
 
     // todo: ability to pass in step, offset, and bar number, like we have for the current euclidian...?
     //          or, tbf, we can derive this from the 'tick'
@@ -51,7 +63,6 @@ class SimplePattern : public BasePattern {
     };
 
     event *events = nullptr;
-
     BaseOutput *output = nullptr;
 
     SimplePattern() : BasePattern() {

@@ -15,6 +15,7 @@ void setup_sequencer() {
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "Pattern %i", i);
         menu->add(new PatternDisplay(label, sequencer.get_pattern(i)));
+        sequencer.get_pattern(i)->colour = menu->get_next_colour();
     }
 
     menu->add_page("Circle");

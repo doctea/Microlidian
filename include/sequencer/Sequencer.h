@@ -1,6 +1,7 @@
 #ifndef SEQUENCER__INCLUDED
 #define SEQUENCER__INCLUDED
 
+
 class SimplePattern;
 class BaseOutput;
 

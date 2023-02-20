@@ -18,6 +18,7 @@
 #include "sequencer/sequencing.h"
 
 bool update_screen();
+void update_screen_dontcare();
 
 bool debug_flag = false;
 
@@ -110,13 +111,6 @@ void loop() {
     MIDI.read();
     restore_interrupts(interrupts);
 
-    interrupts = save_and_disable_interrupts();
-    if (Serial) {
-        Serial.read();
-        Serial.clearWriteError();
-    }
-    restore_interrupts(interrupts);
-
     //bool
     interrupts = save_and_disable_interrupts();
     ticked = update_clock_ticks();
@@ -134,6 +128,13 @@ void loop() {
         //menu->update_ticks(ticks);
     }
 
+    interrupts = save_and_disable_interrupts();
+    if (Serial) {
+        Serial.read();
+        Serial.clearWriteError();
+    }
+    restore_interrupts(interrupts);
+
 /*#ifdef DUALCORE
 }
 
@@ -148,6 +149,7 @@ void loop1() {
             last_tick = ticks;
             restore_interrupts(interrupts);
         }
+        //multicore_launch_core1(update_screen_dontcare);
         update_screen();
     #endif
 }
@@ -155,6 +157,10 @@ void loop1() {
 
 void update_display() {
     menu->updateDisplay();
+}
+
+void update_screen_dontcare() {
+    update_screen();
 }
 
 bool update_screen() {
@@ -182,11 +188,11 @@ bool update_screen() {
             //if (debug_flag) { Serial.println("about to menu->display"); Serial_flush(); }
             if (debug_flag) menu->debug = true;
             uint32_t interrupts = save_and_disable_interrupts();
-            //menu->auto_update = false;
-            menu->display(); //update(ticks);
+            menu->auto_update = false;
+            menu->display();
             restore_interrupts(interrupts);
             //multicore_launch_core1(update_display);
-            //update_display();
+            update_display();
             //if (debug_flag) { Serial.println("just did menu->display"); Serial_flush(); }
             //Serial.printf("display() took %ums..", millis()-before_display);
             last_drawn = millis();
