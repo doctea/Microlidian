@@ -35,6 +35,16 @@ Bounce pushButton = Bounce(D1, 10); // 10ms debounce
 #include "outputs/output.h"
 MIDIOutputProcessor output_processer = MIDIOutputProcessor(&MIDI);
 
+struct perf_t {
+    unsigned long average_loop_length = 0;
+};
+perf_t perf_record;
+
+void calc_loop_length(unsigned long start, unsigned long finish) {
+    perf_record.average_loop_length += finish-start;
+    perf_record.average_loop_length /= 2;
+}
+
 void setup_serial() {
     Serial.begin(115200);
     Serial.setTimeout(0);
@@ -151,6 +161,8 @@ void loop1() {
         }
         //multicore_launch_core1(update_screen_dontcare);
         update_screen();
+        menu->tft->setCursor(0,0);
+        menu->tft->printf("loop: %i", perf_record.average_loop_length);
     #endif
 }
 
@@ -186,6 +198,8 @@ bool update_screen() {
             //Serial.println("gonna redraw..");
             //long before_display = millis();
             //if (debug_flag) { Serial.println("about to menu->display"); Serial_flush(); }
+            if (!menu->tft->ready())
+                return false;
             if (debug_flag) menu->debug = true;
             uint32_t interrupts = save_and_disable_interrupts();
             menu->auto_update = false;
