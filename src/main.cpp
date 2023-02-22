@@ -1,17 +1,24 @@
+// framework
 #include <Arduino.h>
 
+// needed for set_sys_clock_khz
+#include "pico/stdlib.h"
+
+// MIDI + USB
 #include <Adafruit_TinyUSB.h>
 #include <MIDI.h>
 
+// input libraries
 #include "Encoder.h"
 #include "Bounce2.h"
 
+// our app config
 #include "Config.h"
-
 #include "BootConfig.h"
 
 #include "debug.h"
 
+// midihelpers library clock handling
 #include <clock.h>
 #include <bpm.h>
 
@@ -97,6 +104,10 @@ void setup_screen() {
 }
 
 void setup() {
+
+    // overclock the CPU so that we can afford all those CPU cycles drawing the UI!
+    set_sys_clock_khz(225000, true);
+
     setup_serial();
     Debug_println("setup() starting");
 
@@ -161,8 +172,8 @@ void loop1() {
         }
         //multicore_launch_core1(update_screen_dontcare);
         update_screen();
-        menu->tft->setCursor(0,0);
-        menu->tft->printf("loop: %i", perf_record.average_loop_length);
+        //menu->tft->setCursor(0,0);
+        //menu->tft->printf("loop: %i", perf_record.average_loop_length);
     #endif
 }
 
