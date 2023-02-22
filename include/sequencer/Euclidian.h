@@ -101,9 +101,11 @@ class EuclidianPattern : public SimplePattern {
         } else {
             this->pulses /= 2;
         }
-        if (this->pulses >= this->maximum_steps || this->pulses <= 0) {
+        if (this->pulses >= this->steps || this->pulses <= 0) {
             this->pulses = 1;
         }
+        r = random(this->steps/2, this->maximum_steps);
+        this->steps = r;
         this->make_euclid();
     }
 
