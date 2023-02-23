@@ -2,6 +2,8 @@
 
 #include "debug.h"
 
+bool debug_flag = false;
+
 LinkedList<String> *messages_log = new LinkedList<String>();
 
 void messages_log_add(String msg) {
