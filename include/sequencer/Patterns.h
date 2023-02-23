@@ -19,7 +19,7 @@ class BasePattern {
     public:
 
     int steps = 32;
-    int steps_per_beat = 4;
+    int steps_per_beat = STEPS_PER_BEAT;
     int ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
 
     int16_t colour = C_WHITE;

@@ -212,7 +212,7 @@ class EuclidianSequencer : public BaseSequencer {
         }
         if (is_bpm_on_sixteenth(tick)) {
             //this->on_step(this->get_step_for_tick(tick));
-            this->on_step(tick / (PPQN/4));
+            this->on_step(tick / (PPQN/STEPS_PER_BEAT));
         }
     };
     virtual void on_step(int step) override {
