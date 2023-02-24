@@ -54,11 +54,11 @@ class EuclidianPattern : public SimplePattern {
     }
 
     void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1, float effective_euclidian_density = 0.75f) {
-        if (steps > 0) this->arguments.steps = steps;
-        if (pulses > 0) this->arguments.pulses = pulses;
-        if (rotation >= 0) this->arguments.rotation = rotation;
-        if (duration >= 0) this->arguments.duration = duration;
-        if (tie_on >= 0) this->tie_on = tie_on;
+        if (steps > 0)      this->arguments.steps = steps;
+        if (pulses > 0)     this->arguments.pulses = pulses;
+        if (rotation >= 0)  this->arguments.rotation = rotation;
+        if (duration >= 0)  this->arguments.duration = duration;
+        if (tie_on >= 0)    this->tie_on = tie_on;
 
         if (0==memcmp(&this->arguments, &this->last_arguments, sizeof(arguments_t))) {
             // nothing changed, dont do anything
@@ -70,16 +70,16 @@ class EuclidianPattern : public SimplePattern {
         //this->arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
 
         int bucket = 0;
-        for (int i = 0 ; i < this->steps ; i++) {
+        for (int i = 0 ; i < this->arguments.steps ; i++) {
             bucket += temp_pulses;
-            if (bucket >= this->steps) {
-                bucket -= this->steps;
+            if (bucket >= this->arguments.steps) {
+                bucket -= this->arguments.steps;
                 this->set_event_for_tick(i * ticks_per_step);
             } else {
                 this->unset_event_for_tick(i * ticks_per_step);
             }
         }
-        this->maximum_steps = this->steps;
+        //this->maximum_steps = this->arguments.steps;
         
         if (this->arguments.rotation > 0) {
             this->rotate_pattern(this->arguments.rotation);
@@ -126,9 +126,16 @@ class EuclidianPattern : public SimplePattern {
         if (this->arguments.pulses >= this->steps || this->arguments.pulses <= 0) {
             this->arguments.pulses = 1;
         }
-        r = random(this->steps/2, this->maximum_steps);
-        this->steps = r;
+        //r = random(this->steps/2, this->maximum_steps);
+        //this->arguments.steps = r;
         this->make_euclid();
+    }
+
+    virtual byte get_steps() override {
+        return arguments.steps;
+    }
+    virtual void set_steps(byte steps) override {
+        arguments.steps = steps;
     }
 
     /*void trigger_on_for_step(int step) override {

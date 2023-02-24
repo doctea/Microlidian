@@ -64,7 +64,7 @@ void setup() {
     setup_sequencer();
     output_processer.configure_sequencer(&sequencer);
 
-    #ifdef ENABLE_SCREEN
+    #if defined(ENABLE_SCREEN) && defined(ENABLE_CV_INPUT)
         menu->add_page("Parameter Inputs");
         setup_parameter_menu();
         Serial.printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());

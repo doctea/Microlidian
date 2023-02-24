@@ -36,10 +36,6 @@ class BasePattern {
     virtual void set_event_for_tick(unsigned int tick, short note = 0, short velocity = 127, short channel = 0) = 0;
     virtual void unset_event_for_tick(unsigned int tick) = 0;
 
-    virtual void set_pattern_length(int pattern_length) {
-        this->steps = pattern_length;
-    }
-
     virtual void process_step(int step) = 0;
 
     //virtual bool query_note_on_for_step(int step) = 0;
@@ -81,7 +77,7 @@ class SimplePattern : public BasePattern {
     }
 
     virtual unsigned int get_step_for_tick(unsigned int tick) {
-        return (tick / this->ticks_per_step) % steps;
+        return (tick / this->ticks_per_step) % this->get_steps();
     }
 
     virtual void set_event_for_tick(unsigned int tick, short note = 0, short velocity = DEFAULT_VELOCITY, short channel = 0) override {

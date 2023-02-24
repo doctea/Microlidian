@@ -89,7 +89,7 @@ void setup_parameters() {
         EuclidianPattern *pattern = (EuclidianPattern *)sequencer.get_pattern(i);
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
-        parameter_manager->addParameter(new DataParameter<EuclidianPattern,byte>(label, pattern, &EuclidianPattern::set_steps, &EuclidianPattern::get_steps));
+        parameter_manager->addParameter(new DataParameter<EuclidianPattern,byte>(label, pattern, &EuclidianPattern::set_steps, &EuclidianPattern::get_steps, 1, pattern->maximum_steps));
     }
 
     parameter_manager->setDefaultParameterConnections();
