@@ -230,9 +230,11 @@ class EuclidianSequencer : public BaseSequencer {
 
     virtual void on_loop(int tick) override {};
     virtual void on_tick(int tick) override {
-        for (int i = 0 ; i < number_patterns ; i++) {
-            this->patterns[i]->make_euclid();
-        }
+        #ifdef MUTATE_EVERY_TICK
+            for (int i = 0 ; i < number_patterns ; i++) {
+                this->patterns[i]->make_euclid();
+            }
+        #endif
         if (is_bpm_on_phrase(tick)) {
             this->on_phrase(BPM_CURRENT_PHRASE);
         }
@@ -256,7 +258,7 @@ class EuclidianSequencer : public BaseSequencer {
 
     };
     virtual void on_bar (int bar) override {
-        if (bar == BARS_PER_PHRASE - 1) {
+        if (fills_enabled && bar == BARS_PER_PHRASE - 1) {
             // do fill
             for (int i = 0 ; i < 3 ; i++) {
                 int ran = random(0/*euclidian_mutate_minimum_pattern % NUM_PATTERNS*/, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
@@ -275,7 +277,7 @@ class EuclidianSequencer : public BaseSequencer {
     virtual void on_phrase(int phrase) override {
         if (reset_before_mutate)
             reset_patterns();
-        if ((mutate_enabled || fills_enabled)) {
+        if (mutate_enabled) {
             if (mutate_enabled) {
               unsigned long seed = get_euclidian_seed();
               randomSeed(seed);

@@ -118,8 +118,10 @@ class MIDIOutputProcessor {
         static int count = 0;
         //midi->sendNoteOff(35 + count, 0, 1);
         for (int i = 0 ; i < this->nodes.size() ; i++) {
-            if(is_valid_note(this->nodes.get(i)->last_note_number))
+            if(is_valid_note(this->nodes.get(i)->last_note_number)) {
                 midi->sendNoteOff(this->nodes.get(i)->last_note_number, 0, this->nodes.get(i)->get_channel());
+                this->nodes.get(i)->set_last_note_number(NOTE_OFF);
+            }
         }
         count = 0;
         for (int i = 0 ; i < this->nodes.size() ; i++) {
