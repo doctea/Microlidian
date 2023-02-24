@@ -43,6 +43,6 @@
 
 #define ENABLE_CV_INPUT 0x48
 #define TIME_BETWEEN_CV_INPUT_UPDATES 25
-#define DISABLE_CALIBRATION_STORAGE
+//#define ENABLE_CALIBRATION_STORAGE
 
 //#define Serial_println(X) { if (Serial) Serial.println(x); }
