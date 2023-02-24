@@ -43,7 +43,7 @@ class EuclidianPattern : public SimplePattern {
         }
 
 
-    virtual char *get_summary() override {
+    virtual const char *get_summary() override {
         static char summary[32];
         snprintf(summary, 32, 
             "%-2i %-2i %-2i", // [%c]",
@@ -123,7 +123,7 @@ class EuclidianPattern : public SimplePattern {
         } else {
             this->arguments.pulses /= 2;
         }
-        if (this->arguments.pulses >= this->steps || this->arguments.pulses <= 0) {
+        if (this->arguments.pulses >= this->arguments.steps || this->arguments.pulses <= 0) {
             this->arguments.pulses = 1;
         }
         //r = random(this->steps/2, this->maximum_steps);
@@ -231,8 +231,11 @@ class EuclidianSequencer : public BaseSequencer {
     virtual void on_loop(int tick) override {};
     virtual void on_tick(int tick) override {
         #ifdef MUTATE_EVERY_TICK
-            for (int i = 0 ; i < number_patterns ; i++) {
-                this->patterns[i]->make_euclid();
+            int tick_of_step = tick % (PPQN/STEPS_PER_BEAT);
+            if (tick_of_step==(PPQN/STEPS_PER_BEAT)-1) {
+                for (int i = 0 ; i < number_patterns ; i++) {
+                    this->patterns[i]->make_euclid();
+                }
             }
         #endif
         if (is_bpm_on_phrase(tick)) {
@@ -268,7 +271,7 @@ class EuclidianSequencer : public BaseSequencer {
             for (int i = 0 ; i < 3 ; i++) {
                 int ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 this->patterns[ran]->arguments.pulses *= 2;
-                if (this->patterns[ran]->arguments.pulses > this->patterns[ran]->steps) 
+                if (this->patterns[ran]->arguments.pulses > this->patterns[ran]->arguments.steps) 
                     this->patterns[ran]->arguments.pulses /= 8;
                 this->patterns[ran]->make_euclid();
             }

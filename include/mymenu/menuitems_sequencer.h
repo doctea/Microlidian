@@ -24,7 +24,7 @@ class PatternDisplay : public MenuItem {
         virtual int display(Coord pos, bool selected, bool opened) override {
             char label_info[MENU_C_MAX];
             snprintf(label_info, MENU_C_MAX, "%s: Steps=%2i Pulses=%2i Rot=%2i", this->label, 
-                ((EuclidianPattern*)target_pattern)->arguments.steps, 
+                ((EuclidianPattern*)target_pattern)->get_steps(), 
                 ((EuclidianPattern*)target_pattern)->arguments.pulses, 
                 ((EuclidianPattern*)target_pattern)->arguments.rotation
             );
@@ -78,6 +78,7 @@ class PatternDisplay : public MenuItem {
                     (step_for_tick == i ? RED : BLUE) :     // current step active
                     (step_for_tick == i ? RED : GREY);      // current step inactive
                 if (step_on) 
+
                     actual->fillRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
                 else {
                     actual->drawRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
@@ -85,7 +86,9 @@ class PatternDisplay : public MenuItem {
                 }
             }
 
-            base_row += (MAX_COLUMNS/STEP_HEIGHT) * ((STEP_HEIGHT + STEP_GAP) * (target_pattern->get_steps() / MAX_COLUMNS));
+            base_row += (MAX_COLUMNS/STEP_HEIGHT) * ((STEP_HEIGHT + STEP_GAP) * (max(1+(target_pattern->get_steps() / MAX_COLUMNS), 1)));
+            return base_row;
+
             //base_row *= (target_pattern->get_steps() / MAX_COLUMNS);
             tft->setCursor(0, base_row);
 

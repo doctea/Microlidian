@@ -7,3 +7,6 @@ lib/
 .vscode
 Microlidian.code-workspace
 ffs/
+*.orig
+*.rej
+*.patch

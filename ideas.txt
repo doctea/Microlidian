@@ -67,3 +67,9 @@
 [13:54:47] <doctea> yea hmm.  there is a relatively cheap (like probably a £50 kit?) midi to 11 triggers + 5 cv output that would be the companion to this new device
 [13:54:47] <@shandybot> 🤔
 [13:55:53] <doctea> being able to take a midi output from this new device and pass it to a drum machine is one of the use cases i'm imagining too
+
+
+
+[19:39:12] <@johnnyC> !tell doctea if you could pick a waveform and length to output as part of the cv out thatd be neat to have like a euclidean lfo?
+[19:40:04] <doctea> so the length of the lfo would be the time interval between the pulses?
+[19:40:19] <doctea> s/length/cycle period
