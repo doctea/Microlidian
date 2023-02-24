@@ -22,6 +22,10 @@
     #include "mymenu/screen.h"
 #endif
 
+#ifdef ENABLE_CV_INPUT
+    #include "cv_input.h"
+#endif
+
 #include "outputs/output.h"
 MIDIOutputProcessor output_processer = MIDIOutputProcessor(&MIDI);
 
@@ -48,6 +52,18 @@ void setup() {
     setup_usb();
 
     setup_screen();
+
+    #ifdef ENABLE_CV_INPUT
+        setup_cv_input();
+        Serial.printf("after setup_cv_input(), free RAM is %u\n", freeRam());
+        setup_parameters();
+        Serial.printf("after setup_parameters(), free RAM is %u\n", freeRam());
+        #ifdef ENABLE_SCREEN
+        menu->add_page("Parameter Inputs");
+        setup_parameter_menu();
+        Serial.printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
+        #endif
+    #endif
 
     Debug_println("setting up sequencer..");
     setup_sequencer();
@@ -98,9 +114,25 @@ void loop1() {
             last_tick = ticks;
             restore_interrupts(interrupts);
         }
-        update_screen();
+        bool screen_was_drawn = update_screen();
         //menu->tft->setCursor(0,0);
         //menu->tft->printf("loop: %i", perf_record.average_loop_length);
+    #endif
+
+    #ifdef ENABLE_CV_INPUT
+      static unsigned long time_of_last_param_update = 0;
+      if (!screen_was_drawn && millis() - time_of_last_param_update > TIME_BETWEEN_CV_INPUT_UPDATES) {
+        if(debug_flag) parameter_manager->debug = true;
+        if(debug_flag) Serial.println(F("about to do parameter_manager->update_voltage_sources()..")); Serial_flush();
+        parameter_manager->update_voltage_sources();
+        //if(debug) Serial.println("just did parameter_manager->update_voltage_sources().."); Serial_flush();
+        //if(debug) Serial.println("about to do parameter_manager->update_inputs().."); Serial_flush();
+        parameter_manager->update_inputs();
+        //if(debug) Serial.println("about to do parameter_manager->update_mixers().."); Serial_flush();
+        parameter_manager->update_mixers();
+        if(debug_flag) Serial.println(F("just did parameter_manager->update_inputs()..")); Serial_flush();
+        time_of_last_param_update = millis();
+      }
     #endif
 }
 

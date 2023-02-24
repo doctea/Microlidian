@@ -41,4 +41,8 @@
 #define TFT_SCLK D8
 #define TFT_MOSI D10
 
+#define ENABLE_CV_INPUT 0x48
+#define TIME_BETWEEN_CV_INPUT_UPDATES 25
+#define DISABLE_CALIBRATION_STORAGE
+
 //#define Serial_println(X) { if (Serial) Serial.println(x); }
