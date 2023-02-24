@@ -1,0 +1,69 @@
+[13:34:50] <doctea> so, market research.  what do you think CV inputs could be used for on a euclidian rhythm generating device
+[13:35:27] <@delica> build a sensor into a dildo and play the synth with ur buttheol 
+[13:35:49] <na> oh this is a great question doctea
+[13:35:53] <doctea> i'm surprised i havent seen that done on hackaday already delica
+[13:36:05] <doctea> its the next 'music from mushrooms' viral vid
+[13:38:58] <doctea> i have it so like, there are 20 channels of euclidian rhythms each outputing a different drum trigger
+[13:39:38] <doctea> so one thing that i think would be interesting is a 'channel offset' cv, so eg -10v to +10v would tranpose which trigger each channel is using.  so kick rhythm would play on snare, snare on hats, etc
+[13:39:44] <@delica> buttheol trigger
+[13:39:48] <na> so in my own patches, I sometimes run a euclidian pattern and another pattern created on another sequencer into an OR logic to trigger a slightly varying pattern; I usually do this for kick drums
+[13:40:03] <na> so regarding CV
+[13:40:11] <doctea> nice yeah.  also an AND/NAND/XOR would be good for that to make more variations of patterns
+[13:40:19] <na> Maybe something that indroduces an additional trigger?
+[13:40:43] <doctea> additional trigger how?
+[13:40:49] <@delica> the lengths u fukrs go to to avoid learning to play an instrument smh
+[13:40:58] <na> lmao
+[13:41:13] <doctea> learning guitar is just an excuse not to invest in modular
+[13:41:33] <na> Just like with programming; I learned enough music theory to be dangerous, delica
+[13:42:00] <na> I ain't got time for all that thespian bullshit
+[13:42:00] <@shandybot> https://i.imgur.com/FgZ26ul.jpg
+[13:42:07] <doctea> yeah i have weekly guitar lessons where i get taught music theory and popular chord progressions just so i can completely throw all that out of the window
+[13:42:07] <vera> Get forensics up in here...
+[13:42:39] <@delica> never had a music lesson in my life.
+[13:43:02] <doctea> dont need music lessons if you have raw talent and dogged determination
+[13:43:11] <@delica> hmmm
+[13:43:11] <@shandybot> https://i.imgur.com/4Uef0MT.gif
+[13:43:58] <doctea> i was lying in bed last night delica and suddenly i had 'step away from the microphone' playing in my head
+[13:44:15] <@delica> GO DROP A CHILL PILL GO PULL A CONE 
+[13:44:26] <na> so let's say I have a 3/5 euclidian pattern or a 4/9 pattern for a kick drum; have some CV that increases the number hits depending on voltage, but never letting it reaching 1 (e.g. 5/5 and 9/9)
+[13:44:28] <doctea> but nevertheless
+[13:44:48] <@delica> na self harm is a treatable condition.
+[13:44:59] <doctea> na: hmmm almost like a "density" cv?
+[13:44:59] <@shandybot> https://i.imgur.com/4Uef0MT.gif
+[13:45:10] <na> But, that additional trigger falls within a musically timed range
+[13:45:16] <na> yeah, i think so, doctea
+[13:45:19] <na> exactly
+[13:45:21] <na> idk
+[13:45:29] <na> just throwing out ideas
+[13:45:36] <doctea> yea plz keep them coming
+[13:45:52] <na> maybe it's bipolar so it can either add or remove
+[13:46:05] <na> instead of unipolar
+[13:46:36] <na> another option would be CV that extends or shorten the gate trigger
+[13:46:39] <doctea> i have a 'density' control in my current implementation, but i only apply changes to the pattern at the start of every phrase / last bar of phrase; but because of how euclidian generation works, if you increase the pulse count by 1 then the rhythm also changes
+[13:46:59] <na> Gotcha
+[13:47:03] <doctea> duration would be a good one for musical notes, less useful for drums, but good shout
+[13:47:30] <na> instead of length, maybe rachet?
+[13:47:31] <doctea> could maybe do a stutter/ratchet effect tho
+[13:47:34] <na> boom
+[13:47:36] <na> lolol
+[13:47:37] <doctea> :D
+[13:48:11] <doctea> i think i might be able to regenerate the patterns every step and still have enough cpu to do everything else too so maybe that would be interesting to try
+[13:48:14] <na> gonna be buying dem doctea stonks in the near future
+[13:48:39] <doctea> yeah ratchet, also maybe 'echoes'?  so it would actually add an extra trigger after the trigger
+[13:49:01] <na> unrelated but related, are you familiar with the Intellijel Planar?
+[13:49:08] <doctea> i am not
+[13:49:24] <na> it's a joystick CV modulation module
+[13:49:47] <doctea> (and yea so far this new device is looking like it might be relatively cheap to put together.. prototypes might be available in the not too distant future)
+[13:49:52] <doctea> oh right, lemme google
+[13:49:56] <na> Can you build one, but have the joystick itself be a dildo? So we can gift it to delica?
+[13:50:01] <doctea> lol
+[13:50:20] <doctea> i'm not sure i would be comfortable gifting sex toys to delica of all people
+[13:50:49] <na> I will fly over the pond and personally deliver it myself
+[13:51:18] <doctea> one thing about this new device though is it that it is rigged up to receive and send midi - so it would receive midi clock over usb and send notes/triggers over trs midi, idk how much midi you guys have in your systems and whether that would be useful
+[13:52:33] <doctea> my use case is that i will use another module for doing the midi->cv trigger stuff and will clock it from my main master clock which already syncs usb/midi/cv
+[13:52:53] <na> I only implement MIDI out via Pams New Workout expander
+[13:53:10] <na> to start/stop my drum machines that I barely use lolol
+[13:53:14] <doctea> but i think cv-clock-in might be a necessity
+[13:54:47] <doctea> yea hmm.  there is a relatively cheap (like probably a £50 kit?) midi to 11 triggers + 5 cv output that would be the companion to this new device
+[13:54:47] <@shandybot> 🤔
+[13:55:53] <doctea> being able to take a midi output from this new device and pass it to a drum machine is one of the use cases i'm imagining too

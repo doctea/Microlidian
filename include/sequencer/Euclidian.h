@@ -13,18 +13,33 @@
 
 class EuclidianPattern : public SimplePattern {
     public:
+    
+    struct arguments_t {
+        int steps = 16;
+        int pulses = steps/2;
+        int rotation = 1;
+        int duration = 1;
+        float effective_euclidian_density = 0.75;
+    };
 
     bool active_status = true;
-    int pulses, rotation, duration;
+    //int pulses, rotation, duration;
+    arguments_t arguments;
+    arguments_t last_arguments;
     int maximum_steps = steps;
     int tie_on = 0;
 
     //EuclidianPattern() : SimplePattern() {}
 
     EuclidianPattern(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
-        : pulses(pulses), rotation(rotation), duration(duration), tie_on(tie_on)
+        //: arguments.pulses(pulses), arguments.rotation(arguments.rotation), arguments.duration(arguments.duration), tie_on(tie_on)
+        : arguments { .steps = steps, .pulses = pulses, .rotation = rotation, .duration = duration }, tie_on(tie_on)
         {
-            make_euclid(steps, pulses, rotation, duration, tie_on);
+            /*arguments.steps = steps;
+            arguments.pulses = pulses;
+            arguments.rotation = rotation;*/
+            //make_euclid(arguments.steps, arguments.pulses, arguments.rotation, arguments.duration, tie_on);
+            make_euclid();
         }
 
 
@@ -32,25 +47,31 @@ class EuclidianPattern : public SimplePattern {
         static char summary[32];
         snprintf(summary, 32, 
             "%-2i %-2i %-2i", // [%c]",
-            steps, pulses, rotation
+            last_arguments.steps, last_arguments.pulses, last_arguments.rotation
             //this->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR) ? 'X' : ' '
         );
         return summary;
     }
 
     void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1, float effective_euclidian_density = 0.75f) {
-        if (steps > 0) this->steps = steps;
-        if (tie_on >=0) this->tie_on = tie_on;
-        if (pulses > 0) this->pulses = pulses;
-        if (rotation >= 0) this->rotation = rotation;
-        if (duration >= 0) this->duration = duration;
+        if (steps > 0) this->arguments.steps = steps;
+        if (pulses > 0) this->arguments.pulses = pulses;
+        if (rotation >= 0) this->arguments.rotation = rotation;
+        if (duration >= 0) this->arguments.duration = duration;
+        if (tie_on >= 0) this->tie_on = tie_on;
 
-        int original_pulses = this->pulses;
-        this->pulses *= (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
+        if (0==memcmp(&this->arguments, &this->last_arguments, sizeof(arguments_t))) {
+            // nothing changed, dont do anything
+            return;
+        }
+
+        int original_pulses = this->arguments.pulses;
+        int temp_pulses = arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
+        //this->arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
 
         int bucket = 0;
         for (int i = 0 ; i < this->steps ; i++) {
-            bucket += this->pulses;
+            bucket += temp_pulses;
             if (bucket >= this->steps) {
                 bucket -= this->steps;
                 this->set_event_for_tick(i * ticks_per_step);
@@ -60,10 +81,11 @@ class EuclidianPattern : public SimplePattern {
         }
         this->maximum_steps = this->steps;
         
-        if (this->rotation > 0) {
-            this->rotate_pattern(this->rotation);
+        if (this->arguments.rotation > 0) {
+            this->rotate_pattern(this->arguments.rotation);
         }
 
+        memcpy(&this->last_arguments, &this->arguments, sizeof(arguments_t));
     }
 
     // rotate the pattern around specifed number of steps -- TODO: could actually not change the pattern and just use the rotation in addition to offset in the query_patterns
@@ -90,19 +112,19 @@ class EuclidianPattern : public SimplePattern {
         int r = random(0, 100);
         if (r > 50) {
             if (r > 75) {
-                this->pulses += 1;
+                this->arguments.pulses += 1;
             } else {
-                this->pulses -= 1;
+                this->arguments.pulses -= 1;
             }
         } else if (r < 25) {
-            this->rotation += 1;
+            this->arguments.rotation += 1;
         } else if (r > 25) {
-            this->pulses *= 2;
+            this->arguments.pulses *= 2;
         } else {
-            this->pulses /= 2;
+            this->arguments.pulses /= 2;
         }
-        if (this->pulses >= this->steps || this->pulses <= 0) {
-            this->pulses = 1;
+        if (this->arguments.pulses >= this->steps || this->arguments.pulses <= 0) {
+            this->arguments.pulses = 1;
         }
         r = random(this->steps/2, this->maximum_steps);
         this->steps = r;
@@ -201,6 +223,9 @@ class EuclidianSequencer : public BaseSequencer {
 
     virtual void on_loop(int tick) override {};
     virtual void on_tick(int tick) override {
+        for (int i = 0 ; i < number_patterns ; i++) {
+            this->patterns[i]->make_euclid();
+        }
         if (is_bpm_on_phrase(tick)) {
             this->on_phrase(BPM_CURRENT_PHRASE);
         }
@@ -228,14 +253,14 @@ class EuclidianSequencer : public BaseSequencer {
             // do fill
             for (int i = 0 ; i < 3 ; i++) {
                 int ran = random(0/*euclidian_mutate_minimum_pattern % NUM_PATTERNS*/, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
-                this->patterns[ran]->rotation += 2;
+                this->patterns[ran]->arguments.rotation += 2;
                 this->patterns[ran]->make_euclid();
             }
             for (int i = 0 ; i < 3 ; i++) {
                 int ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
-                this->patterns[ran]->pulses *= 2;
-                if (this->patterns[ran]->pulses > this->patterns[ran]->steps) 
-                    this->patterns[ran]->pulses /= 8;
+                this->patterns[ran]->arguments.pulses *= 2;
+                if (this->patterns[ran]->arguments.pulses > this->patterns[ran]->steps) 
+                    this->patterns[ran]->arguments.pulses /= 8;
                 this->patterns[ran]->make_euclid();
             }
         }

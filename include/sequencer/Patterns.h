@@ -18,7 +18,7 @@ class BaseOutput;
 class BasePattern {
     public:
 
-    int steps = 32;
+    byte steps = 32;
     int steps_per_beat = STEPS_PER_BEAT;
     int ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
 
@@ -50,6 +50,13 @@ class BasePattern {
     }
     virtual bool query_note_off_for_step(int step) {
         return this->query_note_off_for_tick(step * ticks_per_step);
+    }
+
+    virtual void set_steps(byte steps) {
+        this->steps = steps;
+    }
+    virtual byte get_steps() {
+        return this->steps;
     }
 };
 

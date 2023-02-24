@@ -15,6 +15,8 @@
 
 //#define LOOP_LENGTH_TICKS   (PPQN*BEATS_PER_BAR*BARS_PER_PHRASE)
 
+#include "sequencer/sequencing.h"
+
 //#include "behaviours/behaviour_base.h"
 //#include "behaviours/behaviour_craftsynth.h"
 
@@ -83,6 +85,13 @@ void setup_parameters() {
         parameter_manager->addParameters(behaviour_manager->behaviours->get(i)->get_parameters());
     }*/
 
+    /*for (int i = 0 ; i < sequencer.number_patterns ; i++) {
+        EuclidianPattern *pattern = (EuclidianPattern *)sequencer.get_pattern(i);
+        char label[MENU_C_MAX];
+        snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
+        parameter_manager->addParameter(new DataParameter<EuclidianPattern,byte>(label, pattern, &EuclidianPattern::set_steps, &EuclidianPattern::get_steps));
+    }*/
+
     parameter_manager->setDefaultParameterConnections();
 
     tft_print("\n");
@@ -108,6 +117,9 @@ FLASHMEM void setup_parameter_menu() {
 
     //parameter_manager->addAllVoltageSourceMenuItems(menu);
     parameter_manager->addAllVoltageSourceCalibrationMenuItems(menu);
+
+    menu->add_page("Parameters");
+    parameter_manager->addAllParameterMenuItems(menu);
 
     //DirectNumberControl<int> *mixer_profile = new DirectNumberControl<int>("Mixer profiling", &parameter_manager->profile_update_mixers, parameter_manager->profile_update_mixers, (int)0, (int)1000000, nullptr);
     //menu->add(mixer_profile);

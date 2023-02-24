@@ -77,7 +77,7 @@ ClockSourceSelectorControl clock_source_selector = ClockSourceSelectorControl("C
 extern FileViewerMenuItem *sequence_fileviewer;
 extern FileViewerMenuItem *project_fileviewer;*/
 
-MenuItem test_item_1 = MenuItem("test 1");
+//MenuItem test_item_1 = MenuItem("test 1");
 
 //DisplayTranslator_STeensy steensy = DisplayTranslator_STeensy();
 //DisplayTranslator_STeensy_Big steensy = DisplayTranslator_STeensy_Big();
@@ -107,7 +107,7 @@ void setup_menu() {
     menu->add(&posbar);     // bpm and position indicator
     menu->add(&clock_source_selector);  // midi clock source (internal or from PC USB)
 
-    menu->add(&test_item_1);
+    //menu->add(&test_item_1);
 
     menu->add_page("Options");
     menu->add(new ObjectToggleControl<EuclidianSequencer>("Mutate", &sequencer, &EuclidianSequencer::set_mutated_enabled,       &EuclidianSequencer::is_mutate_enabled));
