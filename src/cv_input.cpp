@@ -85,12 +85,12 @@ void setup_parameters() {
         parameter_manager->addParameters(behaviour_manager->behaviours->get(i)->get_parameters());
     }*/
 
-    /*for (int i = 0 ; i < sequencer.number_patterns ; i++) {
+    for (int i = 0 ; i < sequencer.number_patterns ; i++) {
         EuclidianPattern *pattern = (EuclidianPattern *)sequencer.get_pattern(i);
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
         parameter_manager->addParameter(new DataParameter<EuclidianPattern,byte>(label, pattern, &EuclidianPattern::set_steps, &EuclidianPattern::get_steps));
-    }*/
+    }
 
     parameter_manager->setDefaultParameterConnections();
 
@@ -105,19 +105,11 @@ FLASHMEM void setup_parameter_menu() {
     // ask ParameterManager to add all the menu items for the ParameterInputs
     parameter_manager->addAllParameterInputMenuItems(menu, "CV Input ");
 
-    // ask ParameterManager to add all the menu items for the Parameters
-    // todo: dynamically loop over all the available behaviours
-    /*#ifdef ENABLE_CRAFTSYNTH_USB
-        parameter_manager->addParameterSubMenuItems(
-            menu, 
-            behaviour_craftsynth->get_label(), 
-            behaviour_craftsynth->get_parameters()
-        );
-    #endif*/
-
     //parameter_manager->addAllVoltageSourceMenuItems(menu);
+    //Serial.println("About to addAllVoltageSourceCalibrationMenuItems().."); Serial.flush();
     parameter_manager->addAllVoltageSourceCalibrationMenuItems(menu);
 
+    //Serial.println("About to addAllParameterMenuItems().."); Serial.flush();
     menu->add_page("Parameters");
     parameter_manager->addAllParameterMenuItems(menu);
 
