@@ -86,7 +86,12 @@ class PatternDisplay : public MenuItem {
                 }
             }
 
-            base_row += (MAX_COLUMNS/STEP_HEIGHT) * ((STEP_HEIGHT + STEP_GAP) * (max(1+(target_pattern->get_steps() / MAX_COLUMNS), 1)));
+            //base_row += (MAX_COLUMNS/STEP_HEIGHT) * ((STEP_HEIGHT + STEP_GAP) * (max(1+(target_pattern->get_steps() / MAX_COLUMNS), 1)));
+            //base_row += (1+(target_pattern->get_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP);
+            base_row += max(
+                STEP_HEIGHT+STEP_GAP,
+                ((target_pattern->get_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP)
+            );
             return base_row;
 
             //base_row *= (target_pattern->get_steps() / MAX_COLUMNS);

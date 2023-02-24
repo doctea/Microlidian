@@ -85,14 +85,11 @@ void setup_parameters() {
         parameter_manager->addParameters(behaviour_manager->behaviours->get(i)->get_parameters());
     }*/
 
-    for (int i = 0 ; i < sequencer.number_patterns ; i++) {
-        EuclidianPattern *pattern = (EuclidianPattern *)sequencer.get_pattern(i);
-        char label[MENU_C_MAX];
-        snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
-        parameter_manager->addParameter(new DataParameter<EuclidianPattern,byte>(label, pattern, &EuclidianPattern::set_steps, &EuclidianPattern::get_steps, 1, pattern->maximum_steps));
-    }
+    Serial.println("about to do setDefaultParameterConnections().."); Serial.flush();
 
     parameter_manager->setDefaultParameterConnections();
+
+    Serial.println("just did do setDefaultParameterConnections().."); Serial.flush();
 
     tft_print("\n");
 }

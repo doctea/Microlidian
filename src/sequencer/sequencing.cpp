@@ -8,7 +8,7 @@ EuclidianSequencer sequencer = EuclidianSequencer();
 
 // call this after the menu has already been set up
 void setup_sequencer() {
-    sequencer.reset_patterns();
+    sequencer.initialise_patterns();
 
     menu->add_page("Euclidian");
     for (int i = 0 ; i < sequencer.number_patterns ; i++) {

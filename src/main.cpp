@@ -60,9 +60,18 @@ void setup() {
         Serial.printf("after setup_parameters(), free RAM is %u\n", freeRam());
     #endif
 
-    Debug_println("setting up sequencer..");
+    Serial.println("setting up sequencer..");
     setup_sequencer();
     output_processer.configure_sequencer(&sequencer);
+
+    #ifdef ENABLE_CV_INPUT
+        Serial.println("..calling getParameters()..");
+        LinkedList<FloatParameter*> *params = sequencer.getParameters();
+        parameter_manager->addParameters(params);
+        parameter_manager->setDefaultParameterConnections();
+        params->clear();
+        delete params;
+    #endif
 
     #if defined(ENABLE_SCREEN) && defined(ENABLE_CV_INPUT)
         menu->add_page("Parameter Inputs");
