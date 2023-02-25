@@ -13,9 +13,12 @@
 class FloatParameter;
 
 #define MINIMUM_DENSITY 0.0f  // 0.10f
+#define MAXIMUM_DENSITY 1.5f
 #define DEFAULT_DURATION 1
 
 #define BARS_PER_PHRASE 4
+
+//float effective_euclidian_density = 0.75f;
 
 class EuclidianPattern : public SimplePattern {
     public:
@@ -37,6 +40,8 @@ class EuclidianPattern : public SimplePattern {
     arguments_t default_arguments;
     int maximum_steps = steps;
     int tie_on = 0;
+
+    float *global_density = nullptr;
 
     //EuclidianPattern() : SimplePattern() {}
 
@@ -72,12 +77,14 @@ class EuclidianPattern : public SimplePattern {
         return summary;
     }
 
-    void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1, float effective_euclidian_density = 0.75f) {
+    void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1) { //}, float effective_euclidian_density = 0.75f) {
         if (steps > 0)      this->arguments.steps = steps;
         if (pulses > 0)     this->arguments.pulses = pulses;
         if (rotation >= 0)  this->arguments.rotation = rotation;
         if (duration >= 0)  this->arguments.duration = duration;
         if (tie_on >= 0)    this->tie_on = tie_on;
+
+        this->arguments.effective_euclidian_density = *this->global_density;
 
         if (initialised && 0==memcmp(&this->arguments, &this->last_arguments, sizeof(arguments_t))) {
             // nothing changed, dont do anything
@@ -85,7 +92,8 @@ class EuclidianPattern : public SimplePattern {
         }
 
         int original_pulses = this->arguments.pulses;
-        int temp_pulses = arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
+        //int temp_pulses = arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
+        int temp_pulses = arguments.pulses * (1.5f*(MINIMUM_DENSITY+*global_density));
         //this->arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
 
         int bucket = 0;
@@ -191,12 +199,22 @@ class EuclidianSequencer : public BaseSequencer {
     int mutate_minimum_pattern = 0, mutate_maximum_pattern = number_patterns;
     bool reset_before_mutate = true, mutate_enabled = true, fills_enabled = true, add_phrase_to_seed = true;
 
+    float global_density = 0.75f;
+
     public:
     EuclidianSequencer() : BaseSequencer() {
         this->patterns = (EuclidianPattern**) calloc(number_patterns, sizeof(EuclidianPattern));
         for (int i = 0 ; i < number_patterns ; i++) {
             this->patterns[i] = new EuclidianPattern();
+            this->patterns[i]->global_density = &this->global_density;
         }
+    }
+
+    float get_density() {
+        return this->global_density;
+    }
+    void set_density(float v) {
+        this->global_density = v;
     }
 
     bool is_mutate_enabled() {

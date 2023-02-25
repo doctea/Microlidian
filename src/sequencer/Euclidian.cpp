@@ -8,6 +8,16 @@
 #if defined(ENABLE_CV_INPUT)
     LinkedList<FloatParameter*> *EuclidianSequencer::getParameters() {
         LinkedList<FloatParameter*> *parameters = new LinkedList<FloatParameter*>();
+
+        parameters->add(new DataParameter<EuclidianSequencer,float> (
+            "Density",
+            this,
+            &EuclidianSequencer::set_density,
+            &EuclidianSequencer::get_density,
+            MINIMUM_DENSITY,
+            MAXIMUM_DENSITY
+        ));
+
         for (int i = 0 ; i < this->number_patterns ; i++) {
             EuclidianPattern *pattern = (EuclidianPattern *)this->get_pattern(i);
             char label[MENU_C_MAX];

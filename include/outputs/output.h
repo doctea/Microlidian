@@ -87,7 +87,7 @@ class MIDINoteOutput : public MIDIDrumOutput {
             for (int i = 0 ; i < this->nodes->size() ; i++) {
                 MIDIDrumOutput *o = this->nodes->get(i);
                 if (o==this) continue;
-                count += o->should_go_on() ? i : 0;
+                count += o->should_go_on() ? (i%12) : 0;
             }
             Debug_printf("get_note_number in MIDINoteOutput is %i\n", count);
             return base_note + quantise_pitch(count);
@@ -103,11 +103,27 @@ class MIDIOutputProcessor {
     MIDIOutputProcessor(midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi) {
         this->midi = midi;
 
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_BASS_DRUM));
+        /*this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_BASS_DRUM));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_SNARE));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_OPEN_HI_HAT));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_PEDAL_HI_HAT));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_CLOSED_HI_HAT));*/
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_BASS_DRUM));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_SIDE_STICK));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_HAND_CLAP));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_SNARE));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_CRASH_CYMBAL_1));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_TAMBOURINE));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_HIGH_TOM));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_LOW_TOM));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_PEDAL_HI_HAT));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_OPEN_HI_HAT));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_CLOSED_HI_HAT));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_CRASH_CYMBAL_2));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_SPLASH_CYMBAL));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_VIBRA_SLAP));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_RIDE_BELL));
+        this->nodes.add(new MIDIDrumOutput(GM_NOTE_RIDE_CYMBAL_1));
         this->nodes.add(new MIDINoteOutput(&this->nodes));
     }
 
