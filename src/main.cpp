@@ -77,6 +77,8 @@ void setup() {
         menu->add_page("Parameter Inputs");
         setup_parameter_menu();
         Serial.printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
+
+        setup_debug_menu();
     #endif
 
     Debug_println("setup() finished!");

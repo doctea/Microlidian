@@ -6,6 +6,7 @@
 #include "menu.h"
 
 #include "mymenu/screen.h"
+#include "mymenu/menu_debug.h"
 
 Encoder encoder(D2, D3);
 Bounce pushButton = Bounce(D1, 10); // 10ms debounce
@@ -26,7 +27,7 @@ void setup_screen() {
         menu->start();
         Debug_printf("after menu->start(), free RAM is %u\n", freeRam());
 
-        //setup_debug_menu();
+        //setup_debug_menu();   // do this in setup() where we can control its position better
         //Serial.printf(F("after setup_debug_menu()\n")); //, free RAM is %u\n"), freeRam());
 
         menu->select_page(0);
