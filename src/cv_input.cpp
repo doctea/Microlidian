@@ -15,6 +15,8 @@
 
 //#define LOOP_LENGTH_TICKS   (PPQN*BEATS_PER_BAR*BARS_PER_PHRASE)
 
+#include "sequencer/sequencing.h"
+
 //#include "behaviours/behaviour_base.h"
 //#include "behaviours/behaviour_craftsynth.h"
 
@@ -83,7 +85,11 @@ void setup_parameters() {
         parameter_manager->addParameters(behaviour_manager->behaviours->get(i)->get_parameters());
     }*/
 
+    Serial.println("about to do setDefaultParameterConnections().."); Serial.flush();
+
     parameter_manager->setDefaultParameterConnections();
+
+    Serial.println("just did do setDefaultParameterConnections().."); Serial.flush();
 
     tft_print("\n");
 }
@@ -96,18 +102,13 @@ FLASHMEM void setup_parameter_menu() {
     // ask ParameterManager to add all the menu items for the ParameterInputs
     parameter_manager->addAllParameterInputMenuItems(menu, "CV Input ");
 
-    // ask ParameterManager to add all the menu items for the Parameters
-    // todo: dynamically loop over all the available behaviours
-    /*#ifdef ENABLE_CRAFTSYNTH_USB
-        parameter_manager->addParameterSubMenuItems(
-            menu, 
-            behaviour_craftsynth->get_label(), 
-            behaviour_craftsynth->get_parameters()
-        );
-    #endif*/
-
     //parameter_manager->addAllVoltageSourceMenuItems(menu);
+    //Serial.println("About to addAllVoltageSourceCalibrationMenuItems().."); Serial.flush();
     parameter_manager->addAllVoltageSourceCalibrationMenuItems(menu);
+
+    //Serial.println("About to addAllParameterMenuItems().."); Serial.flush();
+    menu->add_page("Parameters");
+    parameter_manager->addAllParameterMenuItems(menu);
 
     //DirectNumberControl<int> *mixer_profile = new DirectNumberControl<int>("Mixer profiling", &parameter_manager->profile_update_mixers, parameter_manager->profile_update_mixers, (int)0, (int)1000000, nullptr);
     //menu->add(mixer_profile);

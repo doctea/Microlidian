@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+void setup_debug_menu();
+
 int freeRam();
 void debug_free_ram();
 

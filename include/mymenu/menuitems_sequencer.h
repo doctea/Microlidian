@@ -4,6 +4,8 @@
 //#include "menuitems_object_selector.h"
 //#define NUM_STEPS 16
 
+#include "sequencer/Euclidian.h"
+
 #include <bpm.h>
 #include <clock.h>
 
@@ -20,7 +22,13 @@ class PatternDisplay : public MenuItem {
         }
 
         virtual int display(Coord pos, bool selected, bool opened) override {
-            pos.y = header(label, pos, selected, opened);
+            char label_info[MENU_C_MAX];
+            snprintf(label_info, MENU_C_MAX, "%s: Steps=%2i Pulses=%2i Rot=%2i", this->label, 
+                ((EuclidianPattern*)target_pattern)->get_steps(), 
+                ((EuclidianPattern*)target_pattern)->arguments.pulses, 
+                ((EuclidianPattern*)target_pattern)->arguments.rotation
+            );
+            pos.y = header(label_info, pos, selected, opened);
 
             if (this->target_pattern==nullptr) {
                 tft->println("No pattern selected");
@@ -48,16 +56,17 @@ class PatternDisplay : public MenuItem {
             /*#define STEP_WIDTH 8
             #define STEP_HEIGHT 8
             #define STEP_GAP 2*/
-            #define COLUMNS 16
+            #define MAX_COLUMNS 16
+            //int columns = target_pattern->get_steps();
 
-            static int width_per_cell = tft->width() / COLUMNS;
+            static int width_per_cell = tft->width() / MAX_COLUMNS;
             static int STEP_GAP = 2; //width_per_cell - (width_per_cell/4);
             static int STEP_WIDTH = width_per_cell - STEP_GAP;
             static int STEP_HEIGHT = STEP_WIDTH;
 
-            for (int i = 0 ; i < target_pattern->steps ; i++) {
-                int row = i / COLUMNS;
-                int col = i % COLUMNS;
+            for (int i = 0 ; i < target_pattern->get_steps() ; i++) {
+                int row = i / MAX_COLUMNS;
+                int col = i % MAX_COLUMNS;
 
                 int x = col * (STEP_WIDTH+STEP_GAP);
                 int y = base_row + (row*(STEP_HEIGHT+STEP_GAP));
@@ -69,6 +78,7 @@ class PatternDisplay : public MenuItem {
                     (step_for_tick == i ? RED : BLUE) :     // current step active
                     (step_for_tick == i ? RED : GREY);      // current step inactive
                 if (step_on) 
+
                     actual->fillRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
                 else {
                     actual->drawRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
@@ -76,7 +86,15 @@ class PatternDisplay : public MenuItem {
                 }
             }
 
-            base_row += (COLUMNS/STEP_HEIGHT) * (STEP_HEIGHT + STEP_GAP);
+            //base_row += (MAX_COLUMNS/STEP_HEIGHT) * ((STEP_HEIGHT + STEP_GAP) * (max(1+(target_pattern->get_steps() / MAX_COLUMNS), 1)));
+            //base_row += (1+(target_pattern->get_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP);
+            base_row += max(
+                STEP_HEIGHT+STEP_GAP,
+                ((target_pattern->get_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP)
+            );
+            return base_row;
+
+            //base_row *= (target_pattern->get_steps() / MAX_COLUMNS);
             tft->setCursor(0, base_row);
 
             /*for (int i = 0 ; i < target_pattern->steps ; i++) {

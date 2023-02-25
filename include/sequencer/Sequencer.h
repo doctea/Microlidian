@@ -1,9 +1,9 @@
 #ifndef SEQUENCER__INCLUDED
 #define SEQUENCER__INCLUDED
 
-
 class SimplePattern;
 class BaseOutput;
+class FloatParameter;
 
 class BaseSequencer {
     public:
@@ -47,7 +47,10 @@ class BaseSequencer {
 
     virtual void configure_pattern_output(int index, BaseOutput *output);
     
-};
+    #if defined(ENABLE_CV_INPUT)
+        virtual LinkedList<FloatParameter*> *getParameters();
+    #endif
 
+};
 
 #endif

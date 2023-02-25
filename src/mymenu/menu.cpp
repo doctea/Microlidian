@@ -77,7 +77,7 @@ ClockSourceSelectorControl clock_source_selector = ClockSourceSelectorControl("C
 extern FileViewerMenuItem *sequence_fileviewer;
 extern FileViewerMenuItem *project_fileviewer;*/
 
-MenuItem test_item_1 = MenuItem("test 1");
+//MenuItem test_item_1 = MenuItem("test 1");
 
 //DisplayTranslator_STeensy steensy = DisplayTranslator_STeensy();
 //DisplayTranslator_STeensy_Big steensy = DisplayTranslator_STeensy_Big();
@@ -87,10 +87,9 @@ DisplayTranslator_Configured displaytranslator = DisplayTranslator_Configured();
 FLASHMEM 
 #endif*/
 void setup_menu() {
-    Debug_println(F("Starting setup_menu()..")); //Instantiating DisplayTranslator_STeensy.."));
+    Debug_println(F("Starting setup_menu()..")); 
 
-    //DisplayTranslator_Configured displaytranslator = DisplayTranslator_Configured();
-    tft = &displaytranslator; //DisplayTranslator_STeensy();
+    tft = &displaytranslator; 
     tft->init();
     //delay(50);
     //Serial.println(F("Finished  constructor"));
@@ -104,17 +103,18 @@ void setup_menu() {
     menu->set_messages_log(messages_log);
 
     menu->add_pinned(&top_loop_marker_panel);  // pinned position indicator
-    menu->add(&posbar);     // bpm and position indicator
-    menu->add(&clock_source_selector);  // midi clock source (internal or from PC USB)
+    menu->add(&posbar);                        // bpm and position indicator
+    menu->add(&clock_source_selector);         // midi clock source (internal or from PC USB)
 
-    menu->add(&test_item_1);
+    //menu->add(&test_item_1);
 
-    menu->add_page("Options");
+    menu->add_page("Mutation");
+    menu->add(new ObjectNumberControl<EuclidianSequencer,float>("Density", &sequencer, &EuclidianSequencer::set_density, &EuclidianSequencer::get_density, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
     menu->add(new ObjectToggleControl<EuclidianSequencer>("Mutate", &sequencer, &EuclidianSequencer::set_mutated_enabled,       &EuclidianSequencer::is_mutate_enabled));
     menu->add(new ObjectToggleControl<EuclidianSequencer>("Reset", &sequencer,  &EuclidianSequencer::set_reset_before_mutate,   &EuclidianSequencer::should_reset_before_mutate));
-    menu->add(new ObjectToggleControl<EuclidianSequencer>("Add phrase", &sequencer,  &EuclidianSequencer::set_add_phrase_enabled,   &EuclidianSequencer::is_add_phrase_enabled));
-    menu->add(new ObjectToggleControl<EuclidianSequencer>("Fills", &sequencer,  &EuclidianSequencer::set_fills_enabled,          &EuclidianSequencer::is_fills_enabled));
-    menu->add(new ObjectNumberControl<EuclidianSequencer,int>("Seed", &sequencer, &EuclidianSequencer::set_euclidian_seed, &EuclidianSequencer::get_euclidian_seed));
+    menu->add(new ObjectToggleControl<EuclidianSequencer>("Add phrase", &sequencer, &EuclidianSequencer::set_add_phrase_enabled,&EuclidianSequencer::is_add_phrase_enabled));
+    menu->add(new ObjectToggleControl<EuclidianSequencer>("Fills", &sequencer,  &EuclidianSequencer::set_fills_enabled,         &EuclidianSequencer::is_fills_enabled));
+    menu->add(new ObjectNumberControl<EuclidianSequencer,int>("Seed", &sequencer, &EuclidianSequencer::set_euclidian_seed,      &EuclidianSequencer::get_euclidian_seed));
     
     #ifdef DISABLED_STUFF
     menu->add(new SeparatorMenuItem("Project"));
