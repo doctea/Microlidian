@@ -47,6 +47,8 @@ Clockwise starting from top-right:-
   - options to enable/disable all this
 - MIDI output (via TRS/DIN, for sending clock, triggers, notes and envelopes)
   - ~~basic hacky approach is working~~
+  - nicer mechanisms for assigning outputs - including named outputs ("kick", "snare", etc, "bassline")
+  - options that would allow for modulation 
   - options to enable/disable all this
 - Integrate CV inputs
   - ~~basic cv input parameter~~
@@ -58,6 +60,16 @@ Clockwise starting from top-right:-
   - use an i2c rotary encoder: frees up 3(!) pins; could use the rgb encoder for extra feedback; more difficult to fit neatly under a panel due to the i2c board...
   - or, just use a Pico instead of the XIAO and don't worry about not having enough pins!; may be harder to fit usb-c connector, maybe not tho?
   - can we write to flash without it being overwritten when uploading new code?
+- Stutter/Ratchetting
+- Per-track duration, with modulation
+- Setting a per-parameter range for modulation
+- Load/save settings and presets to the flash
+- "Stick on this pattern" control; A/B controls
+- Logic gates on the triggers (including 'mult-limbed-drummer' options)
+- 'Density' control that keeps the same rhythm but fills in gaps
+  - 'euclidian within euclidian'?  so eg we fill in triggers in between other triggers?
+- rhythm-synced LFO that sets a cycle of the waveform to the length between triggers
+
 
 ## Done
 
