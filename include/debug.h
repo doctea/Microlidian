@@ -37,4 +37,10 @@ void messages_log_add(String msg);
 
 extern bool debug_flag;
 
+
+extern int menu_time;
+extern int tft_time;
+extern int missed_micros;
+extern int sequencer_time;
+
 #endif

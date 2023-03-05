@@ -56,3 +56,8 @@ void messages_log_add(String msg) {
     if (Serial) Serial.println(freeRam());
   }
 #endif
+
+int menu_time = 10;
+int tft_time = 10;
+//int missed_micros = 10;
+int sequencer_time = 10;

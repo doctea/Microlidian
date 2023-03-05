@@ -20,12 +20,14 @@
 //#include "behaviours/behaviour_base.h"
 //#include "behaviours/behaviour_craftsynth.h"
 
+bool cv_input_enabled = true;
+
 ParameterManager *parameter_manager = new ParameterManager(LOOP_LENGTH_TICKS);
 
 // initialise the voltage-reading hardware/libraries and the ParameterManager
 FLASHMEM
 void setup_cv_input() {
-    Serial.println("setup_cv_input...");
+    //Serial.println("setup_cv_input...");
     tft_print("...setup_cv_input...\n");
 
     parameter_manager->init();
@@ -44,7 +46,7 @@ FLASHMEM
 void setup_parameters() {
     //parameter_manager = new ParameterManager();
     // add the available parameters to a list used globally and later passed to each selector menuitem
-    Serial.println(F("==== begin setup_parameters ====")); Serial_flush();
+    //Serial.println(F("==== begin setup_parameters ====")); Serial_flush();
     tft_print("..setup_parameters...");
 
     // initialise the voltage source inputs
@@ -85,20 +87,20 @@ void setup_parameters() {
         parameter_manager->addParameters(behaviour_manager->behaviours->get(i)->get_parameters());
     }*/
 
-    Serial.println("about to do setDefaultParameterConnections().."); Serial.flush();
+    //Serial.println("about to do setDefaultParameterConnections().."); Serial.flush();
 
     parameter_manager->setDefaultParameterConnections();
 
-    Serial.println("just did do setDefaultParameterConnections().."); Serial.flush();
+    //Serial.println("just did do setDefaultParameterConnections().."); Serial.flush();
 
     tft_print("\n");
 }
 
 // set up the menus to provide control over the Parameters and ParameterInputs
 FLASHMEM void setup_parameter_menu() {
-    Serial.println(F("==== setup_parameter_menu starting ===="));
+    //Serial.println(F("==== setup_parameter_menu starting ===="));
 
-    Serial.println(F("Adding ParameterSelectorControls for available_inputs..."));
+    //Serial.println(F("Adding ParameterSelectorControls for available_inputs..."));
     // ask ParameterManager to add all the menu items for the ParameterInputs
     parameter_manager->addAllParameterInputMenuItems(menu, "CV Input ");
 
@@ -113,7 +115,7 @@ FLASHMEM void setup_parameter_menu() {
     //DirectNumberControl<int> *mixer_profile = new DirectNumberControl<int>("Mixer profiling", &parameter_manager->profile_update_mixers, parameter_manager->profile_update_mixers, (int)0, (int)1000000, nullptr);
     //menu->add(mixer_profile);
 
-    Serial.println(F("setup_parameter_menu done =================="));
+    //Serial.println(F("setup_parameter_menu done =================="));
 }
 
 

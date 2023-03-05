@@ -7,6 +7,8 @@
 //#include "submenuitem_bar.h"
 #include "menuitems_listviewer.h"
 
+#include "cv_input.h"
+
 //#include "__version.h"
 
 extern bool debug_flag, debug_stress_sequencer_load;
@@ -32,6 +34,8 @@ class DebugPanel : public MenuItem {
 };
 
 
+extern uint32_t ticks;
+
 #ifndef GDB_DEBUG
 FLASHMEM // void setup_debug_menu() causes a section type conflict with void Menu::start()
 #endif
@@ -53,15 +57,24 @@ void setup_debug_menu() {
     //ActionConfirmItem *reset_control = new ActionConfirmItem("RESET TEENSY?", reset_teensy);
     //menu->add(reset_control);
 
-    /*SubMenuItemBar *bar = new SubMenuItemBar("Debug");
+    SubMenuItemBar *bar = new SubMenuItemBar("Debug");
 
     ObjectToggleControl<Menu> *debug_times_control = new ObjectToggleControl<Menu>("Render times", menu, &Menu::setDebugTimes, &Menu::isDebugTimes, nullptr);
-    bar->add(debug_times_control);
+    /*bar->add(debug_times_control);
     bar->add(new NumberControl<bool>("Extra", (bool*)&debug_flag, debug_flag, false, true));
     bar->add(new NumberControl<bool>("InSaNe", (bool*)&debug_stress_sequencer_load, debug_flag, false, true));
     menu->add(bar);*/
+    menu->add(debug_times_control);
+
+    bar->add(new NumberControl<int>("menu time", (int*)&menu_time, 0, 0, pow(2,31), (bool)false));
+    bar->add(new NumberControl<int>("tft time", (int*)&tft_time, 0, 0, pow(2,31), (bool)false));
+    bar->add(new NumberControl<int>("missed ticks", (int*)&missed_micros, 0, 0, pow(2,31), (bool)false));
+    bar->add(new NumberControl<uint32_t>("ticks", (uint32_t*)&ticks, 0, 0, pow(2,31), (bool)false));
+    menu->add(bar);
 
     menu->add(new DebugPanel());
+
+    menu->add(new ToggleControl<bool>("CV Input", &cv_input_enabled, nullptr));
 
     menu->add(new ListViewerMenuItem("Message history", messages_log));
 }

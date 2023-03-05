@@ -17,7 +17,7 @@
 
 #include "mymenu.h"
 
-#include "submenuitem.h"
+#include "submenuitem_bar.h"
 
 /*#include "mymenu/menu_looper.h"
 #include "mymenu/menu_sequencer.h"*/
@@ -106,15 +106,24 @@ void setup_menu() {
     menu->add(&posbar);                        // bpm and position indicator
     menu->add(&clock_source_selector);         // midi clock source (internal or from PC USB)
 
+    // add start/stop/continue bar
+    SubMenuItemBar *project_startstop = new SubMenuItemBar("Transport");
+    project_startstop->add(new ActionItem("Start",    &clock_start));
+    project_startstop->add(new ActionItem("Stop",     &clock_stop));
+    project_startstop->add(new ActionItem("Continue", &clock_continue));
+    menu->add(project_startstop);
+
     //menu->add(&test_item_1);
 
-    menu->add_page("Mutation");
-    menu->add(new ObjectNumberControl<EuclidianSequencer,float>("Density", &sequencer, &EuclidianSequencer::set_density, &EuclidianSequencer::get_density, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
-    menu->add(new ObjectToggleControl<EuclidianSequencer>("Mutate", &sequencer, &EuclidianSequencer::set_mutated_enabled,       &EuclidianSequencer::is_mutate_enabled));
-    menu->add(new ObjectToggleControl<EuclidianSequencer>("Reset", &sequencer,  &EuclidianSequencer::set_reset_before_mutate,   &EuclidianSequencer::should_reset_before_mutate));
-    menu->add(new ObjectToggleControl<EuclidianSequencer>("Add phrase", &sequencer, &EuclidianSequencer::set_add_phrase_enabled,&EuclidianSequencer::is_add_phrase_enabled));
-    menu->add(new ObjectToggleControl<EuclidianSequencer>("Fills", &sequencer,  &EuclidianSequencer::set_fills_enabled,         &EuclidianSequencer::is_fills_enabled));
-    menu->add(new ObjectNumberControl<EuclidianSequencer,int>("Seed", &sequencer, &EuclidianSequencer::set_euclidian_seed,      &EuclidianSequencer::get_euclidian_seed));
+    #ifdef ENABLE_EUCLIDIAN
+        menu->add_page("Mutation");
+        menu->add(new ObjectNumberControl<EuclidianSequencer,float>("Density", &sequencer, &EuclidianSequencer::set_density,        &EuclidianSequencer::get_density, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+        menu->add(new ObjectToggleControl<EuclidianSequencer>("Mutate", &sequencer, &EuclidianSequencer::set_mutated_enabled,       &EuclidianSequencer::is_mutate_enabled));
+        menu->add(new ObjectToggleControl<EuclidianSequencer>("Reset", &sequencer,  &EuclidianSequencer::set_reset_before_mutate,   &EuclidianSequencer::should_reset_before_mutate));
+        menu->add(new ObjectToggleControl<EuclidianSequencer>("Add phrase", &sequencer, &EuclidianSequencer::set_add_phrase_enabled,&EuclidianSequencer::is_add_phrase_enabled));
+        menu->add(new ObjectToggleControl<EuclidianSequencer>("Fills", &sequencer,  &EuclidianSequencer::set_fills_enabled,         &EuclidianSequencer::is_fills_enabled));
+        menu->add(new ObjectNumberControl<EuclidianSequencer,int>("Seed", &sequencer, &EuclidianSequencer::set_euclidian_seed,      &EuclidianSequencer::get_euclidian_seed));
+    #endif
     
     #ifdef DISABLED_STUFF
     menu->add(new SeparatorMenuItem("Project"));

@@ -28,3 +28,5 @@ void setup_parameters();
 void setup_parameter_menu();
 
 extern ParameterManager *parameter_manager;
+
+extern bool cv_input_enabled;

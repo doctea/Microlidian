@@ -52,7 +52,7 @@ bool update_screen() {
 
         //tft_update(ticks);
         ///Serial.println("going into menu->display and then pausing 1000ms: "); Serial_flush();
-        */
+        */       
         static unsigned long last_drawn;
         if (menu!=nullptr) {
             uint32_t interrupts = save_and_disable_interrupts();
@@ -71,10 +71,14 @@ bool update_screen() {
             if (debug_flag) menu->debug = true;
             uint32_t interrupts = save_and_disable_interrupts();
             menu->auto_update = false;
+            int t = millis();
             menu->display();
+            menu_time = (menu_time + (millis()-t))/2;
             restore_interrupts(interrupts);
             //multicore_launch_core1(update_display);
+            t = millis();
             update_display();
+            tft_time = (tft_time + (millis()-t))/2;
             //if (debug_flag) { Serial.println("just did menu->display"); Serial_flush(); }
             //Serial.printf("display() took %ums..", millis()-before_display);
             last_drawn = millis();
