@@ -108,9 +108,10 @@ void setup_menu() {
 
     // add start/stop/continue bar
     SubMenuItemBar *project_startstop = new SubMenuItemBar("Transport");
-    project_startstop->add(new ActionItem("Start",    &clock_start));
-    project_startstop->add(new ActionItem("Stop",     &clock_stop));
-    project_startstop->add(new ActionItem("Continue", &clock_continue));
+    project_startstop->add(new ActionItem("Start",    clock_start));
+    project_startstop->add(new ActionItem("Stop",     clock_stop));
+    project_startstop->add(new ActionItem("Continue", clock_continue));
+    project_startstop->add(new ActionFeedbackItem("Restart", (ActionFeedbackItem::setter_def_2)set_restart_on_next_bar_on, is_restart_on_next_bar, "Restarting..", "Restart"));
     menu->add(project_startstop);
 
     //menu->add(&test_item_1);

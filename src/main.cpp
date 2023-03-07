@@ -39,6 +39,32 @@ void setup_serial() {
     #endif
 }
 
+// call this when global clock should be reset
+void global_on_restart() {
+  set_restart_on_next_bar(false);
+
+  //Serial.println(F("on_restart()==>"));
+
+  #ifdef USE_UCLOCK
+    /*uClock.setTempo(bpm_current); // todo: probably not needed?
+    Serial.println(F("reset tempo"));
+    uClock.resetCounters();
+    Serial.println(F("reset counters"));*/
+  #else
+    ticks = 0;
+    //Serial.println(F("reset ticks"));
+  #endif
+  //noInterrupts();
+  ticks = 0;
+  //interrupts();
+  last_processed_tick = -1;
+  
+  //send_midi_serial_stop_start();
+
+  //behaviour_manager->on_restart();
+
+  //Serial.println(F("<==on_restart()"));
+}
 
 void setup() {
     // overclock the CPU so that we can afford all those CPU cycles drawing the UI!
@@ -47,6 +73,9 @@ void setup() {
 
     setup_serial();
     Debug_println("setup() starting");
+
+    setup_cheapclock();
+    set_global_restart_callback(global_on_restart);
 
     setup_midi();
 
@@ -120,6 +149,17 @@ void loop() {
     restore_interrupts(interrupts);
 
     if (ticked) {
+        if (is_restart_on_next_bar() && is_bpm_on_bar(ticks)) {
+            //if (debug) Serial.println(F("do_tick(): about to global_on_restart"));
+            //in_ticks = ticks = 0;
+            global_on_restart();
+            //ATOMIC(
+            //midi_apcmini->sendNoteOn(7, APCMINI_OFF, 1);
+            //)
+            //restart_on_next_bar = false;
+            set_restart_on_next_bar(false);
+        }
+
         MIDI.sendClock();
         #ifdef ENABLE_EUCLIDIAN
             sequencer.on_tick(ticks);
