@@ -64,25 +64,27 @@ class PatternDisplay : public MenuItem {
             static int STEP_WIDTH = width_per_cell - STEP_GAP;
             static int STEP_HEIGHT = STEP_WIDTH;
 
-            for (int i = 0 ; i < target_pattern->get_steps() ; i++) {
-                int row = i / MAX_COLUMNS;
-                int col = i % MAX_COLUMNS;
+            int actual_current_step = target_pattern->get_step_for_tick(ticks);
 
-                int x = col * (STEP_WIDTH+STEP_GAP);
-                int y = base_row + (row*(STEP_HEIGHT+STEP_GAP));
+            for (int step = 0 ; step < target_pattern->get_steps() ; step++) {
+                // for every step of sequence
 
-                int step_for_tick = target_pattern->get_step_for_tick(ticks);
+                // first calculate the row, column and on-screen coordinates
+                const int row = step / MAX_COLUMNS;
+                const int col = step % MAX_COLUMNS;
+                const int x = col * (STEP_WIDTH+STEP_GAP);
+                const int y = base_row + (row*(STEP_HEIGHT+STEP_GAP));
 
-                bool step_on = target_pattern->query_note_on_for_step(i);
-                const uint16_t colour = step_on ? 
-                    (step_for_tick == i ? RED : BLUE) :     // current step active
-                    (step_for_tick == i ? RED : GREY);      // current step inactive
-                if (step_on) 
+                const bool is_step_on = target_pattern->query_note_on_for_step(step);
+                const uint16_t colour = is_step_on ? 
+                    (actual_current_step == step ? RED : BLUE) :     // current step active
+                    (actual_current_step == step ? RED : GREY);      // current step inactive
 
+                if (is_step_on) {  // yer twisting my melon, man
                     actual->fillRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
-                else {
+                } else {        // call the cops
                     actual->drawRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
-                    actual->fillRect(x + 1, y + 1, STEP_WIDTH-2, STEP_HEIGHT-2, BLACK);
+                    //actual->fillRect(x + 1, y + 1, STEP_WIDTH-2, STEP_HEIGHT-2, BLACK); // hollow out the center
                 }
             }
 
@@ -92,18 +94,19 @@ class PatternDisplay : public MenuItem {
                 STEP_HEIGHT+STEP_GAP,
                 ((target_pattern->get_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP)
             );
-            return base_row;
-
-            //base_row *= (target_pattern->get_steps() / MAX_COLUMNS);
             tft->setCursor(0, base_row);
+            return base_row;
+            
+            //base_row *= (target_pattern->get_steps() / MAX_COLUMNS);
 
             /*for (int i = 0 ; i < target_pattern->steps ; i++) {
                 tft->printf("%02i: ", i);
                 tft->printf(get_note_name_c(behaviour_beatstep->sequence->get_pitch_at_step(i)));
                 tft->println();
             }*/
-            pos.y = tft->getCursorY();
+            /*pos.y = tft->getCursorY();
 
             return pos.y; // + 40; //row + 12; //pos.y + (first_found - last_found); //127;  
+            */
         }
 };
