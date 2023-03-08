@@ -34,13 +34,44 @@ void setup_screen() {
     #endif
 }
 
+#include <atomic>
+std::atomic<bool> locked;
 
-void update_display() {
+void push_display() {
+    if (locked) return;
+    if (!menu->tft->ready()) return;
+    locked = true;
+    uint32_t interrupts = save_and_disable_interrupts();
     menu->updateDisplay();
+    restore_interrupts(interrupts);
+    locked = false;
 }
 
 void update_screen_dontcare() {
     update_screen();
+}
+
+void draw_screen() {
+    //if (locked || menu==nullptr) 
+    //    return;
+    while (locked) {};
+    locked = true;
+    uint32_t interrupts = save_and_disable_interrupts();
+    menu->display();
+    restore_interrupts(interrupts);
+    locked = false;    
+}
+
+void loop1() {
+    static unsigned long last_pushed = 0;
+    //if (last_pushed==0) delay(5000);
+    while(locked) {
+        delay(MENU_MS_BETWEEN_REDRAW/2);
+    }
+    if (menu!=nullptr && millis() - last_pushed > MENU_MS_BETWEEN_REDRAW) {
+        draw_screen();
+        last_pushed = millis();
+    }
 }
 
 bool update_screen() {
@@ -53,6 +84,10 @@ bool update_screen() {
         //tft_update(ticks);
         ///Serial.println("going into menu->display and then pausing 1000ms: "); Serial_flush();
         */       
+        if (locked) 
+            return false;
+        locked = true;
+
         static unsigned long last_drawn;
         if (menu!=nullptr) {
             uint32_t interrupts = save_and_disable_interrupts();
@@ -61,7 +96,7 @@ bool update_screen() {
         } else {
             Debug_println("menu is nullptr!");
         }
-        if (millis() - last_drawn > MENU_MS_BETWEEN_REDRAW) {
+        if (!locked && millis() - last_drawn > MENU_MS_BETWEEN_REDRAW) {
             //menu->debug = true;
             //Serial.println("gonna redraw..");
             //long before_display = millis();
@@ -72,12 +107,13 @@ bool update_screen() {
             uint32_t interrupts = save_and_disable_interrupts();
             menu->auto_update = false;
             int t = millis();
-            menu->display();
+            //menu->display();
+            //draw_screen();
             menu_time = (menu_time + (millis()-t))/2;
             restore_interrupts(interrupts);
-            //multicore_launch_core1(update_display);
+            //multicore_launch_core1(push_display);
             t = millis();
-            update_display();
+            push_display();
             tft_time = (tft_time + (millis()-t))/2;
             //if (debug_flag) { Serial.println("just did menu->display"); Serial_flush(); }
             //Serial.printf("display() took %ums..", millis()-before_display);
@@ -86,6 +122,7 @@ bool update_screen() {
         } else {
             screen_was_drawn = false;
         }
+        locked = false;
       //delay(1000); Serial.println("exiting sleep after menu->display"); Serial_flush();
     #endif
 

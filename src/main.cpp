@@ -137,6 +137,28 @@ void add_loop_length(int length) {
     }
 }
 
+void update_cv_input() {
+    static int_fast8_t current_mode = 0;
+    if(debug_flag) {
+        parameter_manager->debug = true;
+        Serial.println(F("about to do parameter_manager->update_voltage_sources()..")); Serial_flush();
+    }
+    if (current_mode==0) {
+        parameter_manager->update_voltage_sources();
+        current_mode++;
+    } else if (current_mode==1) {
+        //if(debug) Serial.println("just did parameter_manager->update_voltage_sources().."); Serial_flush();
+        //if(debug) Serial.println("about to do parameter_manager->update_inputs().."); Serial_flush();
+        parameter_manager->update_inputs();
+        //if(debug) Serial.println("about to do parameter_manager->update_mixers().."); Serial_flush();
+        current_mode++;
+    } else if (current_mode==2) {
+        parameter_manager->update_mixers_sliced();
+        if(debug_flag) Serial.println(F("just did parameter_manager->update_inputs()..")); Serial_flush();
+        current_mode = 0;
+    }
+}
+
 void loop() {
     uint32_t mics_start = micros();
     //Serial.println("loop()");
@@ -171,61 +193,54 @@ void loop() {
         #endif
     }
 
-    interrupts = save_and_disable_interrupts();
-    if (Serial) {
-        Serial.read();
-        Serial.clearWriteError();
-    }
-    restore_interrupts(interrupts);
-
 /*#ifdef DUALCORE
 }
 
 void loop1() {
 #endif*/
     if (clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0 && micros() + loop_average >= last_ticked_at_micros + micros_per_tick) {
+        // don't process anything else this loop, since we probably don't have time before the next tick arrives
         //Serial.printf("early return because %i + %i >= %i + %i\n", micros(), loop_average, last_ticked_at_micros, micros_per_tick);
         //Serial.flush();
     } else {
-
-    static uint32_t last_tick = -1;
-    #ifdef ENABLE_SCREEN
-        if (ticked) {    
-            uint32_t interrupts = save_and_disable_interrupts();
-            menu->update_ticks(ticks);
-            last_tick = ticks;
-            restore_interrupts(interrupts);
+        interrupts = save_and_disable_interrupts();
+        if (Serial) {
+            Serial.read();
+            Serial.clearWriteError();
         }
-        bool screen_was_drawn = update_screen();
-        //menu->tft->setCursor(0,0);
-        //menu->tft->printf("loop: %i", perf_record.average_loop_length);
-    #endif
+        restore_interrupts(interrupts);
 
-    #ifdef ENABLE_CV_INPUT
-        static unsigned long time_of_last_param_update = 0;
-        static int_fast8_t current_mode = 0;
-        if (cv_input_enabled && (screen_was_drawn || millis() - time_of_last_param_update > TIME_BETWEEN_CV_INPUT_UPDATES)) {
-            if(debug_flag) parameter_manager->debug = true;
-            if(debug_flag) Serial.println(F("about to do parameter_manager->update_voltage_sources()..")); Serial_flush();
-            if (current_mode==0) {
-                parameter_manager->update_voltage_sources();
-                current_mode++;
-            } else if (current_mode==1) {
-                //if(debug) Serial.println("just did parameter_manager->update_voltage_sources().."); Serial_flush();
-                //if(debug) Serial.println("about to do parameter_manager->update_inputs().."); Serial_flush();
-                parameter_manager->update_inputs();
-                //if(debug) Serial.println("about to do parameter_manager->update_mixers().."); Serial_flush();
-                current_mode++;
-            } else if (current_mode==2) {
-                parameter_manager->update_mixers();
-                if(debug_flag) Serial.println(F("just did parameter_manager->update_inputs()..")); Serial_flush();
-                time_of_last_param_update = millis();
-                current_mode = 0;
+        static uint32_t last_tick = -1;
+        static unsigned long last_drawn;
+
+        #ifdef ENABLE_SCREEN
+            if (ticked) {    
+                uint32_t interrupts = save_and_disable_interrupts();
+                menu->update_ticks(ticks);
+                last_tick = ticks;
+                restore_interrupts(interrupts);
             }
+            bool screen_was_drawn = false;
+            if (ticked || millis() - last_drawn > MENU_MS_BETWEEN_REDRAW) {
+                screen_was_drawn = update_screen();
+            }
+            //menu->tft->setCursor(0,0);
+            //menu->tft->printf("loop: %i", perf_record.average_loop_length);
+        #endif
+
+        if (micros() + loop_average < last_ticked_at_micros + micros_per_tick) {
+            #ifdef ENABLE_CV_INPUT
+                static unsigned long time_of_last_param_update = 0;
+                if (cv_input_enabled && (ticked || millis() - time_of_last_param_update > TIME_BETWEEN_CV_INPUT_UPDATES)) {
+                    update_cv_input();
+                    //multicore_launch_core1(update_cv_input);
+                    time_of_last_param_update = millis();
+                }
+            #endif
+
+            add_loop_length(micros()-mics_start);
         }
-    #endif
     }
-    add_loop_length(micros()-mics_start);
 
 }
 

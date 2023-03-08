@@ -1,5 +1,8 @@
 #include "sequencer/Sequencer.h"
+#include "sequencer/Patterns.h"
+
 #include "menuitems.h"
+
 //#include "submenuitem_bar.h"
 //#include "menuitems_object_selector.h"
 //#define NUM_STEPS 16
@@ -79,18 +82,18 @@ class CircleDisplay : public MenuItem {
                 static Adafruit_ST7789 *actual = tft2->tft;
             #endif
 
-            static const int circle_center_x = tft->width()/4;
-            static const int circle_center_y = tft->width()/3;
+            static const int_fast8_t circle_center_x = tft->width()/4;
+            static const int_fast8_t circle_center_y = tft->width()/3;
 
-            for (int seq = 0 ; seq < target_sequencer->number_patterns ; seq++ ) {
-                int first_x, first_y;
-                int last_x, last_y;
-                int count = 0;
+            for (int_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++ ) {
+                int_fast8_t first_x, first_y;
+                int_fast8_t last_x, last_y;
+                int_fast8_t count = 0;
                 BasePattern *pattern = target_sequencer->get_pattern(seq);
                 //int16_t colour = color565(255 * seq, 255 - (255 * seq), seq) + (seq*8);
                 for (int i = 0 ; i < 16 ; i++) {
-                    int coord_x = circle_center_x + coordinates_x[i];
-                    int coord_y = circle_center_y + coordinates_y[i];
+                    int_fast8_t coord_x = circle_center_x + coordinates_x[i];
+                    int_fast8_t coord_y = circle_center_y + coordinates_y[i];
                     if (pattern->query_note_on_for_tick(i*PPQN)) {
                         if (count>0) {
                             actual->drawLine(
@@ -111,8 +114,8 @@ class CircleDisplay : public MenuItem {
                 }
             }
 
-            const int radius = 2;
-            for (int i = 0 ; i < 16 ; i++) {
+            const int_fast8_t radius = 2;
+            for (int_fast8_t i = 0 ; i < 16 ; i++) {
                 int16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : BLUE;
                 actual->fillCircle(
                     circle_center_x + coordinates_x[i], 
@@ -126,9 +129,9 @@ class CircleDisplay : public MenuItem {
             colours(false, C_WHITE);
             tft->println("St Pu Ro   St Pu Ro");
             tft->setCursor(tft->width()/2, pos.y);
-            for (int seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
-                int column = seq / 10;
-                int row = 1+(seq % 10);
+            for (int_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
+                int_fast8_t column = seq / 10;
+                int_fast8_t row = 1+(seq % 10);
                 tft->setCursor((tft->width()/2) + (column*65), initial_y + (row*8)); //tft->getCursorY());
                 //tft->setCursor((tft->width()/2) + (seq/10), tft->getCursorY());
                 BasePattern *pattern = target_sequencer->get_pattern(seq);

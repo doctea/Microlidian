@@ -6,7 +6,7 @@
 #include "mymenu.h"
 
 void setup_screen();
-void update_display();
+void push_display();
 void update_screen_dontcare();
 bool update_screen();
 
