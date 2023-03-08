@@ -54,7 +54,9 @@ void update_screen_dontcare() {
 void draw_screen() {
     //if (locked || menu==nullptr) 
     //    return;
-    while (locked) {};
+    while (locked) {
+        delay(MENU_MS_BETWEEN_REDRAW/2);
+    };
     locked = true;
     uint32_t interrupts = save_and_disable_interrupts();
     menu->display();

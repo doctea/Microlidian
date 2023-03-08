@@ -57,7 +57,7 @@ void messages_log_add(String msg) {
   }
 #endif
 
-int menu_time = 10;
-int tft_time = 10;
+volatile int menu_time = 10;
+volatile int tft_time = 10;
 //int missed_micros = 10;
-int sequencer_time = 10;
+volatile int sequencer_time = 10;
