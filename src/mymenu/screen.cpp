@@ -50,9 +50,9 @@ void push_display() {
     if (locked) return;
     locked = true;
         
-    uint32_t interrupts = save_and_disable_interrupts();
+    //uint32_t interrupts = save_and_disable_interrupts();
     menu->updateDisplay();
-    restore_interrupts(interrupts);
+    //restore_interrupts(interrupts);
     last_drawn = millis();
 
     frame_ready = false;
@@ -70,12 +70,14 @@ void draw_screen() {
         delay(MENU_MS_BETWEEN_REDRAW/2);
     };
     locked = true;
-    uint32_t interrupts = save_and_disable_interrupts();
+    //uint32_t interrupts = save_and_disable_interrupts();
     frame_ready = false;
     menu->display();
     frame_ready = true;
-    restore_interrupts(interrupts);
+    //restore_interrupts(interrupts);
     locked = false;    
+
+    push_display();
 }
 
 void loop1() {
@@ -121,13 +123,13 @@ bool update_screen() {
             if (!menu->tft->ready())
                 return false;
             if (debug_flag) menu->debug = true;
-            uint32_t interrupts = save_and_disable_interrupts();
+            //uint32_t interrupts = save_and_disable_interrupts();
             menu->auto_update = false;
             int t = millis();
             //menu->display();
             //draw_screen();
             menu_time = (menu_time + (millis()-t))/2;
-            restore_interrupts(interrupts);
+            //restore_interrupts(interrupts);
             //multicore_launch_core1(push_display);
             t = millis();
             push_display();

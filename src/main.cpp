@@ -160,28 +160,29 @@ void update_cv_input() {
 }
 
 void read_serial_buffer() {
-    uint32_t interrupts = save_and_disable_interrupts();
+    //uint32_t interrupts = save_and_disable_interrupts();
     if (Serial) {
         Serial.read();
         Serial.clearWriteError();
     }
-    restore_interrupts(interrupts);
+    //restore_interrupts(interrupts);
 }
 
 void loop() {
     uint32_t mics_start = micros();
     //Serial.println("loop()");
-    uint32_t interrupts = save_and_disable_interrupts();
+    //uint32_t interrupts = save_and_disable_interrupts();
     MIDI.read();
-    restore_interrupts(interrupts);
+    //restore_interrupts(interrupts);
 
-    interrupts = save_and_disable_interrupts();
+    //interrupts = save_and_disable_interrupts();
     ticked = update_clock_ticks();
-    restore_interrupts(interrupts);
+    //restore_interrupts(interrupts);
 
     if (menu!=nullptr) {
         //uint32_t interrupts = save_and_disable_interrupts();
-        menu->update_inputs();
+        if (!locked)
+            menu->update_inputs();
         //restore_interrupts(interrupts);
     } else {
         Debug_println("menu is nullptr!");
@@ -199,17 +200,19 @@ void loop() {
             set_restart_on_next_bar(false);
         }
 
+        //uint32_t interrupts = save_and_disable_interrupts();
         MIDI.sendClock();
+        //restore_interrupts(interrupts);
         #ifdef ENABLE_EUCLIDIAN
             sequencer.on_tick(ticks);
-            uint32_t interrupts = save_and_disable_interrupts();
+            //interrupts = save_and_disable_interrupts();
             if (is_bpm_on_sixteenth(ticks)) {
                 output_processer.process();
             }
             //restore_interrupts(interrupts);
         #endif
     }
-    restore_interrupts(interrupts);
+    //restore_interrupts(interrupts);
 
     if (clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0 && micros() + loop_average >= last_ticked_at_micros + micros_per_tick) {
         // don't process anything else this loop, since we probably don't have time before the next tick arrives
@@ -221,11 +224,12 @@ void loop() {
         static unsigned long last_drawn;
 
         #ifdef ENABLE_SCREEN
-            if (ticked) {    
-                uint32_t interrupts = save_and_disable_interrupts();
-                menu->update_ticks(ticks);
+            if (ticked) {
+                //uint32_t interrupts = save_and_disable_interrupts();
+                if (!locked)
+                    menu->update_ticks(ticks);
                 last_tick = ticks;
-                restore_interrupts(interrupts);
+                //restore_interrupts(interrupts);
             }
             bool screen_was_drawn = false;
             if (ticked || millis() - last_drawn > MENU_MS_BETWEEN_REDRAW) {
@@ -250,7 +254,7 @@ void loop() {
         //ticked = false;
     }
 
-    push_display();
+    //push_display();
 
 }
 
