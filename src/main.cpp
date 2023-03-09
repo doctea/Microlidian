@@ -114,6 +114,7 @@ void setup() {
 
         menu->select_page(0);
     #endif
+    started = true;
 
     Debug_println("setup() finished!");
 }
@@ -226,7 +227,7 @@ void loop() {
         #ifdef ENABLE_SCREEN
             if (ticked) {
                 //uint32_t interrupts = save_and_disable_interrupts();
-                if (!locked)
+                //if (!locked)
                     menu->update_ticks(ticks);
                 last_tick = ticks;
                 //restore_interrupts(interrupts);

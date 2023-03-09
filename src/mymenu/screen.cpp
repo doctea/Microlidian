@@ -38,6 +38,7 @@ void setup_screen() {
 }
 
 #include <atomic>
+std::atomic<bool> started;
 std::atomic<bool> locked;
 std::atomic<bool> frame_ready;
 
@@ -78,6 +79,12 @@ void draw_screen() {
     locked = false;    
 
     push_display();
+}
+
+void setup1() {
+    while (!started) {
+        delay(1);
+    };
 }
 
 void loop1() {
