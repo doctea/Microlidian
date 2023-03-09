@@ -1,3 +1,5 @@
+#ifndef SCREEN__INCLUDED
+#define SCREEN__INCLUDED
 
 // input libraries
 #include "Encoder.h"
@@ -12,3 +14,8 @@ bool update_screen();
 
 extern Encoder encoder;
 extern Bounce pushButton;
+
+#include <atomic>
+extern std::atomic<bool> ticked;
+
+#endif

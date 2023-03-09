@@ -118,7 +118,7 @@ void setup() {
     Debug_println("setup() finished!");
 }
 
-volatile bool ticked = false;
+//volatile bool ticked = false;
 
 #define LOOP_AVG_COUNT 50
 int loop_averages[LOOP_AVG_COUNT];
@@ -159,6 +159,15 @@ void update_cv_input() {
     }
 }
 
+void read_serial_buffer() {
+    uint32_t interrupts = save_and_disable_interrupts();
+    if (Serial) {
+        Serial.read();
+        Serial.clearWriteError();
+    }
+    restore_interrupts(interrupts);
+}
+
 void loop() {
     uint32_t mics_start = micros();
     //Serial.println("loop()");
@@ -169,6 +178,14 @@ void loop() {
     interrupts = save_and_disable_interrupts();
     ticked = update_clock_ticks();
     restore_interrupts(interrupts);
+
+    if (menu!=nullptr) {
+        //uint32_t interrupts = save_and_disable_interrupts();
+        menu->update_inputs();
+        //restore_interrupts(interrupts);
+    } else {
+        Debug_println("menu is nullptr!");
+    }
 
     if (ticked) {
         if (is_restart_on_next_bar() && is_bpm_on_bar(ticks)) {
@@ -189,27 +206,17 @@ void loop() {
             if (is_bpm_on_sixteenth(ticks)) {
                 output_processer.process();
             }
-            restore_interrupts(interrupts);
+            //restore_interrupts(interrupts);
         #endif
     }
+    restore_interrupts(interrupts);
 
-/*#ifdef DUALCORE
-}
-
-void loop1() {
-#endif*/
     if (clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0 && micros() + loop_average >= last_ticked_at_micros + micros_per_tick) {
         // don't process anything else this loop, since we probably don't have time before the next tick arrives
         //Serial.printf("early return because %i + %i >= %i + %i\n", micros(), loop_average, last_ticked_at_micros, micros_per_tick);
         //Serial.flush();
     } else {
-        interrupts = save_and_disable_interrupts();
-        if (Serial) {
-            Serial.read();
-            Serial.clearWriteError();
-        }
-        restore_interrupts(interrupts);
-
+        read_serial_buffer();
         static uint32_t last_tick = -1;
         static unsigned long last_drawn;
 
@@ -240,7 +247,10 @@ void loop1() {
 
             add_loop_length(micros()-mics_start);
         }
+        //ticked = false;
     }
+
+    push_display();
 
 }
 
