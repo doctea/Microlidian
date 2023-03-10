@@ -16,7 +16,7 @@
     //    #define TFT_ST7789_T3
     //    #define TFT_ST7789_T3_BIG
     //#endif
-    #define MENU_MS_BETWEEN_REDRAW  50
+    #define MENU_MS_BETWEEN_REDRAW  20
 #endif
 
 /*#ifndef ENABLE_SCREEN
