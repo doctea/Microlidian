@@ -7,9 +7,11 @@
 //#include "submenuitem_bar.h"
 #include "menuitems_listviewer.h"
 
-#include "cv_input.h"
+//#include "menuitems_selector.h"
 
 #include "cv_input.h"
+
+#include "bpm.h"
 
 //#include "__version.h"
 
@@ -36,7 +38,9 @@ class DebugPanel : public MenuItem {
 };
 
 
-extern uint32_t ticks;
+extern volatile uint32_t ticks;
+
+float bpm_selector_values[] = { 60, 90, 120, 150, 180, 500, 1000, 2000, 3000 };
 
 #ifndef GDB_DEBUG
 FLASHMEM // void setup_debug_menu() causes a section type conflict with void Menu::start()
@@ -59,6 +63,13 @@ void setup_debug_menu() {
     //ActionConfirmItem *reset_control = new ActionConfirmItem("RESET TEENSY?", reset_teensy);
     //menu->add(reset_control);
 
+    SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");
+    bpm_selector->available_values = bpm_selector_values;
+    bpm_selector->num_values = sizeof(bpm_selector_values)/sizeof(float);
+    bpm_selector->setter = set_bpm;
+    bpm_selector->getter = get_bpm;
+    menu->add(bpm_selector);
+
     SubMenuItemBar *bar = new SubMenuItemBar("Debug");
 
     ObjectToggleControl<Menu> *debug_times_control = new ObjectToggleControl<Menu>("Render times", menu, &Menu::setDebugTimes, &Menu::isDebugTimes, nullptr);
@@ -79,6 +90,6 @@ void setup_debug_menu() {
     #ifdef ENABLE_CV_INPUT
         menu->add(new ToggleControl<bool>("CV Input", &cv_input_enabled, nullptr));
     #endif
-
+    
     menu->add(new ListViewerMenuItem("Message history", messages_log));
 }
