@@ -5,6 +5,8 @@
 
 #include "menu.h"
 
+#include "cv_input.h"
+
 #include "mymenu/screen.h"
 #include "mymenu/menu_debug.h"
 
@@ -97,63 +99,13 @@ void loop1() {
         draw_screen();
         last_pushed = millis();
     }
-}
-
-bool update_screen() {
-    return false;
-    bool screen_was_drawn = false;
-    #ifdef ENABLE_SCREEN
-        /*if (debug_flag) { Serial.println(F("about to do menu->update_ticks(ticks)")); Serial_flush(); }
-        menu->update_ticks(ticks);
-        if (debug_flag) { Serial.println(F("just did menu->update_ticks(ticks)")); Serial_flush(); }
-
-        //tft_update(ticks);
-        ///Serial.println("going into menu->display and then pausing 1000ms: "); Serial_flush();
-        */       
-        if (locked) 
-            return false;
-        locked = true;
-
-        static unsigned long last_drawn;
-        /*if (menu!=nullptr) {
-            uint32_t interrupts = save_and_disable_interrupts();
-            menu->update_inputs();
-            restore_interrupts(interrupts);
-        } else {
-            Debug_println("menu is nullptr!");
-        }*/       
-        if (!locked && millis() - last_drawn > MENU_MS_BETWEEN_REDRAW) {
-            //menu->debug = true;
-            //Serial.println("gonna redraw..");
-            //long before_display = millis();
-            //if (debug_flag) { Serial.println("about to menu->display"); Serial_flush(); }
-            if (!menu->tft->ready())
-                return false;
-            if (debug_flag) menu->debug = true;
-            //uint32_t interrupts = save_and_disable_interrupts();
-            menu->auto_update = false;
-            int t = millis();
-            //menu->display();
-            //draw_screen();
-            menu_time = (menu_time + (millis()-t))/2;
-            //restore_interrupts(interrupts);
-            //multicore_launch_core1(push_display);
-            t = millis();
-            push_display();
-            tft_time = (tft_time + (millis()-t))/2;
-            //if (debug_flag) { Serial.println("just did menu->display"); Serial_flush(); }
-            //Serial.printf("display() took %ums..", millis()-before_display);
-            last_drawn = millis();
-            screen_was_drawn = true;
-        } else {
-            screen_was_drawn = false;
+    #ifdef ENABLE_CV_INPUT
+        static unsigned long last_cv_update = 0;
+        if (!locked && millis() - last_cv_update > TIME_BETWEEN_CV_INPUT_UPDATES) {
+            update_cv_input();
+            last_cv_update = millis();
         }
-        locked = false;
-      //delay(1000); Serial.println("exiting sleep after menu->display"); Serial_flush();
     #endif
-
-    return screen_was_drawn;
 }
-
 
 #endif

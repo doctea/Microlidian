@@ -41,11 +41,11 @@
 #define TFT_SCLK D8
 #define TFT_MOSI D10
 
-#define ENABLE_CV_INPUT 0x48
+//#define ENABLE_CV_INPUT 0x48
 //#define ENABLE_CALIBRATION_STORAGE
 #define TIME_BETWEEN_CV_INPUT_UPDATES 25
 
-#define ENABLE_EUCLIDIAN
+//#define ENABLE_EUCLIDIAN
 #define MUTATE_EVERY_TICK
 
 //#define Serial_println(X) { if (Serial) Serial.println(x); }

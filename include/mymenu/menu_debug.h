@@ -9,6 +9,8 @@
 
 #include "cv_input.h"
 
+#include "cv_input.h"
+
 //#include "__version.h"
 
 extern bool debug_flag, debug_stress_sequencer_load;
@@ -74,7 +76,9 @@ void setup_debug_menu() {
 
     menu->add(new DebugPanel());
 
-    menu->add(new ToggleControl<bool>("CV Input", &cv_input_enabled, nullptr));
+    #ifdef ENABLE_CV_INPUT
+        menu->add(new ToggleControl<bool>("CV Input", &cv_input_enabled, nullptr));
+    #endif
 
     menu->add(new ListViewerMenuItem("Message history", messages_log));
 }
