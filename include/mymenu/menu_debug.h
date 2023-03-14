@@ -40,7 +40,7 @@ class DebugPanel : public MenuItem {
 
 extern volatile uint32_t ticks;
 
-float bpm_selector_values[] = { 60, 90, 120, 150, 180, 500, 1000, 2000, 3000 };
+//float bpm_selector_values[] = { 60, 90, 120, 150, 180, 500, 1000, 2000, 3000 };
 
 #ifndef GDB_DEBUG
 FLASHMEM // void setup_debug_menu() causes a section type conflict with void Menu::start()
@@ -63,12 +63,12 @@ void setup_debug_menu() {
     //ActionConfirmItem *reset_control = new ActionConfirmItem("RESET TEENSY?", reset_teensy);
     //menu->add(reset_control);
 
-    SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");
+    /*SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");
     bpm_selector->available_values = bpm_selector_values;
     bpm_selector->num_values = sizeof(bpm_selector_values)/sizeof(float);
     bpm_selector->setter = set_bpm;
     bpm_selector->getter = get_bpm;
-    menu->add(bpm_selector);
+    menu->add(bpm_selector);*/
 
     SubMenuItemBar *bar = new SubMenuItemBar("Debug");
 

@@ -86,6 +86,9 @@ DisplayTranslator_Configured displaytranslator = DisplayTranslator_Configured();
 /*#ifndef GDB_DEBUG
 FLASHMEM 
 #endif*/
+
+float bpm_selector_values[] = { 60, 90, 120, 150, 180, 500, 1000, 2000, 3000 };
+
 void setup_menu() {
     Debug_println(F("Starting setup_menu()..")); 
 
@@ -113,6 +116,14 @@ void setup_menu() {
     project_startstop->add(new ActionItem("Continue", clock_continue));
     project_startstop->add(new ActionFeedbackItem("Restart", (ActionFeedbackItem::setter_def_2)set_restart_on_next_bar_on, is_restart_on_next_bar, "Restarting..", "Restart"));
     menu->add(project_startstop);
+
+    // debug bpm selector
+    SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");
+    bpm_selector->available_values = bpm_selector_values;
+    bpm_selector->num_values = sizeof(bpm_selector_values)/sizeof(float);
+    bpm_selector->setter = set_bpm;
+    bpm_selector->getter = get_bpm;
+    menu->add(bpm_selector);
 
     //menu->add(&test_item_1);
 

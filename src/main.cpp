@@ -167,6 +167,7 @@ void loop() {
         static uint32_t last_tick = -1;
         static unsigned long last_drawn;
         if (ticked) {
+            while(locked) {}
             menu->update_ticks(ticks);
             last_tick = ticks;
         }
