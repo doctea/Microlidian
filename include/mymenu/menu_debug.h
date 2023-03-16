@@ -13,7 +13,7 @@
 
 #include "bpm.h"
 
-//#include "__version.h"
+#include "__version.h"
 
 extern bool debug_flag, debug_stress_sequencer_load;
 
@@ -27,8 +27,9 @@ class DebugPanel : public MenuItem {
             unsigned long time = millis()/1000;
             tft->setCursor(pos.x,pos.y);
             header("Statistics:", pos, selected, opened);
-            tft->println("Built at " __TIME__ " on " __DATE__);
-            //tft->println("Git info: " COMMIT_INFO);
+            //tft->println("Built at " __TIME__ " on " __DATE__);
+            tft->println("Built at " __BUILD_TIME__);
+            tft->println("Git info: " COMMIT_INFO);
             //tft->printf("Free RAM: %u bytes\n", freeRam());
             tft->printf("Uptime: %02uh %02um %02us\n", time/60/60, (time/60)%60, (time)%60);
             tft->print("Serial: ");
