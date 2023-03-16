@@ -138,6 +138,9 @@ void read_serial_buffer() {
     //restore_interrupts(interrupts);
 }
 
+bool menu_tick_pending = false;
+//uint32_t menu_tick_pending_tick = -1;
+
 void loop() {
     uint32_t mics_start = micros();
     //Serial.println("loop()");
@@ -166,10 +169,19 @@ void loop() {
     #ifdef ENABLE_SCREEN
         static uint32_t last_tick = -1;
         static unsigned long last_drawn;
-        if (ticked) {
+        /*if (ticked) {         // block updating menu if its currently being updated - works but very high BPMs (like 3000bpm!) have a lot of jitter
             while(locked) {}
             menu->update_ticks(ticks);
             last_tick = ticks;
+        }*/
+        if ((ticked || menu_tick_pending) && !locked) {     // don't block, assume that we can make up for the missed tick next loop; much less jitter when at very very high BPMs
+            menu->update_ticks(ticks);
+            last_tick = ticks;
+            menu_tick_pending = false;
+        } else if (ticked && locked) {
+            menu_tick_pending = true;
+            //menu->update_ticks(ticks);
+            //last_tick = ticks;
         }
     #endif
 
