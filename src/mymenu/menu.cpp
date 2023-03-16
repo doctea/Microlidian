@@ -23,6 +23,8 @@
 #include "mymenu/menu_sequencer.h"*/
 #include "mymenu/menu_bpm.h"
 #include "mymenu/menu_clock_source.h"
+
+#include "mymenu/menuitems_scale.h"
 /*#include "mymenu/menu_midi_matrix.h"
 
 #include "menuitems_object_multitoggle.h"
@@ -124,6 +126,9 @@ void setup_menu() {
     bpm_selector->setter = set_bpm;
     bpm_selector->getter = get_bpm;
     menu->add(bpm_selector);
+
+    menu->add_page("Scales");
+    menu->add(new ScaleMenuItem("Scales"));
 
     //menu->add(&test_item_1);
 

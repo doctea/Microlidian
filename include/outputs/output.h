@@ -90,7 +90,8 @@ class MIDINoteOutput : public MIDIDrumOutput {
                 count += o->should_go_on() ? (i%12) : 0;
             }
             Debug_printf("get_note_number in MIDINoteOutput is %i\n", count);
-            return base_note + quantise_pitch(count);
+            //return base_note + quantise_pitch(count);
+            return quantise_pitch(count, SCALE_ROOT_C, 0);
         }
 };
 
