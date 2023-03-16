@@ -4,14 +4,14 @@
 #include <Arduino.h>
 
 #include "clock.h"
+#include "midi_helpers.h"
 
 #ifdef ENABLE_SCREEN
     #include "menu.h"
 #endif
 
-#define NOTE_OFF -1
 #define DEFAULT_VELOCITY 127
-//#define PPQN    24
+
 
 class BaseOutput;
 
