@@ -105,6 +105,8 @@ void setup_menu() {
     Debug_println(F("Created Menu object"));
     Serial_flush();
 
+    menu->set_screen_height_cutoff(0.5f);
+
     menu->set_messages_log(messages_log);
 
     menu->add_pinned(&top_loop_marker_panel);  // pinned position indicator
