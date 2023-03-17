@@ -49,7 +49,6 @@ class CircleDisplay : public MenuItem {
             Debug_println("CircleDisplay() finished setup_coordinates"); Serial.flush();
         }
 
-
         virtual int display(Coord pos, bool selected, bool opened) override {
             //return pos.y;
             int initial_y = pos.y;
@@ -94,7 +93,7 @@ class CircleDisplay : public MenuItem {
                 //int16_t colour = color565(255 * seq, 255 - (255 * seq), seq) + (seq*8);
                 uint16_t colour = pattern->colour;
                 if (!pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR))
-                    colour /= 2;
+                    colour = tft->halfbright_565(colour);
                 for (int i = 0 ; i < 16 ; i++) {
                     int_fast8_t coord_x = circle_center_x + coordinates_x[i];
                     int_fast8_t coord_y = circle_center_y + coordinates_y[i];
@@ -133,7 +132,7 @@ class CircleDisplay : public MenuItem {
             // draw flashy blocks for every patterns
             tft->setCursor(tft->width()/2, ++initial_y);
             colours(false, C_WHITE);
-            tft->println("St Pu Ro   St Pu Ro");
+            tft->println(" St Pu Ro   St Pu Ro");
             tft->setCursor(tft->width()/2, pos.y);
             for (int_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
                 int_fast8_t column = seq / 10;
@@ -142,6 +141,8 @@ class CircleDisplay : public MenuItem {
                 //tft->setCursor((tft->width()/2) + (seq/10), tft->getCursorY());
                 BasePattern *pattern = target_sequencer->get_pattern(seq);
                 colours(pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR), pattern->colour, BLACK);
+                tft->print(" ");
+                colours(false, C_WHITE);
                 //tft->printf("%i %s\n", seq, pattern->get_summary());
                 tft->print(pattern->get_summary());
             }
