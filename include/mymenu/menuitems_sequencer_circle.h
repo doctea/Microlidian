@@ -53,7 +53,7 @@ class CircleDisplay : public MenuItem {
         virtual int display(Coord pos, bool selected, bool opened) override {
             //return pos.y;
             int initial_y = pos.y;
-            pos.y = header(label, pos, selected, opened);
+            //pos.y = header(label, pos, selected, opened);
 
             tft->printf("ticks:%4i step:%i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
             
@@ -85,20 +85,24 @@ class CircleDisplay : public MenuItem {
             static const int_fast8_t circle_center_x = tft->width()/4;
             static const int_fast8_t circle_center_y = tft->width()/3;
 
+            // draw circle
             for (int_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++ ) {
                 int_fast8_t first_x, first_y;
                 int_fast8_t last_x, last_y;
                 int_fast8_t count = 0;
                 BasePattern *pattern = target_sequencer->get_pattern(seq);
                 //int16_t colour = color565(255 * seq, 255 - (255 * seq), seq) + (seq*8);
+                uint16_t colour = pattern->colour;
+                if (!pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR))
+                    colour /= 2;
                 for (int i = 0 ; i < 16 ; i++) {
                     int_fast8_t coord_x = circle_center_x + coordinates_x[i];
                     int_fast8_t coord_y = circle_center_y + coordinates_y[i];
-                    if (pattern->query_note_on_for_tick(i*PPQN)) {
+                    if (pattern->query_note_on_for_step(i)) {
                         if (count>0) {
                             actual->drawLine(
                                 last_x, last_y, coord_x, coord_y,
-                                pattern->colour
+                                colour
                             );
                         } else {
                             first_x = coord_x;
@@ -110,10 +114,11 @@ class CircleDisplay : public MenuItem {
                     }
                 }
                 if (count>1) {
-                    actual->drawLine(last_x, last_y, first_x, first_y, pattern->colour);
+                    actual->drawLine(last_x, last_y, first_x, first_y, colour);
                 }
             }
 
+            // draw step markers around circle
             const int_fast8_t radius = 2;
             for (int_fast8_t i = 0 ; i < 16 ; i++) {
                 int16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : BLUE;
@@ -125,6 +130,7 @@ class CircleDisplay : public MenuItem {
                 );
             }
 
+            // draw flashy blocks for every patterns
             tft->setCursor(tft->width()/2, ++initial_y);
             colours(false, C_WHITE);
             tft->println("St Pu Ro   St Pu Ro");
