@@ -18,6 +18,10 @@
 
 #include "sequencer/sequencing.h"
 
+#ifdef ENABLE_STORAGE
+    #include "storage/storage.h"
+#endif
+
 #ifdef ENABLE_SCREEN
     #include "mymenu/screen.h"
 #endif
@@ -68,6 +72,10 @@ void setup() {
     setup_usb();
     #ifdef ENABLE_SCREEN
         setup_screen();
+    #endif
+
+    #ifdef ENABLE_STORAGE
+        setup_storage();
     #endif
 
     #ifdef ENABLE_CV_INPUT

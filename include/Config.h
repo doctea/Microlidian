@@ -3,8 +3,6 @@
     //#define F(x) { x }
 #endif
 
-//#define ENABLE_DEBUG_SERIAL
-
 #ifdef ENABLE_SCREEN
     #ifdef TFT_BODMER
         #define DisplayTranslator_Configured DisplayTranslator_Bodmer
@@ -41,8 +39,12 @@
 #define TFT_SCLK D8
 #define TFT_MOSI D10
 
+//#define ENABLE_DEBUG_SERIAL
+#define ENABLE_STORAGE
+
 #define ENABLE_CV_INPUT 0x48
-//#define ENABLE_CALIBRATION_STORAGE
+#define ENABLE_CALIBRATION_STORAGE
+#define LOAD_CALIBRATION_ON_BOOT
 #define TIME_BETWEEN_CV_INPUT_UPDATES 25
 
 #define ENABLE_EUCLIDIAN

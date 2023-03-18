@@ -80,8 +80,8 @@ void setup_debug_menu() {
     menu->add(bar);*/
     menu->add(debug_times_control);
 
-    bar->add(new NumberControl<int>("menu time", (int*)&menu_time, 0, 0, pow(2,31), (bool)false));
-    bar->add(new NumberControl<int>("tft time", (int*)&tft_time, 0, 0, pow(2,31), (bool)false));
+    //bar->add(new NumberControl<int>("menu time", (int*)&menu_time, 0, 0, pow(2,31), (bool)false));
+    //bar->add(new NumberControl<int>("tft time", (int*)&tft_time, 0, 0, pow(2,31), (bool)false));
     bar->add(new NumberControl<int>("missed micros", (int*)&missed_micros, 0, 0, pow(2,31), (bool)false));
     bar->add(new NumberControl<uint32_t>("ticks", (uint32_t*)&ticks, 0, 0, pow(2,31), (bool)false));
     menu->add(bar);

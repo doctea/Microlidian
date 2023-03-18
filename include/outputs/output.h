@@ -1,14 +1,6 @@
 #include <Arduino.h>
 #include <LinkedList.h>
 
-// class to receive triggers from a sequencer and do something with them
-class BaseOutput {
-    public:
-
-    virtual void receive_event(byte event_value_1, byte event_value_2, byte event_value_3) = 0;
-    virtual void reset() = 0;
-};
-
 #include "debug.h"
 
 #include <Adafruit_TinyUSB.h>
@@ -20,6 +12,18 @@ class BaseOutput {
 
 #include "midi_helpers.h"
 
+// class to receive triggers from a sequencer and return values to the owner Processor
+class BaseOutput {
+    public:
+    
+    // event_value_1 = send a note on
+    // event_value_2 = send a note off
+    // event_value_3 = ??
+    virtual void receive_event(byte event_value_1, byte event_value_2, byte event_value_3) = 0;
+    virtual void reset() = 0;
+};
+
+// an output that tracks MIDI drum triggers
 class MIDIDrumOutput : public BaseOutput {
     public:
 
@@ -67,17 +71,20 @@ class MIDIDrumOutput : public BaseOutput {
         this->event_value_2 -= 1;
     }
 
+    // forget the last message
     virtual void reset() {
         this->event_value_1 = this->event_value_2 = this->event_value_3 = 0;
     }
 };
 
-class MIDINoteOutput : public MIDIDrumOutput {
+// class that counts up all active triggers from passed-in nodes, and calculates a note from that
+class MIDINoteTriggerCountOutput : public MIDIDrumOutput {
     public:
+        byte octave = 3;
         LinkedList<MIDIDrumOutput*> *nodes = nullptr;
-        int base_note = 35;
+        int base_note = SCALE_ROOT_A * octave;
 
-        MIDINoteOutput(LinkedList<MIDIDrumOutput*> *nodes) : MIDIDrumOutput(0) {
+        MIDINoteTriggerCountOutput(LinkedList<MIDIDrumOutput*> *nodes) : MIDIDrumOutput(0) {
             this->channel = 1;
             this->nodes = nodes;
         }
@@ -89,19 +96,27 @@ class MIDINoteOutput : public MIDIDrumOutput {
                 if (o==this) continue;
                 count += o->should_go_on() ? (i%12) : 0;
             }
-            Debug_printf("get_note_number in MIDINoteOutput is %i\n", count);
+            Debug_printf("get_note_number in MIDINoteTriggerCountOutput is %i\n", count);
             //return base_note + quantise_pitch(count);
             return quantise_pitch(count, SCALE_ROOT_C, 0);
         }
 };
 
-class MIDIOutputProcessor {
+// holds individual output nodes and processes them (eg queries them for the pitch and sends note on/offs)
+class BaseOutputProcessor {
+    public:
+        virtual void process() = 0;
+};
+
+// handles MIDI output; 
+// possibly todo: move MIDIOutputWrapper stuff out of usb_midi_clocker and into a library and use that here?
+class MIDIOutputProcessor : public BaseOutputProcessor {
     public:
 
     LinkedList<MIDIDrumOutput*> nodes = LinkedList<MIDIDrumOutput*>();
     midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi = nullptr;
 
-    MIDIOutputProcessor(midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi) {
+    MIDIOutputProcessor(midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi) : BaseOutputProcessor() {
         this->midi = midi;
 
         /*this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_BASS_DRUM));
@@ -125,11 +140,13 @@ class MIDIOutputProcessor {
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_VIBRA_SLAP));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_RIDE_BELL));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_RIDE_CYMBAL_1));
-        this->nodes.add(new MIDINoteOutput(&this->nodes));
+        this->nodes.add(new MIDINoteTriggerCountOutput(&this->nodes));
     }
 
     //virtual void on_tick(uint32_t ticks) {
         //if (is_bpm_on_sixteenth(ticks)) {
+
+    // ask all the nodes to do their thing; send the results out to our output device
     virtual void process() {
         Debug_println("process-->");
         static int count = 0;
@@ -175,6 +192,7 @@ class MIDIOutputProcessor {
         Debug_println(".end.");
     }
 
+    // configure target sequencer to use the output nodes held by this OutputProcessor
     virtual void configure_sequencer(BaseSequencer *sequencer) {
         for (int i = 0 ; i < this->nodes.size() ; i++) {
             sequencer->configure_pattern_output(i, this->nodes.get(i));

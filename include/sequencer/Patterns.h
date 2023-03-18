@@ -73,6 +73,10 @@ class SimplePattern : public BasePattern {
         this->events = (event*)calloc(sizeof(event), steps);
     }
 
+    /*const char *get_label() {
+
+    }*/
+
     virtual void set_output(BaseOutput *output) {
         this->output = output;
     }
