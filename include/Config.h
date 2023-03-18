@@ -43,8 +43,11 @@
 #define ENABLE_STORAGE
 
 #define ENABLE_CV_INPUT 0x48
-#define ENABLE_CALIBRATION_STORAGE
+/*
+// defined in platformio.ini build flags
+#define ENABLE_CALIBRATION_STORAGE  
 #define LOAD_CALIBRATION_ON_BOOT
+*/
 #define TIME_BETWEEN_CV_INPUT_UPDATES 25
 
 #define ENABLE_EUCLIDIAN

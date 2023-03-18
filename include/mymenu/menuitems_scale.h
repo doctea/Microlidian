@@ -10,18 +10,25 @@
 #include <clock.h>
 
 #include "midi_helpers.h"
+#include "scales.h"
 
 class ScaleMenuItem : public MenuItem {
     public:
 
-        byte scale_number = 0;
+        int8_t scale_number = 0;
         int8_t root_note = SCALE_ROOT_A;
 
         ScaleMenuItem(const char *label) : MenuItem(label) {}
 
         virtual int display(Coord pos, bool selected, bool opened) override {
             char label[MENU_C_MAX];
-            snprintf(label, MENU_C_MAX, "%s: %-3i => %3s", this->label, this->root_note, (char*)get_note_name_c(root_note));
+            snprintf(label, MENU_C_MAX, 
+                "%s: %-3i => %3s %s", this->label,  //  [%i]
+                this->root_note, 
+                (char*)get_note_name_c(root_note), 
+                scales[scale_number].label
+                //, scale_number
+            );
             pos.y = header(label, pos, selected, opened);
             //tft->printf("Root note %-3i => %3s\n", (int)this->root_note, (char*)get_note_name_c(root_note));
             for (int i = 0 ; i < 24 ; i++) {
@@ -46,15 +53,38 @@ class ScaleMenuItem : public MenuItem {
             return tft->getCursorY();
         }
 
+        int mode = 0;
+
+        virtual bool button_select () {
+            mode = !mode;
+            if (mode) {
+                menu_set_last_message("Toggled to SCALE", YELLOW);
+            } else {
+                menu_set_last_message("Toggled to ROOT", YELLOW);
+            }
+            return go_back_on_select;
+        }
+
         virtual bool knob_left() override {
-            root_note--;
-            if (root_note < 0) root_note = 12;
+            if (mode==0) {
+                root_note--;
+                if (root_note < 0) root_note = 12;
+            } else {
+                scale_number--;
+                if (scale_number<0 || scale_number>=NUMBER_SCALES)
+                    scale_number = NUMBER_SCALES-1;
+            }
             return true;
         }
         virtual bool knob_right() override {
-            root_note++;
-            //if (root_note > 96) root_note = 0;
-            root_note %= 12;
+            if (mode==0) {
+                root_note++;
+                root_note %= 12;
+            } else {
+                scale_number++;
+                if (scale_number >= NUMBER_SCALES)
+                    scale_number = 0;
+            }
             return true;
         }
 };
