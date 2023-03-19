@@ -80,6 +80,9 @@ class SimplePattern : public BasePattern {
     virtual void set_output(BaseOutput *output) {
         this->output = output;
     }
+    virtual BaseOutput *get_output() {
+        return this->output;
+    }
 
     virtual unsigned int get_step_for_tick(unsigned int tick) {
         return (tick / this->ticks_per_step) % this->get_steps();
@@ -122,6 +125,9 @@ class SimplePattern : public BasePattern {
 
     virtual void trigger_on_for_step(int step);
     virtual void trigger_off_for_step(int step);
+
+    virtual void restore_default_arguments() {}
+    virtual void store_current_arguments_as_default() {}
 
 };
 

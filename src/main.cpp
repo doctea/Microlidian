@@ -89,6 +89,7 @@ void setup() {
         //Serial.println("setting up sequencer..");
         setup_sequencer();
         output_processer.configure_sequencer(&sequencer);
+        setup_sequencer_menu();
     #endif
 
     #if defined(ENABLE_CV_INPUT) && defined(ENABLE_EUCLIDIAN)

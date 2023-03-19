@@ -1,3 +1,6 @@
+#ifndef OUTPUT__INCLUDED
+#define OUTPUT__INCLUDED
+
 #include <Arduino.h>
 #include <LinkedList.h>
 
@@ -12,15 +15,30 @@
 
 #include "midi_helpers.h"
 
+#define MAX_LABEL 20
+
 // class to receive triggers from a sequencer and return values to the owner Processor
 class BaseOutput {
     public:
+    char label[MAX_LABEL];
+    BaseOutput (const char *label) {
+        strncpy(this->label, label, MAX_LABEL);
+    }
     
     // event_value_1 = send a note on
     // event_value_2 = send a note off
     // event_value_3 = ??
     virtual void receive_event(byte event_value_1, byte event_value_2, byte event_value_3) = 0;
     virtual void reset() = 0;
+    virtual bool matches_label(const char *compare) {
+        return strcmp(compare, this->label)==0;
+    }
+
+    virtual bool should_go_on() = 0;
+    virtual bool should_go_off() = 0;
+
+    virtual void stop() {};
+    virtual void process() {};
 };
 
 // an output that tracks MIDI drum triggers
@@ -31,8 +49,36 @@ class MIDIDrumOutput : public BaseOutput {
     byte channel = 10;
     byte event_value_1, event_value_2, event_value_3;
 
-    MIDIDrumOutput(byte note_number) {
+    midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi = nullptr;
+
+    MIDIDrumOutput(const char *label, byte note_number, midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi) : BaseOutput(label) {
         this->note_number = note_number;
+        this->midi = midi;
+    }
+
+    virtual void stop() override {
+        if(is_valid_note(last_note_number)) {
+            midi->sendNoteOff(last_note_number, 0, this->get_channel());
+            this->set_last_note_number(NOTE_OFF);
+        }
+    }
+    virtual void process() override {
+        if (should_go_off()) {
+            int note_number = get_last_note_number();
+            Debug_printf("\t\tgoes off note %i (%s), ", note_number, get_note_name_c(note_number));
+            //Serial.printf("Sending note off for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
+            midi->sendNoteOff(note_number, 0, get_channel());
+            //this->nodes.get(i)->went_off();
+        }
+        if (should_go_on()) {
+            int note_number = get_note_number();
+            Debug_printf("\t\tgoes on note %i (%s), ", note_number, get_note_name_c(note_number));
+            //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
+            set_last_note_number(note_number);
+            midi->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
+            //this->nodes.get(i)->went_on();
+            //count += i;
+        }
     }
 
     virtual byte get_note_number() {
@@ -81,10 +127,11 @@ class MIDIDrumOutput : public BaseOutput {
 class MIDINoteTriggerCountOutput : public MIDIDrumOutput {
     public:
         byte octave = 3;
-        LinkedList<MIDIDrumOutput*> *nodes = nullptr;
+        LinkedList<BaseOutput*> *nodes = nullptr;
         int base_note = SCALE_ROOT_A * octave;
 
-        MIDINoteTriggerCountOutput(LinkedList<MIDIDrumOutput*> *nodes) : MIDIDrumOutput(0) {
+        MIDINoteTriggerCountOutput(const char *name, LinkedList<BaseOutput*> *nodes, midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi) 
+            : MIDIDrumOutput(name, 0, midi) {
             this->channel = 1;
             this->nodes = nodes;
         }
@@ -92,7 +139,7 @@ class MIDINoteTriggerCountOutput : public MIDIDrumOutput {
         virtual byte get_note_number() override {
             int count = 0;
             for (int i = 0 ; i < this->nodes->size() ; i++) {
-                MIDIDrumOutput *o = this->nodes->get(i);
+                BaseOutput *o = this->nodes->get(i);
                 if (o==this) continue;
                 count += o->should_go_on() ? (i%12) : 0;
             }
@@ -113,7 +160,7 @@ class BaseOutputProcessor {
 class MIDIOutputProcessor : public BaseOutputProcessor {
     public:
 
-    LinkedList<MIDIDrumOutput*> nodes = LinkedList<MIDIDrumOutput*>();
+    LinkedList<BaseOutput*> nodes = LinkedList<BaseOutput*>();
     midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi = nullptr;
 
     MIDIOutputProcessor(midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi) : BaseOutputProcessor() {
@@ -124,23 +171,23 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_OPEN_HI_HAT));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_PEDAL_HI_HAT));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_CLOSED_HI_HAT));*/
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_BASS_DRUM));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_SIDE_STICK));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_HAND_CLAP));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_SNARE));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_CRASH_CYMBAL_1));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_TAMBOURINE));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_HIGH_TOM));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_LOW_TOM));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_PEDAL_HI_HAT));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_OPEN_HI_HAT));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_CLOSED_HI_HAT));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_CRASH_CYMBAL_2));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_SPLASH_CYMBAL));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_VIBRA_SLAP));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_RIDE_BELL));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_RIDE_CYMBAL_1));
-        this->nodes.add(new MIDINoteTriggerCountOutput(&this->nodes));
+        this->nodes.add(new MIDIDrumOutput("Kick",          GM_NOTE_ELECTRIC_BASS_DRUM, midi));
+        this->nodes.add(new MIDIDrumOutput("Stick",         GM_NOTE_SIDE_STICK, midi));
+        this->nodes.add(new MIDIDrumOutput("Clap",          GM_NOTE_HAND_CLAP, midi));
+        this->nodes.add(new MIDIDrumOutput("Snare",         GM_NOTE_ELECTRIC_SNARE, midi));
+        this->nodes.add(new MIDIDrumOutput("Cymbal 1",      GM_NOTE_CRASH_CYMBAL_1, midi));
+        this->nodes.add(new MIDIDrumOutput("Tamb",          GM_NOTE_TAMBOURINE, midi));
+        this->nodes.add(new MIDIDrumOutput("HiTom",         GM_NOTE_HIGH_TOM, midi));
+        this->nodes.add(new MIDIDrumOutput("LoTom",         GM_NOTE_LOW_TOM, midi));
+        this->nodes.add(new MIDIDrumOutput("PHH",           GM_NOTE_PEDAL_HI_HAT, midi));
+        this->nodes.add(new MIDIDrumOutput("OHH",           GM_NOTE_OPEN_HI_HAT, midi));
+        this->nodes.add(new MIDIDrumOutput("CHH",           GM_NOTE_CLOSED_HI_HAT, midi));
+        this->nodes.add(new MIDIDrumOutput("Cymbal 2",      GM_NOTE_CRASH_CYMBAL_2, midi));
+        this->nodes.add(new MIDIDrumOutput("Splash",        GM_NOTE_SPLASH_CYMBAL, midi));
+        this->nodes.add(new MIDIDrumOutput("Vibra",         GM_NOTE_VIBRA_SLAP, midi));
+        this->nodes.add(new MIDIDrumOutput("Ride Bell",     GM_NOTE_RIDE_BELL, midi));
+        this->nodes.add(new MIDIDrumOutput("Ride Cymbal",   GM_NOTE_RIDE_CYMBAL_1, midi));
+        this->nodes.add(new MIDINoteTriggerCountOutput("Bass", &this->nodes, midi));
     }
 
     //virtual void on_tick(uint32_t ticks) {
@@ -152,31 +199,14 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         static int count = 0;
         //midi->sendNoteOff(35 + count, 0, 1);
         for (int i = 0 ; i < this->nodes.size() ; i++) {
-            if(is_valid_note(this->nodes.get(i)->last_note_number)) {
-                midi->sendNoteOff(this->nodes.get(i)->last_note_number, 0, this->nodes.get(i)->get_channel());
-                this->nodes.get(i)->set_last_note_number(NOTE_OFF);
-            }
+            BaseOutput *n = this->nodes.get(i);
+            n->stop();
         }
         count = 0;
         for (int i = 0 ; i < this->nodes.size() ; i++) {
-            MIDIDrumOutput *o = this->nodes.get(i);
+            BaseOutput *o = this->nodes.get(i);
             Debug_printf("\tnode %i\n", i);
-            if (o->should_go_off()) {
-                int note_number = o->get_last_note_number();
-                Debug_printf("\t\tgoes off note %i (%s), ", note_number, get_note_name_c(note_number));
-                //Serial.printf("Sending note off for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
-                midi->sendNoteOff(note_number, 0, o->get_channel());
-                //this->nodes.get(i)->went_off();
-            }
-            if (o->should_go_on()) {
-                int note_number = o->get_note_number();
-                Debug_printf("\t\tgoes on note %i (%s), ", note_number, get_note_name_c(note_number));
-                //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
-                o->set_last_note_number(note_number);
-                midi->sendNoteOn(note_number, MIDI_MAX_VELOCITY, o->get_channel());
-                //this->nodes.get(i)->went_on();
-                //count += i;
-            }
+            o->process();
             Debug_println();
         }
         /*if (count>0) {
@@ -200,3 +230,5 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         //sequencer->configure_pattern_output(0, this->nodes.get(0));
     }
 };
+
+#endif

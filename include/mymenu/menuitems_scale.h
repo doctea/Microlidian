@@ -1,4 +1,4 @@
-#include "sequencer/Patterns.h"
+//#include "sequencer/Patterns.h"
 #include "menuitems.h"
 //#include "submenuitem_bar.h"
 //#include "menuitems_object_selector.h"

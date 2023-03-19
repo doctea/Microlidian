@@ -57,15 +57,20 @@ class EuclidianPattern : public SimplePattern {
             //make_euclid();
         }
 
+    virtual void restore_default_arguments() override {
+        this->set_arguments(&this->default_arguments);
+    }
+    virtual void store_current_arguments_as_default() override {
+        set_default_arguments(&this->arguments);
+    }
+
     virtual void set_default_arguments(arguments_t *default_arguments_to_use) {
         memcpy(&this->default_arguments, default_arguments_to_use, sizeof(arguments_t));
     }
     virtual void set_arguments(arguments_t *arguments_to_use) {
         memcpy(&this->arguments, arguments_to_use, sizeof(arguments_t));
     }
-    virtual void restore_default_arguments() {
-        this->set_arguments(&this->default_arguments);
-    }
+
 
     virtual const char *get_summary() override {
         static char summary[32];
@@ -181,6 +186,13 @@ class EuclidianPattern : public SimplePattern {
     virtual void set_rotation(byte rotation) {
         arguments.rotation = rotation;
     }
+    virtual byte get_duration() {
+        return arguments.duration;
+    }
+    virtual void set_duration(byte duration) {
+        arguments.duration = duration;
+    }
+
 
     /*void trigger_on_for_step(int step) override {
         Serial.printf("trigger_on_for_step(%i)\n", step);
