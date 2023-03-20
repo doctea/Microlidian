@@ -128,7 +128,7 @@ class OutputSelectorControl : public SelectorControl<int> {
         //Serial.println(F("ParameterInputSelectorControl display()!")); Serial_flush();
         tft->setTextSize(0);
 
-        pos.y = header(label, pos, selected, opened);
+        //pos.y = header(label, pos, selected, opened);
       
         num_values = this->available_objects->size(); //NUM_AVAILABLE_PARAMETERS;
         //Serial.printf(F("\tdisplay got num_values %i\n"), num_values); Serial_flush();
@@ -143,10 +143,10 @@ class OutputSelectorControl : public SelectorControl<int> {
 
             if (this->actual_value_index>=0) {
                 //Serial.printf(F("\tactual value index %i\n"), this->actual_value_index); Serial_flush();
-                tft->printf((char*)"Selected: %s\n", (char*)this->get_label_for_index(this->actual_value_index));
+                tft->printf((char*)"Output: %s\n", (char*)this->get_label_for_index(this->actual_value_index));
                 //Serial.printf(F("\tdrew selected %i\n"), this->actual_value_index); Serial_flush();
             } else {
-                tft->printf((char*)"Selected: none\n");
+                tft->printf((char*)"Output: none\n");
             }
         } else {
             // opened, so show the possible values to select from

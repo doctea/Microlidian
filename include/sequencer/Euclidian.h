@@ -31,6 +31,8 @@ class EuclidianPattern : public SimplePattern {
         float effective_euclidian_density = 0.75;
     };
 
+    bool locked = false;
+
     bool initialised = false;
 
     bool active_status = true;
@@ -193,6 +195,12 @@ class EuclidianPattern : public SimplePattern {
         arguments.duration = duration;
     }
 
+    virtual bool is_locked() {
+        return this->locked;
+    }
+    virtual void set_locked(bool state) {
+        this->locked = state;
+    }
 
     /*void trigger_on_for_step(int step) override {
         Serial.printf("trigger_on_for_step(%i)\n", step);
@@ -295,8 +303,11 @@ class EuclidianSequencer : public BaseSequencer {
     }
     void reset_patterns() {
         for (int i = 0 ; i < number_patterns ; i++) {
-            ((EuclidianPattern*)this->get_pattern(i))->restore_default_arguments();
-            ((EuclidianPattern*)this->get_pattern(i))->make_euclid();
+            EuclidianPattern *p = (EuclidianPattern*)this->get_pattern(i);
+            if (!p->is_locked()) {
+                p->restore_default_arguments();
+                p->make_euclid();
+            }
         }
     }
 
@@ -306,7 +317,9 @@ class EuclidianSequencer : public BaseSequencer {
             int tick_of_step = tick % (PPQN/STEPS_PER_BEAT);
             if (tick_of_step==(PPQN/STEPS_PER_BEAT)-1) {
                 for (int i = 0 ; i < number_patterns ; i++) {
-                    this->patterns[i]->make_euclid();
+                    if (!patterns[i]->is_locked()) {
+                        this->patterns[i]->make_euclid();
+                    }
                 }
             }
         #endif
@@ -337,15 +350,19 @@ class EuclidianSequencer : public BaseSequencer {
             // do fill
             for (int i = 0 ; i < 3 ; i++) {
                 int ran = random(0/*euclidian_mutate_minimum_pattern % NUM_PATTERNS*/, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
-                this->patterns[ran]->arguments.rotation += 2;
-                this->patterns[ran]->make_euclid();
+                if (!patterns[ran]->is_locked()) {
+                    this->patterns[ran]->arguments.rotation += 2;
+                    this->patterns[ran]->make_euclid();
+                }
             }
             for (int i = 0 ; i < 3 ; i++) {
                 int ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
-                this->patterns[ran]->arguments.pulses *= 2;
-                if (this->patterns[ran]->arguments.pulses > this->patterns[ran]->arguments.steps) 
-                    this->patterns[ran]->arguments.pulses /= 8;
-                this->patterns[ran]->make_euclid();
+                if (!patterns[ran]->is_locked()) {
+                    this->patterns[ran]->arguments.pulses *= 2;
+                    if (this->patterns[ran]->arguments.pulses > this->patterns[ran]->arguments.steps) 
+                        this->patterns[ran]->arguments.pulses /= 8;
+                    this->patterns[ran]->make_euclid();
+                }
             }
         }
     };
@@ -360,7 +377,9 @@ class EuclidianSequencer : public BaseSequencer {
                 // choose a pattern to mutate, out of all those for whom mutate is enabled
                 int ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 randomSeed(seed + ran);
-                this->patterns[ran]->mutate();
+                if (!patterns[ran]->is_locked()) {
+                    this->patterns[ran]->mutate();
+                }
               }
             }
         }
