@@ -47,12 +47,22 @@ void messages_log_add(String msg) {
     if (Serial) Serial.print(F("Free RAM is "));
     if (Serial) Serial.println(freeRam());
   }
-#else
+#elif defined(ARDUINO_ARCH_RP2040)
+  #include "pico/stdlib.h"  // not sure if we need this?
+
   int freeRam () {  
-    return 1337;
+    return rp2040.getFreeHeap();
   }
   void debug_free_ram() {
-    if (Serial) Serial.print(F("Free RAM is not implemented: "));
+    if (Serial) Serial.print(F("Free RAM: "));
+    if (Serial) Serial.println(freeRam());
+  }
+#else
+  int freeRam () {  
+    return 1337
+  }
+  void debug_free_ram() {
+    if (Serial) Serial.print(F("Free RAM: not implemented on this platform"));
     if (Serial) Serial.println(freeRam());
   }
 #endif
