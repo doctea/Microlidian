@@ -28,6 +28,9 @@
 
 #ifdef ENABLE_CV_INPUT
     #include "cv_input.h"
+    #ifdef ENABLE_CLOCK_INPUT_CV
+        #include "cv_input_clock.h"
+    #endif
 #endif
 
 #include "outputs/output.h"
@@ -67,22 +70,28 @@ void setup() {
 
     setup_cheapclock();
     set_global_restart_callback(global_on_restart);
+    #if defined(ENABLE_CV_INPUT) && defined(ENABLE_CLOCK_INPUT_CV)
+        set_check_cv_clock_ticked_callback(actual_check_cv_clock_ticked);
+        set_clock_mode_changed_callback(clock_mode_changed);
+    #endif
 
     setup_midi();
     setup_usb();
     #ifdef ENABLE_SCREEN
         setup_screen();
+        Serial.printf("after setup_screen(), free RAM is %u\n", freeRam());
     #endif
 
     #ifdef ENABLE_STORAGE
         setup_storage();
-    #endif
+        Serial.printf("after setup_storage(), free RAM is %u\n", freeRam());
+    #endif    
 
     #ifdef ENABLE_CV_INPUT
         setup_cv_input();
-        //Serial.printf("after setup_cv_input(), free RAM is %u\n", freeRam());
+        Serial.printf("after setup_cv_input(), free RAM is %u\n", freeRam());
         setup_parameters();
-        //Serial.printf("after setup_parameters(), free RAM is %u\n", freeRam());
+        Serial.printf("after setup_parameters(), free RAM is %u\n", freeRam());
     #endif
 
     #ifdef ENABLE_EUCLIDIAN
@@ -90,6 +99,7 @@ void setup() {
         setup_sequencer();
         output_processer.configure_sequencer(&sequencer);
         setup_sequencer_menu();
+        Serial.printf("after setup_sequencer_menu, free RAM is %u\n", freeRam());
     #endif
 
     #if defined(ENABLE_CV_INPUT) && defined(ENABLE_EUCLIDIAN)
@@ -98,6 +108,7 @@ void setup() {
         parameter_manager->addParameters(params);
         params->clear();
         delete params;
+        Serial.printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());
     #endif
 
     #ifdef ENABLE_CV_INPUT
@@ -106,15 +117,19 @@ void setup() {
 
     #if defined(ENABLE_SCREEN) && defined(ENABLE_CV_INPUT)
         menu->add_page("Parameter Inputs");
+        Serial.printf("before setup_parameter_menu(), free RAM is %u\n", freeRam());
         setup_parameter_menu();
-        //Serial.printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
+        Serial.printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
     #endif
 
     setup_debug_menu();
+    debug_free_ram();
 
     menu->select_page(0);
 
     started = true;
+
+    Serial.printf("at end of setup(), free RAM is %u\n", freeRam());
 
     Debug_println("setup() finished!");
 }

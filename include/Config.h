@@ -43,6 +43,7 @@
 #define ENABLE_STORAGE
 
 #define ENABLE_CV_INPUT 0x48
+//#define ENABLE_PARAMETER_MAPPING
 /*
 // defined in platformio.ini build flags
 #define ENABLE_CALIBRATION_STORAGE  

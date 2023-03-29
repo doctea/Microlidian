@@ -5,7 +5,12 @@
 
 #include "menu.h"
 
-#include "cv_input.h"
+#ifdef ENABLE_CV_INPUT
+    #include "cv_input.h"
+    #ifdef ENABLE_CLOCK_INPUT_CV
+        #include "cv_input_clock.h"
+    #endif
+#endif
 
 #include "mymenu/screen.h"
 #include "mymenu/menu_debug.h"
@@ -101,7 +106,7 @@ void loop1() {
     }
     #ifdef ENABLE_CV_INPUT
         static unsigned long last_cv_update = 0;
-        if (!locked && millis() - last_cv_update > TIME_BETWEEN_CV_INPUT_UPDATES) {
+        if (!locked && millis() - last_cv_update > time_between_cv_input_updates) {
             update_cv_input();
             last_cv_update = millis();
         }

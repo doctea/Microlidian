@@ -103,14 +103,19 @@ FLASHMEM void setup_parameter_menu() {
     //Serial.println(F("Adding ParameterSelectorControls for available_inputs..."));
     // ask ParameterManager to add all the menu items for the ParameterInputs
     parameter_manager->addAllParameterInputMenuItems(menu, "CV Input ");
+    Serial.printf("after addAllParameterInput, free ram is %i\n", rp2040.getFreeHeap());
 
     //parameter_manager->addAllVoltageSourceMenuItems(menu);
     //Serial.println("About to addAllVoltageSourceCalibrationMenuItems().."); Serial.flush();
     parameter_manager->addAllVoltageSourceCalibrationMenuItems(menu);
+    Serial.printf("after addAllVoltageSourceCalibrationMenuItems, free ram is %i\n", rp2040.getFreeHeap());
 
     //Serial.println("About to addAllParameterMenuItems().."); Serial.flush();
-    menu->add_page("Parameters");
-    parameter_manager->addAllParameterMenuItems(menu);
+    #ifdef ENABLE_PARAMETER_MAPPING
+        menu->add_page("Parameters");
+        parameter_manager->addAllParameterMenuItems(menu);
+        Serial.printf("after addAllParameterMenuItems, free ram is %i\n", rp2040.getFreeHeap());
+    #endif
 
     //DirectNumberControl<int> *mixer_profile = new DirectNumberControl<int>("Mixer profiling", &parameter_manager->profile_update_mixers, parameter_manager->profile_update_mixers, (int)0, (int)1000000, nullptr);
     //menu->add(mixer_profile);
