@@ -9,7 +9,7 @@ int time_between_cv_input_updates = TIME_BETWEEN_CV_INPUT_UPDATES;
 
 void clock_mode_changed(ClockMode old_mode, ClockMode new_mode) {
     if (new_mode==CLOCK_EXTERNAL_CV) {
-        time_between_cv_input_updates = 2;  // increase speed of reads from ADC so that we don't miss clock ticks
+        time_between_cv_input_updates = 1;  // increase speed of reads from ADC so that we don't miss clock ticks
         ticks = 0; // so that the next tick we receive is treated as 0?
         playing = true;
     } else {
