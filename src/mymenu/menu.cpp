@@ -105,6 +105,13 @@ void setup_menu() {
 
     tft = &displaytranslator; 
     tft->init();
+
+    for (int x = 0 ; x < tft->width() ; x+=3) {
+        for (int y = 0 ; y < tft->height() ; y+=3) {
+            tft->drawLine(0,0,x,y,random(65535));
+        }        
+    }
+
     //delay(50);
     //Serial.println(F("Finished  constructor"));
     Serial_flush();

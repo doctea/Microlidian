@@ -5,6 +5,8 @@
 
 #include <ParameterManager.h>
 
+// callbacks for use by the midihelpers and parameters libraries.
+
 int time_between_cv_input_updates = TIME_BETWEEN_CV_INPUT_UPDATES;
 
 void clock_mode_changed(ClockMode old_mode, ClockMode new_mode) {
@@ -22,9 +24,10 @@ bool actual_check_cv_clock_ticked() {
     static uint32_t last_checked_time;
     static bool already_high = false;
     //Serial.println("actual_check_cv_clock_ticked");
-    
-    //parameter_manager->voltage_sources->get(0)->update();
-    float v = parameter_manager->voltage_sources->get(0)->get_voltage();
+
+    // todo: make this configurable; add reset;     
+    float v = parameter_manager->voltage_sources->get(0)->get_voltage();    
+
     //Serial.printf("\tgot value %3.3f\n", parameter_manager->voltage_sources->get(0)->get_voltage()); 
     if (!already_high && v >= 3.0) {
         already_high = true;

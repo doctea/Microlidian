@@ -53,7 +53,9 @@ Clockwise starting from top-right:-
 - Integrate CV inputs
   - ~~basic cv input parameter~~
   - for controlling parameters
-  - maybe for clock too?
+  - low-memory version of the mapping tool, since providing options for all options of 20 tracks uses 100K+ and takes us over the available RAM!
+  - ~~maybe for clock too?~~
+  - implement CV input 'reset'
 - Figure out a way to provide storage, to save presets and templates/.mid files?  Need an extra pin for CS
   - use an i2c flashmem chip?; needs no extra pins; would need to support mounting it over usb in order to send files to it
   - use an attiny85 as a coprocessor that reads from the i2c and sends values over serial to the host: would also be useful for usb_midi_clocker or generally for these things; extra level of coding required; frees up 2xi2c pins, 1 of which would be needed for SD CS, so would have an extra pin free...
