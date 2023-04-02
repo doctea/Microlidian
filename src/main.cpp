@@ -34,7 +34,7 @@
 #endif
 
 #include "outputs/output.h"
-MIDIOutputProcessor output_processer = MIDIOutputProcessor(&MIDI);
+MIDIOutputProcessor output_processer = MIDIOutputProcessor(&USBMIDI);
 
 // serial console to host, for debug etc
 void setup_serial() {
@@ -77,6 +77,7 @@ void setup() {
 
     setup_midi();
     setup_usb();
+
     #ifdef ENABLE_SCREEN
         setup_screen();
         Serial.printf("after setup_screen(), free RAM is %u\n", freeRam());
@@ -169,7 +170,7 @@ void loop() {
     uint32_t mics_start = micros();
     //Serial.println("loop()");
     
-    MIDI.read();
+    USBMIDI.read();
 
     ticked = update_clock_ticks();
 
@@ -181,7 +182,8 @@ void loop() {
             set_restart_on_next_bar(false);
         }
 
-        MIDI.sendClock();
+        USBMIDI.sendClock();
+        DINMIDI.sendClock();
         #ifdef ENABLE_EUCLIDIAN
             sequencer.on_tick(ticks);
             if (is_bpm_on_sixteenth(ticks)) {

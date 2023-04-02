@@ -6,7 +6,8 @@
 #include <bpm.h>
 
 Adafruit_USBD_MIDI usb_midi;
-MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MIDI);
+MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, USBMIDI);
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, DINMIDI);
 
 void setup_usb() {
     #if defined(ARDUINO_ARCH_MBED) && defined(ARDUINO_ARCH_RP2040)
@@ -18,11 +19,17 @@ void setup_usb() {
 }
 
 void setup_midi() {
-    MIDI.begin(MIDI_CHANNEL_OMNI);
-    MIDI.turnThruOff();
 
-    MIDI.setHandleClock(pc_usb_midi_handle_clock);
-    MIDI.setHandleStart(pc_usb_midi_handle_start);
-    MIDI.setHandleStop(pc_usb_midi_handle_stop);
-    MIDI.setHandleContinue(pc_usb_midi_handle_continue);
+    // setup USB MIDI connection
+    USBMIDI.begin(MIDI_CHANNEL_OMNI);
+    USBMIDI.turnThruOff();
+
+    USBMIDI.setHandleClock(pc_usb_midi_handle_clock);
+    USBMIDI.setHandleStart(pc_usb_midi_handle_start);
+    USBMIDI.setHandleStop(pc_usb_midi_handle_stop);
+    USBMIDI.setHandleContinue(pc_usb_midi_handle_continue);
+
+    // setup serial MIDI output on standard UART pins
+    DINMIDI.turnThruOff();
+    DINMIDI.begin(0);
 }
