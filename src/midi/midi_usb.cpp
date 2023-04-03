@@ -1,6 +1,8 @@
 #include "Config.h"
 #include "midi/midi_usb.h"
 
+#include "debug.h"
+
 // midihelpers library clock handling
 #include <clock.h>
 #include <bpm.h>
@@ -32,26 +34,32 @@ void setup_usb() {
     while( !TinyUSBDevice.mounted() ) delay(1);
 }
 
+void auto_handle_start() {
+    if(clock_mode != CLOCK_EXTERNAL_USB_HOST) {
+        // automatically switch to using external USB clock if we receive a START message from the usb host
+        // todo: probably move this into the midihelper library?
+        //set_clock_mode(CLOCK_EXTERNAL_USB_HOST);
+        if (__clock_mode_changed_callback!=nullptr)
+            __clock_mode_changed_callback(clock_mode, CLOCK_EXTERNAL_USB_HOST);
+        clock_mode = CLOCK_EXTERNAL_USB_HOST;
+        //ticks = 0;
+        messages_log_add("Auto-switched to CLOCK_EXTERNAL_USB_HOST");
+    }
+    pc_usb_midi_handle_start();
+}
+
 void setup_midi() {
-
-    //Serial1.begin(31250);
-
     // setup USB MIDI connection
     USBMIDI.begin(MIDI_CHANNEL_OMNI);
     USBMIDI.turnThruOff();
 
+    // callbacks for messages recieved from USB MIDI host
     USBMIDI.setHandleClock(pc_usb_midi_handle_clock);
-    USBMIDI.setHandleStart(pc_usb_midi_handle_start);
+    USBMIDI.setHandleStart(auto_handle_start); //pc_usb_midi_handle_start);
     USBMIDI.setHandleStop(pc_usb_midi_handle_stop);
     USBMIDI.setHandleContinue(pc_usb_midi_handle_continue);
 
-    // setup serial MIDI output on standard UART pins
-    /*Serial1.setRX(SerialPIO::NOPIN);
-    Serial1.setTX(D6);
-    Serial1.begin(31250);*/
-
-    //serialDINMIDI.begin();
-
+    // setup serial MIDI output on standard UART pins; send only
     DINMIDI.begin(0);
     DINMIDI.turnThruOff();
 }
