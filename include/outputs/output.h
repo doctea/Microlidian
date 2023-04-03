@@ -1,5 +1,5 @@
-#ifndef OUTPUT__INCLUDED
-#define OUTPUT__INCLUDED
+#ifndef MIDI_OUTPUT__INCLUDED
+#define MIDI_OUTPUT__INCLUDED
 
 #include <Arduino.h>
 #include <LinkedList.h>
@@ -16,6 +16,11 @@
 #include "midi_helpers.h"
 
 #define MAX_LABEL 20
+
+#include <SoftwareSerial.h>
+extern midi::MidiInterface<midi::SerialMIDI<SerialPIO>> DINMIDI;
+
+byte get_muso_note_for_drum(byte drum_note);
 
 // class to receive triggers from a sequencer and return values to the owner Processor
 class BaseOutput {
@@ -68,6 +73,10 @@ class MIDIDrumOutput : public BaseOutput {
             Debug_printf("\t\tgoes off note %i (%s), ", note_number, get_note_name_c(note_number));
             //Serial.printf("Sending note off for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
             midi->sendNoteOff(note_number, 0, get_channel());
+            /*if (channel==GM_CHANNEL_DRUMS) {
+                Serial.printf("sending note off for %i on %i\n", note_number, MUSO_CV_CHANNEL);
+                DINMIDI.sendNoteOff(get_muso_note_for_drum(note_number), 0, MUSO_CV_CHANNEL);
+            }*/
             //this->nodes.get(i)->went_off();
         }
         if (should_go_on()) {
@@ -76,6 +85,10 @@ class MIDIDrumOutput : public BaseOutput {
             //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
             set_last_note_number(note_number);
             midi->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
+            /*if (channel==GM_CHANNEL_DRUMS) {
+                Serial.printf("sending note on for %i on %i\n", note_number, MUSO_CV_CHANNEL);
+                DINMIDI.sendNoteOn(get_muso_note_for_drum(note_number), MIDI_MAX_VELOCITY, MUSO_CV_CHANNEL);
+            }*/
             //this->nodes.get(i)->went_on();
             //count += i;
         }

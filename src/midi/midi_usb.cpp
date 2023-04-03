@@ -5,9 +5,16 @@
 #include <clock.h>
 #include <bpm.h>
 
+#include <SoftwareSerial.h>
+
+//SoftwareSerial SoftSerial(D6, -1, false);
+
+SerialPIO spio(D6, SerialPIO::NOPIN);
+
 Adafruit_USBD_MIDI usb_midi;
 MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, USBMIDI);
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, DINMIDI);
+//MIDI_CREATE_INSTANCE(SoftwareSerial, SoftSerial, DINMIDI);
+MIDI_CREATE_INSTANCE(SerialPIO, spio, DINMIDI);
 
 void setup_usb() {
     #if defined(ARDUINO_ARCH_MBED) && defined(ARDUINO_ARCH_RP2040)
@@ -20,6 +27,8 @@ void setup_usb() {
 
 void setup_midi() {
 
+    //Serial1.begin(31250);
+
     // setup USB MIDI connection
     USBMIDI.begin(MIDI_CHANNEL_OMNI);
     USBMIDI.turnThruOff();
@@ -30,6 +39,12 @@ void setup_midi() {
     USBMIDI.setHandleContinue(pc_usb_midi_handle_continue);
 
     // setup serial MIDI output on standard UART pins
-    DINMIDI.turnThruOff();
+    /*Serial1.setRX(SerialPIO::NOPIN);
+    Serial1.setTX(D6);
+    Serial1.begin(31250);*/
+
+    //serialDINMIDI.begin();
+
     DINMIDI.begin(0);
+    DINMIDI.turnThruOff();
 }

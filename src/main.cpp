@@ -182,8 +182,21 @@ void loop() {
             set_restart_on_next_bar(false);
         }
 
+        static byte count = 0;
+
+        if (is_bpm_on_beat(ticks)) {
+            DINMIDI.sendNoteOn(count, MIDI_MAX_VELOCITY, MUSO_CV_CHANNEL);
+            Serial.println("beat!");
+        }
+        if (is_bpm_on_beat(ticks,12)) {
+            DINMIDI.sendNoteOff(count, MIDI_MAX_VELOCITY, MUSO_CV_CHANNEL);
+            Serial.println("beat off!");
+        }
+        count++;
+        if (count>127) count = 0;
+
         USBMIDI.sendClock();
-        DINMIDI.sendClock();
+        //DINMIDI.sendClock();
         #ifdef ENABLE_EUCLIDIAN
             sequencer.on_tick(ticks);
             if (is_bpm_on_sixteenth(ticks)) {

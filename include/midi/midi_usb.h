@@ -11,7 +11,8 @@ extern midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> USBMIDI;
 
 //#include <SerialUART.h>
 //SerialUART
-extern midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> DINMIDI;
+#include <SoftwareSerial.h>
+extern midi::MidiInterface<midi::SerialMIDI<SerialPIO>> DINMIDI;
 
 
 void setup_midi();
