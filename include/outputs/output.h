@@ -17,8 +17,7 @@
 
 #define MAX_LABEL 20
 
-#include <SoftwareSerial.h>
-extern midi::MidiInterface<midi::SerialMIDI<SerialPIO>> DINMIDI;
+#include "midi/midi_usb.h"
 
 byte get_muso_note_for_drum(byte drum_note);
 
@@ -64,31 +63,34 @@ class MIDIDrumOutput : public BaseOutput {
     virtual void stop() override {
         if(is_valid_note(last_note_number)) {
             midi->sendNoteOff(last_note_number, 0, this->get_channel());
+            DINMIDI.sendNoteOff(get_muso_note_for_drum(last_note_number), 0, MUSO_TRIGGER_CHANNEL);
             this->set_last_note_number(NOTE_OFF);
         }
     }
     virtual void process() override {
         if (should_go_off()) {
             int note_number = get_last_note_number();
-            Debug_printf("\t\tgoes off note %i (%s), ", note_number, get_note_name_c(note_number));
+            Debug_printf("\t\tgoes off note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
             //Serial.printf("Sending note off for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
-            midi->sendNoteOff(note_number, 0, get_channel());
-            /*if (channel==GM_CHANNEL_DRUMS) {
-                Serial.printf("sending note off for %i on %i\n", note_number, MUSO_CV_CHANNEL);
-                DINMIDI.sendNoteOff(get_muso_note_for_drum(note_number), 0, MUSO_CV_CHANNEL);
-            }*/
+            if (is_valid_note(note_number)) {
+                midi->sendNoteOff(note_number, 0, get_channel());
+                if (channel==GM_CHANNEL_DRUMS) {
+                    //Serial.printf("%i: sending note off\tfor\t%i on\t%i (aka %i)\n", this->note_number, note_number, MUSO_TRIGGER_CHANNEL, get_muso_note_for_drum(note_number));
+                    DINMIDI.sendNoteOff(get_muso_note_for_drum(note_number), 0, MUSO_TRIGGER_CHANNEL);
+                }
+            }
             //this->nodes.get(i)->went_off();
         }
         if (should_go_on()) {
             int note_number = get_note_number();
-            Debug_printf("\t\tgoes on note %i (%s), ", note_number, get_note_name_c(note_number));
+            Debug_printf("\t\tgoes on note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
             //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
             set_last_note_number(note_number);
             midi->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
-            /*if (channel==GM_CHANNEL_DRUMS) {
-                Serial.printf("sending note on for %i on %i\n", note_number, MUSO_CV_CHANNEL);
-                DINMIDI.sendNoteOn(get_muso_note_for_drum(note_number), MIDI_MAX_VELOCITY, MUSO_CV_CHANNEL);
-            }*/
+            if (channel==GM_CHANNEL_DRUMS) {
+                //Serial.printf("%i: sending note on \tfor\t%i on\t%i (aka %i)\n", this->note_number, note_number, MUSO_TRIGGER_CHANNEL, get_muso_note_for_drum(note_number));
+                DINMIDI.sendNoteOn(get_muso_note_for_drum(note_number), MIDI_MAX_VELOCITY, MUSO_TRIGGER_CHANNEL);
+            }
             //this->nodes.get(i)->went_on();
             //count += i;
         }

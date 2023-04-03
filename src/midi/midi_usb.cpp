@@ -1,4 +1,4 @@
-
+#include "Config.h"
 #include "midi/midi_usb.h"
 
 // midihelpers library clock handling
@@ -7,14 +7,21 @@
 
 #include <SoftwareSerial.h>
 
-//SoftwareSerial SoftSerial(D6, -1, false);
-
-SerialPIO spio(D6, SerialPIO::NOPIN);
-
 Adafruit_USBD_MIDI usb_midi;
 MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, USBMIDI);
-//MIDI_CREATE_INSTANCE(SoftwareSerial, SoftSerial, DINMIDI);
-MIDI_CREATE_INSTANCE(SerialPIO, spio, DINMIDI);
+
+#ifdef MIDI_SERIAL_SOFTWARE
+    #include <SoftwareSerial.h>
+    SoftwareSerial SoftSerial(D6, -1, false);
+    MIDI_CREATE_INSTANCE(SoftwareSerial, SoftSerial, DINMIDI);
+#endif
+#ifdef MIDI_SERIAL_SPIO
+    SerialPIO spio(D6, SerialPIO::NOPIN);
+    MIDI_CREATE_INSTANCE(SerialPIO, spio, DINMIDI);
+#endif
+#ifdef MIDI_SERIAL_HARDWARE
+    MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, DINMIDI);
+#endif
 
 void setup_usb() {
     #if defined(ARDUINO_ARCH_MBED) && defined(ARDUINO_ARCH_RP2040)
