@@ -18,13 +18,17 @@ Eventually thinking of targeting an 8-10hp Eurorack panel with USB-C in, 3 bipol
 
 ## Hardware/wiring
 
+- WIP PCB & panels in KiCAD and Gerber format [here](https://github.com/doctea/Microlidian-hardware) - don't use these yet without checking with the author for any problems/new versions!
+
+### Breadboard wiring
+
 Clockwise starting from top-right:-
 
 - 3.3v
 - gnd
 - 5v
 - D10/MOSI -> ST7789 SPI
-- D9/MISO  -> back button
+- D9/MISO  -> back button (swapped with D0 on PCB version)
 - D8/SCK   -> ST7789 SCK
 - D7/CS    -> ST7789 CS
 
@@ -34,7 +38,7 @@ Clockwise starting from top-right:-
 - D3       -> Encoder right
 - D2       -> Encoder left
 - D1       -> Encoder button
-- D0       -> ST7789 DC (probably swap this with D9?)
+- D0       -> ST7789 DC (swapped with D9 on PCB version)
 
 ## TODO
 
@@ -45,7 +49,7 @@ Clockwise starting from top-right:-
   - ~~make a nice graphical display widget for it~~
 - MIDI input (via USB, for setting options, ~~clock sync,~~ forwarding notes and drums)
   - options to enable/disable all this
-- MIDI output (via TRS/DIN, for sending clock, triggers, notes and envelopes)
+- MIDI output (~~via TRS/DIN, for sending clock, triggers, notes~~ and envelopes)
   - ~~basic hacky approach is working~~
   - nicer mechanisms for assigning outputs - including named outputs ("kick", "snare", etc, "bassline")
   - options that would allow for modulation 
