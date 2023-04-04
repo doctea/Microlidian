@@ -6,7 +6,7 @@ Project for XIAO RP2040 mcu with st7789 screen and rotary encoder.  Using compon
 
 The aim here is to have a flexible and extensible MIDI generator based on the mutating Euclidian features from [drum2musocv](https://github.com/doctea/drum2musocv), but aiming to be a bit more modular and extensible.
 
-Eventually thinking of targeting an 8-10hp Eurorack panel with USB-C in, 3 bipolar CV inputs (using Pimoroni ADC board) with TRS MIDI out for sending 16+ rhythm tracks to a MIDIMUSO-CV12 board.
+8hp Eurorack panel with USB-Type C input for USB MIDI, 3 bipolar CV inputs (using Pimoroni ADC board), with TRS MIDI out for sending 16+ rhythm tracks to a MIDIMUSO-CV12 board (or other MIDI devices!).
 
 ## Requirements
 
@@ -22,7 +22,7 @@ Eventually thinking of targeting an 8-10hp Eurorack panel with USB-C in, 3 bipol
 
 ### Breadboard wiring
 
-Clockwise starting from top-right:-
+XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 
 - 3.3v
 - gnd
@@ -51,7 +51,9 @@ Clockwise starting from top-right:-
   - options to enable/disable all this
 - MIDI output (~~via TRS/DIN, for sending clock, triggers, notes~~ and envelopes)
   - ~~basic hacky approach is working~~
-  - nicer mechanisms for assigning outputs - including named outputs ("kick", "snare", etc, "bassline")
+  - standard gm drum machine option with assignable drum numbers
+  - midimuso cv trigger+cv modes
+  - nicer mechanisms for assigning outputs
   - options that would allow for modulation 
   - options to enable/disable all this
 - Integrate CV inputs
@@ -82,3 +84,7 @@ Clockwise starting from top-right:-
 - Basic engine for BPM and internal/external clock (based on midihelpers/usb_midi_clocker code)
 - Basic display and encoder for changing options
 - Fix redrawing problem due to no framebuffer in the TFT_eSPI library (can we just use that buffer wrapper library?)
+- Named MIDI outputs ("kick", "snare", etc, "bassline")
+- Menu options and hotkeys to force reboot + firmware update modes:
+  - Hold BACK button for 4 seconds to reboot (useful if the screen hasn't started up after a cold boot, or similar)
+  - Hold BACK button for 4 seconds while holding encoder button for 3 seconds to go into firmware update mode
