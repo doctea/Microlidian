@@ -63,6 +63,7 @@ void setup() {
     // overclock the CPU so that we can afford all those CPU cycles drawing the UI!
     //set_sys_clock_khz(225000, true);
     //set_sys_clock_khz(230000, true);
+    delay(100);
     set_sys_clock_khz(200000, true);
 
     setup_serial();
@@ -75,13 +76,13 @@ void setup() {
         set_clock_mode_changed_callback(clock_mode_changed);
     #endif
 
-    setup_midi();
-    setup_usb();
-
     #ifdef ENABLE_SCREEN
         setup_screen();
         Serial.printf("after setup_screen(), free RAM is %u\n", freeRam());
     #endif
+
+    setup_midi();
+    setup_usb();
 
     #ifdef ENABLE_STORAGE
         setup_storage();
@@ -225,5 +226,13 @@ void loop() {
         add_loop_length(micros()-mics_start);
     }
 
+    // if the back button is held down for 4 seconds, do a soft reboot
+    if (!pushButtonA.read() && pushButtonB.read() && pushButtonB.currentDuration() >= 4000) {
+        //#define AIRCR_Register (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C)))
+        //AIRCR_Register = 0x5FA0004;
+        reset_rp2040();
+    } else if (pushButtonA.read() && pushButtonB.read() && pushButtonA.currentDuration() >= 3000 && pushButtonA.currentDuration() >= 4000) {
+        reset_upload_firmware();
+    }
 }
 

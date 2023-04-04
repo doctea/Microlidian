@@ -43,6 +43,7 @@ extern volatile uint32_t ticks;
 
 //float bpm_selector_values[] = { 60, 90, 120, 150, 180, 500, 1000, 2000, 3000 };
 
+
 #ifndef GDB_DEBUG
 FLASHMEM // void setup_debug_menu() causes a section type conflict with void Menu::start()
 #endif
@@ -61,8 +62,11 @@ void setup_debug_menu() {
 
     menu->add_page("Debug");
 
-    //ActionConfirmItem *reset_control = new ActionConfirmItem("RESET TEENSY?", reset_teensy);
-    //menu->add(reset_control);
+    ActionConfirmItem *reset_control = new ActionConfirmItem("RESET RP2040?", reset_rp2040);
+    menu->add(reset_control);
+
+    ActionConfirmItem *reset_bootloader = new ActionConfirmItem("FIRMWARE UPLOAD?", reset_upload_firmware);
+    menu->add(reset_bootloader);
 
     /*SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");
     bpm_selector->available_values = bpm_selector_values;

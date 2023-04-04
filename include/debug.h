@@ -8,7 +8,8 @@ void setup_debug_menu();
 int freeRam();
 void debug_free_ram();
 
-//void reset_teensy();
+void reset_rp2040();
+void reset_upload_firmware();
 
 #ifndef Serial_flush
     #ifdef SERIAL_FLUSH_REALLY

@@ -36,7 +36,6 @@ void messages_log_add(String msg) {
       CPU_RESTART;
       //Serial.println(F("Restarted?!"); Serial_flush();
   }
-
 #elif defined(__avr__)
   int freeRam () {  
     extern int __heap_start, *__brkval;
@@ -49,6 +48,33 @@ void messages_log_add(String msg) {
   }
 #elif defined(ARDUINO_ARCH_RP2040)
   #include "pico/stdlib.h"  // not sure if we need this?
+  #include "pico/bootrom.h" // needed for reset_usb_boot
+
+  void reset_rp2040 () {
+    // https://forums.raspberrypi.com/viewtopic.php?t=318747
+    //#define AIRCR_Register (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C)))
+    //AIRCR_Register = 0x5FA0004;
+    watchdog_reboot(0,0,0);
+  }
+
+  #include "mymenu.h"
+  #include "mymenu/screen.h"
+
+  void reset_upload_firmware() {
+    while(locked) {}; // wait until current screen drawing on other core has finished
+    locked = true;    // lock so that other core won't trash what we're about to draw to the screen
+    menu->tft->clear();
+    menu->tft->setTextSize(3);
+    menu->tft->setCursor(0,0);
+    menu->tft->setTextColor(BLACK, C_WHITE);
+    menu->tft->println("   FIRMWARE  \n    UPDATE   ");
+    menu->tft->setTextSize(2);
+    menu->tft->setTextColor(C_WHITE, BLACK);
+    menu->tft->println("1.Connect USB to PC\n2.Open mounted drive\n3.Copy new .uf2 file\n4.Profit");
+    menu->tft->updateDisplay();
+    delay(100);
+    reset_usb_boot(0,0);
+  }
 
   int freeRam () {  
     return rp2040.getFreeHeap();

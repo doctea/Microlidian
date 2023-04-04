@@ -31,7 +31,7 @@ void setup_usb() {
         TinyUSB_Device_Init(0);
     #endif
 
-    while( !TinyUSBDevice.mounted() ) delay(1);
+    //while( !TinyUSBDevice.mounted() ) delay(1);
 }
 
 void auto_handle_start() {
