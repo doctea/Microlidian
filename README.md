@@ -49,7 +49,7 @@ XIAO RP2040 pins.  Counting clockwise starting from top-right:-
   - ~~make a nice graphical display widget for it~~
 - MIDI input (via USB, for setting options, ~~clock sync,~~ forwarding notes and drums)
   - options to enable/disable all this
-- MIDI output (~~via TRS/DIN, for sending clock, triggers, notes~~ and envelopes)
+- MIDI output (~~via TRS/DIN, for sending clock, triggers, notes~~ and triggerable envelopes/LFO)
   - ~~basic hacky approach is working~~
   - standard gm drum machine option with assignable drum numbers
   - midimuso cv trigger+cv modes
@@ -77,6 +77,7 @@ XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - 'Density' control that keeps the same rhythm but fills in gaps
   - 'euclidian within euclidian'?  so eg we fill in triggers in between other triggers?
 - rhythm-synced LFO that sets a cycle of the waveform to the length between triggers
+- Accept CCs to configure settings (similar to how drum2musocv already does it, perhaps)
 
 
 ## Done
