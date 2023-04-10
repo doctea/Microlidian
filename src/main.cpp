@@ -86,6 +86,7 @@ void setup() {
 
     #ifdef ENABLE_STORAGE
         setup_storage();
+        setup_storage_menu();
         Serial.printf("after setup_storage(), free RAM is %u\n", freeRam());
     #endif    
 
