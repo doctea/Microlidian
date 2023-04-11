@@ -76,10 +76,17 @@ void setup() {
     #endif
 
     #ifdef ENABLE_SCREEN
-        delay(1000);    // see if giving 1 second to calm down will help reliability of screen initialisation   // TODO: remove if/when we manage to solve this problem!
+        //delay(1000);    // see if giving 1 second to calm down will help reliability of screen initialisation... it does not. :(
         setup_screen();
         Serial.printf("after setup_screen(), free RAM is %u\n", freeRam());
     #endif
+
+    // check if the two buttons are held down, if so, enter firmware reset mode as quickly as possible!
+    pushButtonA.update(); 
+    pushButtonB.update();
+    if (pushButtonA.read() && pushButtonB.read()) {
+        reset_upload_firmware();
+    }
 
     setup_midi();
     setup_usb();
@@ -227,18 +234,15 @@ void loop() {
         add_loop_length(micros()-mics_start);
     }
 
-    static bool first_run = false;  // for allowing to go into firmware update on boot if both buttons held TODO: move this as early into setup() as we can
     // if the back button is held down for 4 seconds, do a soft reboot
     if (!pushButtonA.read() && pushButtonB.read() && pushButtonB.currentDuration() >= 4000) {
         //#define AIRCR_Register (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C)))
         //AIRCR_Register = 0x5FA0004;
         reset_rp2040();
     } else if (
-        (first_run && pushButtonA.read() && pushButtonB.read()) ||
-        (pushButtonA.read() && pushButtonB.read() && pushButtonA.currentDuration() >= 3000 && pushButtonA.currentDuration() >= 4000)
+        pushButtonA.read() && pushButtonB.read() && pushButtonA.currentDuration() >= 3000 && pushButtonA.currentDuration() >= 4000
     ) {
         reset_upload_firmware();
     }
-    first_run = false;
 }
 
