@@ -45,8 +45,10 @@ XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - ~~Implement a basic sequencer~~
   - ~~with Euclidian stuff on top of that~~
   - menus for controlling such
-    - modulate the parameters from cv or midi input 
+    - modulate the parameters from ~~cv or~~ midi input 
   - ~~make a nice graphical display widget for it~~
+- Other sequencer types
+  - eg raga sequencer that loads .mid files
 - MIDI input (via USB, for setting options, ~~clock sync,~~ forwarding notes and drums)
   - options to enable/disable all this
 - MIDI output (~~via TRS/DIN, for sending clock, triggers, notes~~ and triggerable envelopes/LFO)
@@ -62,23 +64,30 @@ XIAO RP2040 pins.  Counting clockwise starting from top-right:-
   - low-memory version of the mapping tool, since providing options for all options of 20 tracks uses 100K+ and takes us over the available RAM!
   - ~~maybe for clock too?~~
   - implement CV input 'reset'
-- Figure out a way to provide storage, to save presets and templates/.mid files?  Need an extra pin for CS
-  - use an i2c flashmem chip?; needs no extra pins; would need to support mounting it over usb in order to send files to it
-  - use an attiny85 as a coprocessor that reads from the i2c and sends values over serial to the host: would also be useful for usb_midi_clocker or generally for these things; extra level of coding required; frees up 2xi2c pins, 1 of which would be needed for SD CS, so would have an extra pin free...
+  - Setting a per-parameter range for modulation
+- MIDI inputs for controlling parameters
+  - Configurable MIDI inputs for control surfaces from host USB
+  - Accept baked-in CCs to configure settings (similar to how drum2musocv already does it, perhaps)
+- Figure out a way to provide storage, to save presets and templates/.mid files?
+  - ~~just save to the internal flash via LittleFS!~~ DONE
+  - ~~rudimentary save/load of parameter mappings~~ DONE
+  - allow configuration of the output devices/channels..
+  - add other settings things to be saved/recalled..?
+  - Load/save settings and presets to the flash
+- Other sequencer types
+  - eg raga sequencer that loads .mid files
+- Free up pins..?
   - use an i2c rotary encoder: frees up 3(!) pins; could use the rgb encoder for extra feedback; more difficult to fit neatly under a panel due to the i2c board...
-  - or, just use a Pico instead of the XIAO and don't worry about not having enough pins!; may be harder to fit usb-c connector, maybe not tho?
-  - can we write to flash without it being overwritten when uploading new code?
+  - or, just use a Pico or Waveshare Zero instead of the XIAO and don't worry about not having enough pins!
 - Stutter/Ratchetting
-- Per-track duration, with modulation
-- Setting a per-parameter range for modulation
-- Load/save settings and presets to the flash
-- "Stick on this pattern" control; A/B controls
-- Logic gates on the triggers (including 'mult-limbed-drummer' options)
-- 'Density' control that keeps the same rhythm but fills in gaps
+- Per-track note duration, with modulation
+- "Stick on the current pattern" control; A/B controls
+- Optional logic gates on the triggers (including 'mult-limbed-drummer' options)
+- an enhanced 'Density' control that keeps the same rhythm, but fills in gaps?
   - 'euclidian within euclidian'?  so eg we fill in triggers in between other triggers?
 - rhythm-synced LFO that sets a cycle of the waveform to the length between triggers
-- Accept CCs to configure settings (similar to how drum2musocv already does it, perhaps)
-
+- Ability to boot up as a USB flash drive, for copying files to/from the LittleFS flash?
+- Allow holding a button to go into firmware update mode before running much code at all as a failsafe against bad code that won't complete setup() or first loop()
 
 ## Done
 
