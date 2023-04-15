@@ -11,6 +11,7 @@
 #include <bpm.h>
 
 class FloatParameter;
+class Menu;
 
 #define MINIMUM_DENSITY 0.0f  // 0.10f
 #define MAXIMUM_DENSITY 1.5f
@@ -54,6 +55,7 @@ class EuclidianPattern : public SimplePattern {
             /*arguments.steps = steps;
             arguments.pulses = pulses;
             arguments.rotation = rotation;*/
+            this->maximum_steps = steps > 0 ? steps : default_arguments.steps;
             if (steps>0)
                 make_euclid(default_arguments.steps, default_arguments.pulses, default_arguments.rotation, default_arguments.duration, tie_on);
             //make_euclid();
@@ -102,6 +104,9 @@ class EuclidianPattern : public SimplePattern {
         //int temp_pulses = arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
         int temp_pulses = arguments.pulses * (1.5f*(MINIMUM_DENSITY+*global_density));
         //this->arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
+
+        if (arguments.steps>maximum_steps)
+            maximum_steps = arguments.steps;
 
         int bucket = 0;
         for (int i = 0 ; i < this->arguments.steps ; i++) {
@@ -209,6 +214,10 @@ class EuclidianPattern : public SimplePattern {
     void trigger_off_for_step(int step) override {
         Serial.printf("trigger_off_for_step(%i)\n", step);
     }*/
+
+    #ifdef ENABLE_SCREEN
+        void create_menu_items(Menu *menu, int index);
+    #endif
 };
 
 class EuclidianSequencer : public BaseSequencer {
@@ -223,7 +232,8 @@ class EuclidianSequencer : public BaseSequencer {
 
     public:
     EuclidianSequencer() : BaseSequencer() {
-        this->patterns = (EuclidianPattern**) calloc(number_patterns, sizeof(EuclidianPattern));
+        EuclidianPattern *p = nullptr;
+        this->patterns = (EuclidianPattern**) calloc(number_patterns, sizeof(p));
         for (int i = 0 ; i < number_patterns ; i++) {
             this->patterns[i] = new EuclidianPattern();
             this->patterns[i]->global_density = &this->global_density;

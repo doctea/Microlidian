@@ -1,3 +1,6 @@
+#ifndef MENUITEMS_SEQUENCER__H
+#define MENUITEMS_SEQUENCER__H
+
 #include "sequencer/Patterns.h"
 #include "menuitems.h"
 //#include "submenuitem_bar.h"
@@ -110,3 +113,5 @@ class PatternDisplay : public MenuItem {
             */
         }
 };
+
+#endif

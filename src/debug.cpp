@@ -63,15 +63,17 @@ void messages_log_add(String msg) {
   void reset_upload_firmware() {
     while(locked) {}; // wait until current screen drawing on other core has finished
     locked = true;    // lock so that other core won't trash what we're about to draw to the screen
-    menu->tft->clear();
-    menu->tft->setTextSize(3);
-    menu->tft->setCursor(0,0);
-    menu->tft->setTextColor(BLACK, C_WHITE);
-    menu->tft->println("   FIRMWARE  \n    UPDATE   ");
-    menu->tft->setTextSize(2);
-    menu->tft->setTextColor(C_WHITE, BLACK);
-    menu->tft->println("1.Connect USB to PC\n2.Open mounted drive\n3.Copy new .uf2 file\n4.Profit");
-    menu->tft->updateDisplay();
+    if (menu!=nullptr && menu->tft) {
+      menu->tft->clear();
+      menu->tft->setTextSize(3);
+      menu->tft->setCursor(0,0);
+      menu->tft->setTextColor(BLACK, C_WHITE);
+      menu->tft->println("   FIRMWARE  \n    UPDATE   ");
+      menu->tft->setTextSize(2);
+      menu->tft->setTextColor(C_WHITE, BLACK);
+      menu->tft->println("1.Connect USB to PC\n2.Open mounted drive\n3.Copy new .uf2 file\n4.Profit");
+      menu->tft->updateDisplay();
+    }
     delay(100);
     reset_usb_boot(0,0);
   }

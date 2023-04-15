@@ -5,6 +5,8 @@
 #include "sequencer/Euclidian.h"
 #include "parameters/Parameter.h"
 
+#include "outputs/output.h"
+
 #if defined(ENABLE_CV_INPUT)
     LinkedList<FloatParameter*> *EuclidianSequencer::getParameters() {
         LinkedList<FloatParameter*> *parameters = new LinkedList<FloatParameter*>();
@@ -57,5 +59,20 @@
             );
         }
         return parameters;
+    }
+#endif
+
+#ifdef ENABLE_SCREEN
+    #include "mymenu.h"
+    #include "mymenu/menuitems_pattern_euclidian.h"
+
+    void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index) {
+        char label[MENU_C_MAX];
+        snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
+        menu->add_page(label);
+
+        //EuclidianPattern *p = (EuclidianPattern *)sequencer.get_pattern(pattern_index);
+        EuclidianPatternControl *epc = new EuclidianPatternControl(label, this);
+        menu->add(epc);
     }
 #endif

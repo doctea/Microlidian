@@ -1,7 +1,7 @@
 #ifndef MENUITEMS_SEQUENCER_CIRCLE__H
 #define MENUITEMS_SEQUENCER_CIRCLE__H
 
-#include "sequencer/Sequencer.h"
+#include "sequencer/Euclidian.h"
 #include "sequencer/Patterns.h"
 
 #include "menuitems.h"
@@ -13,14 +13,15 @@
 #include <bpm.h>
 #include <clock.h>
 
-class CircleDisplay : public MenuItem {
+class SingleCircleDisplay : public MenuItem {
     public:
         //DeviceBehaviour_Beatstep *behaviour_beatstep = nullptr;
-        BaseSequencer *target_sequencer = nullptr;
+        //BaseSequencer *target_sequencer = nullptr;
+        EuclidianPattern *target_pattern = nullptr;
         int coordinates_x[16];
         int coordinates_y[16];
-        CircleDisplay(const char *label, BaseSequencer *sequencer) : MenuItem(label) {
-            this->set_sequencer(sequencer);
+        SingleCircleDisplay(const char *label, EuclidianPattern *target_pattern) : MenuItem(label) {
+            this->set_target(target_pattern);
         }
 
         void on_add() override {
@@ -28,12 +29,12 @@ class CircleDisplay : public MenuItem {
             setup_coordinates();
         }
 
-        void set_sequencer(BaseSequencer *sequencer) {
-            this->target_sequencer = sequencer;
+        void set_target(EuclidianPattern *target_pattern) {
+            this->target_pattern = target_pattern;
         }
 
         void setup_coordinates() {
-            Debug_printf("CircleDisplay() setup_coordinates, tft width is %i\n", tft->width()); Serial.flush();
+            Debug_printf("SingleCircleDisplay() setup_coordinates, tft width is %i\n", tft->width()); Serial.flush();
             //this->set_pattern(target_pattern);
             const size_t divisions = 16;
             const size_t degrees_per_iter = 360 / divisions;
@@ -49,23 +50,22 @@ class CircleDisplay : public MenuItem {
                 position = position % divisions;
             }
             //this->set_sequencer(sequencer);
-            Debug_println("CircleDisplay() finished setup_coordinates"); Serial.flush();
+            Debug_println("SingleCircleDisplay() finished setup_coordinates"); Serial.flush();
         }
 
         virtual int display(Coord pos, bool selected, bool opened) override {
             //return pos.y;
             int initial_y = pos.y;
             //pos.y = header(label, pos, selected, opened);
-
-            tft->printf("ticks:%4i step:%i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
+            //tft->printf("ticks:%4i step:%i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
             
             /*static int last_rendered_step = -1;
             if (BPM_CURRENT_STEP_OF_BAR==last_rendered_step)
                 return tft->height();
             last_rendered_step = BPM_CURRENT_STEP_OF_BAR;*/
 
-            if (this->target_sequencer==nullptr) {
-                tft->println("No sequencer selected"); Serial.flush();
+            if (this->target_pattern==nullptr) {
+                tft->println("No pattern selected"); Serial.flush();
                 return tft->getCursorY();
             }
 
@@ -85,22 +85,22 @@ class CircleDisplay : public MenuItem {
             #endif
 
             static const int_fast8_t circle_center_x = tft->width()/4;
-            static const int_fast8_t circle_center_y = tft->width()/3;
+            static const int_fast8_t circle_center_y = pos.y + ((tft->height() - pos.y) / 2);
 
             // draw circle
-            for (int_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++ ) {
+            //for (int_fast8_t seq = 0 ; seq < target_pattern->number_patterns ; seq++ ) {
                 int_fast8_t first_x, first_y;
                 int_fast8_t last_x, last_y;
                 int_fast8_t count = 0;
-                BasePattern *pattern = target_sequencer->get_pattern(seq);
+                //BasePattern *pattern = target_sequencer->get_pattern(seq);
                 //int16_t colour = color565(255 * seq, 255 - (255 * seq), seq) + (seq*8);
-                uint16_t colour = pattern->colour;
-                if (!pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR))
+                uint16_t colour = target_pattern->colour;
+                if (!target_pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_PHRASE))
                     colour = tft->halfbright_565(colour);
-                for (int i = 0 ; i < 16 ; i++) {
-                    int_fast8_t coord_x = circle_center_x + coordinates_x[i];
-                    int_fast8_t coord_y = circle_center_y + coordinates_y[i];
-                    if (pattern->query_note_on_for_step(i)) {
+                for (int i = 0 ; i < max(target_pattern->get_steps(),16) ; i++) {
+                    int_fast8_t coord_x = circle_center_x + coordinates_x[i%16];
+                    int_fast8_t coord_y = circle_center_y + coordinates_y[i%16];
+                    if (target_pattern->query_note_on_for_step(i)) {
                         if (count>0) {
                             actual->drawLine(
                                 last_x, last_y, coord_x, coord_y,
@@ -110,15 +110,17 @@ class CircleDisplay : public MenuItem {
                             first_x = coord_x;
                             first_y = coord_y;
                         }
-                        last_x = circle_center_x + coordinates_x[i];
-                        last_y = circle_center_y + coordinates_y[i];
+                        last_x = circle_center_x + coordinates_x[i%16];
+                        last_y = circle_center_y + coordinates_y[i%16];
+
+                        actual->fillCircle(last_x, last_y, 6, colour);  // draw a slightly larger colour circle
                         count++;
                     }
                 }
                 if (count>1) {
                     actual->drawLine(last_x, last_y, first_x, first_y, colour);
                 }
-            }
+            //}
 
             // draw step markers around circle
             const int_fast8_t radius = 2;
@@ -132,12 +134,12 @@ class CircleDisplay : public MenuItem {
                 );
             }
 
-            // draw flashy blocks for every patterns
+            /*// draw flashy blocks for every patterns
             tft->setCursor(tft->width()/2, ++initial_y);
             colours(false, C_WHITE);
             tft->println(" St Pu Ro   St Pu Ro");
             tft->setCursor(tft->width()/2, pos.y);
-            for (int_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
+            for (int_fast8_t seq = 0 ; seq < target_pattern->number_patterns ; seq++) {
                 int_fast8_t column = seq / 10;
                 int_fast8_t row = 1+(seq % 10);
                 tft->setCursor((tft->width()/2) + (column*65), initial_y + (row*8)); //tft->getCursorY());
@@ -148,7 +150,7 @@ class CircleDisplay : public MenuItem {
                 colours(false, C_WHITE);
                 //tft->printf("%i %s\n", seq, pattern->get_summary());
                 tft->print(pattern->get_summary());
-            }
+            }*/
 
             return tft->height();
         }

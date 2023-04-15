@@ -41,37 +41,9 @@
 
         for (int i = 0 ; i < sequencer.number_patterns ; i++) {
             //Serial.printf("adding controls for pattern %i..\n", i);
-            char label[MENU_C_MAX];
-            snprintf(label, MENU_C_MAX, "Pattern %i", i);
-            menu->add_page(label);
             EuclidianPattern *p = (EuclidianPattern *)sequencer.get_pattern(i);
 
-            menu->add(new PatternDisplay(label, p));
-
-            OutputSelectorControl<EuclidianPattern> *selector = new OutputSelectorControl<EuclidianPattern>(
-                "Output",
-                p,
-                &EuclidianPattern::set_output,
-                &EuclidianPattern::get_output,
-                &output_processer.nodes,
-                p->output
-            );
-            selector->go_back_on_select = true;
-            menu->add(selector);
-
-            //menu->add(new ObjectToggleControl<EuclidianPattern> ("Locked", p, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
-
-            SubMenuItemBar *bar = new SubMenuItemBar("Arguments");
-            //Menu *bar = menu;
-            bar->add(new ObjectNumberControl<EuclidianPattern,byte> ("Steps",    p, &EuclidianPattern::set_steps,      &EuclidianPattern::get_steps,    nullptr, 1, STEPS_PER_BAR, true, true));
-            bar->add(new ObjectNumberControl<EuclidianPattern,byte> ("Pulses",   p, &EuclidianPattern::set_pulses,     &EuclidianPattern::get_pulses,   nullptr, 1, STEPS_PER_BAR, true, true));
-            bar->add(new ObjectNumberControl<EuclidianPattern,byte> ("Rotation", p, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, STEPS_PER_BAR, true, true));
-            menu->add(bar);
-
-            //menu->add(new ObjectNumberControl<EuclidianPattern,byte> ("Duration", p, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, 1, STEPS_PER_BAR, true, true));
-            //menu->debug = true;
-
-            menu->add(new ObjectActionConfirmItem<EuclidianPattern> ("Store as default", p, &EuclidianPattern::store_current_arguments_as_default));
+            p->create_menu_items(menu, i);
         }
 
         menu->select_page(0);
