@@ -153,10 +153,8 @@ void setup_menu() {
     menu->add(bpm_selector);*/
 
     // debug scales page
-    /*
     menu->add_page("Scales");
     menu->add(new ScaleMenuItem("Scales"));
-    */
 
     //menu->add(&test_item_1);
 

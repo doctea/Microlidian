@@ -45,56 +45,50 @@ class BaseOutput {
     virtual void process() {};
 };
 
-// an output that tracks MIDI drum triggers
-class MIDIDrumOutput : public BaseOutput {
+// todo: port usb_midi_clocker's OutputWrapper to work here?
+// wrapper class to wrap different MIDI output types
+class MIDIOutputWrapper {
+    public:
+
+    midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *usbmidi = &USBMIDI;
+    midi::MidiInterface<midi::SerialMIDI<SerialPIO>> *dinmidi = &DINMIDI;
+
+    void sendNoteOn(byte pitch, byte velocity, byte channel) {
+        //Serial.printf("MIDIOutputWrapper#sendNoteOn(%i, %i, %i)\n", pitch, velocity, channel);
+        usbmidi->sendNoteOff(pitch, velocity, channel);
+        if (channel==GM_CHANNEL_DRUMS)
+            dinmidi->sendNoteOn(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
+    }
+    void sendNoteOff(byte pitch, byte velocity, byte channel) {
+        usbmidi->sendNoteOff(pitch, velocity, channel);
+        if (channel==GM_CHANNEL_DRUMS)
+            dinmidi->sendNoteOff(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
+    }
+    void sendClock() {
+        usbmidi->sendClock();
+        dinmidi->sendClock(); // todo: make able to send divisions of clock to muso, to make the clock output more useful
+    }
+    void sendStart() {
+        usbmidi->sendStart();
+        dinmidi->sendStart();
+    }
+    void sendStop() {
+        usbmidi->sendStop();
+        dinmidi->sendStop();
+    }
+};
+
+// track basic monophonic MIDI output
+class MIDIBaseOutput : public BaseOutput {
     public:
 
     byte note_number = -1, last_note_number = -1;
     byte channel = 10;
     byte event_value_1, event_value_2, event_value_3;
 
-    midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi = nullptr;
+    MIDIOutputWrapper *output_wrapper = nullptr;
 
-    MIDIDrumOutput(const char *label, byte note_number, midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi) : BaseOutput(label) {
-        this->note_number = note_number;
-        this->midi = midi;
-    }
-
-    virtual void stop() override {
-        if(is_valid_note(last_note_number)) {
-            midi->sendNoteOff(last_note_number, 0, this->get_channel());
-            DINMIDI.sendNoteOff(get_muso_note_for_drum(last_note_number), 0, MUSO_TRIGGER_CHANNEL);
-            this->set_last_note_number(NOTE_OFF);
-        }
-    }
-    virtual void process() override {
-        if (should_go_off()) {
-            int note_number = get_last_note_number();
-            Debug_printf("\t\tgoes off note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
-            //Serial.printf("Sending note off for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
-            if (is_valid_note(note_number)) {
-                midi->sendNoteOff(note_number, 0, get_channel());
-                if (channel==GM_CHANNEL_DRUMS) {
-                    //Serial.printf("%i: sending note off\tfor\t%i on\t%i (aka %i)\n", this->note_number, note_number, MUSO_TRIGGER_CHANNEL, get_muso_note_for_drum(note_number));
-                    DINMIDI.sendNoteOff(get_muso_note_for_drum(note_number), 0, MUSO_TRIGGER_CHANNEL);
-                }
-            }
-            //this->nodes.get(i)->went_off();
-        }
-        if (should_go_on()) {
-            int note_number = get_note_number();
-            Debug_printf("\t\tgoes on note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
-            //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
-            set_last_note_number(note_number);
-            midi->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
-            if (channel==GM_CHANNEL_DRUMS) {
-                //Serial.printf("%i: sending note on \tfor\t%i on\t%i (aka %i)\n", this->note_number, note_number, MUSO_TRIGGER_CHANNEL, get_muso_note_for_drum(note_number));
-                DINMIDI.sendNoteOn(get_muso_note_for_drum(note_number), MIDI_MAX_VELOCITY, MUSO_TRIGGER_CHANNEL);
-            }
-            //this->nodes.get(i)->went_on();
-            //count += i;
-        }
-    }
+    MIDIBaseOutput(const char *label, byte note_number, MIDIOutputWrapper *output_wrapper) : BaseOutput(label), note_number(note_number), output_wrapper(output_wrapper) {}
 
     virtual byte get_note_number() {
         return this->note_number;
@@ -109,10 +103,31 @@ class MIDIDrumOutput : public BaseOutput {
         return this->channel;
     }
 
-    virtual void receive_event(byte event_value_1, byte event_value_2, byte event_value_3) override {
-        this->event_value_1 += event_value_1;
-        this->event_value_2 += event_value_2;
-        this->event_value_3 += event_value_3;
+    virtual void stop() override {
+        if(is_valid_note(last_note_number)) {
+            output_wrapper->sendNoteOff(last_note_number, 0, this->get_channel());
+            this->set_last_note_number(NOTE_OFF);
+        }
+    }
+    virtual void process() override {
+        if (should_go_off()) {
+            int note_number = get_last_note_number();
+            Debug_printf("\t\tgoes off note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
+            //Serial.printf("Sending note off for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
+            if (is_valid_note(note_number)) {
+                output_wrapper->sendNoteOff(note_number, 0, get_channel());
+            }
+            //this->nodes.get(i)->went_off();
+        }
+        if (should_go_on()) {
+            int note_number = get_note_number();
+            Debug_printf("\t\tgoes on note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
+            //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
+            set_last_note_number(note_number);
+            output_wrapper->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
+            //this->nodes.get(i)->went_on();
+            //count += i;
+        }
     }
 
     virtual bool should_go_on() {
@@ -132,23 +147,48 @@ class MIDIDrumOutput : public BaseOutput {
         this->event_value_2 -= 1;
     }
 
+    // receive an event from a sequencer
+    virtual void receive_event(byte event_value_1, byte event_value_2, byte event_value_3) override {
+        this->event_value_1 += event_value_1;
+        this->event_value_2 += event_value_2;
+        this->event_value_3 += event_value_3;
+    }
+
     // forget the last message
     virtual void reset() {
         this->event_value_1 = this->event_value_2 = this->event_value_3 = 0;
     }
 };
 
-// class that counts up all active triggers from passed-in nodes, and calculates a note from that
-class MIDINoteTriggerCountOutput : public MIDIDrumOutput {
+// an output that tracks MIDI drum triggers
+class MIDIDrumOutput : public MIDIBaseOutput {
     public:
-        byte octave = 3;
-        LinkedList<BaseOutput*> *nodes = nullptr;
-        int base_note = SCALE_ROOT_A * octave;
+    MIDIDrumOutput(const char *label, byte note_number, MIDIOutputWrapper *output_wrapper) : MIDIBaseOutput(label, note_number, output_wrapper) {
+        this->channel = GM_CHANNEL_DRUMS;
+    }
+};
 
-        MIDINoteTriggerCountOutput(const char *name, LinkedList<BaseOutput*> *nodes, midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi) 
-            : MIDIDrumOutput(name, 0, midi) {
-            this->channel = 1;
+#include "scales.h"
+
+// class that counts up all active triggers from passed-in nodes, and calculates a note from that, for eg monophonic basslines
+class MIDINoteTriggerCountOutput : public MIDIBaseOutput {
+    public:
+        LinkedList<BaseOutput*> *nodes = nullptr;   // output nodes that will count towards the note calculation
+
+        byte octave = 3;
+        byte scale_root = SCALE_ROOT_A;
+        SCALE scale_number = SCALE::MAJOR;
+        int base_note = scale_root * octave;
+
+        MIDINoteTriggerCountOutput(const char *name, LinkedList<BaseOutput*> *nodes, MIDIOutputWrapper *output_wrapper, byte channel = 1, byte scale_root = SCALE_ROOT_A, SCALE scale_number = SCALE::MAJOR, byte octave = 3) 
+            : MIDIBaseOutput(label, 0, output_wrapper) {
+            this->channel = channel;
             this->nodes = nodes;
+
+            this->octave = octave;
+            this->scale_root = scale_root;
+            this->scale_number = scale_number;
+            this->base_note = scale_root * octave;
         }
 
         virtual byte get_note_number() override {
@@ -160,7 +200,7 @@ class MIDINoteTriggerCountOutput : public MIDIDrumOutput {
             }
             Debug_printf("get_note_number in MIDINoteTriggerCountOutput is %i\n", count);
             //return base_note + quantise_pitch(count);
-            return quantise_pitch(count, SCALE_ROOT_C, 0);
+            return quantise_pitch(base_note + count, scale_root, scale_number);
         }
 };
 
@@ -176,33 +216,38 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
     public:
 
     LinkedList<BaseOutput*> nodes = LinkedList<BaseOutput*>();
-    midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi = nullptr;
+    MIDIOutputWrapper *output_wrapper = nullptr;
 
-    MIDIOutputProcessor(midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *midi) : BaseOutputProcessor() {
-        this->midi = midi;
-
+    MIDIOutputProcessor(MIDIOutputWrapper *output_wrapper) : BaseOutputProcessor(), output_wrapper(output_wrapper) {
         /*this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_BASS_DRUM));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_SNARE));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_OPEN_HI_HAT));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_PEDAL_HI_HAT));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_CLOSED_HI_HAT));*/
-        this->nodes.add(new MIDIDrumOutput("Kick",          GM_NOTE_ELECTRIC_BASS_DRUM, midi));
-        this->nodes.add(new MIDIDrumOutput("Stick",         GM_NOTE_SIDE_STICK, midi));
-        this->nodes.add(new MIDIDrumOutput("Clap",          GM_NOTE_HAND_CLAP, midi));
-        this->nodes.add(new MIDIDrumOutput("Snare",         GM_NOTE_ELECTRIC_SNARE, midi));
-        this->nodes.add(new MIDIDrumOutput("Cymbal 1",      GM_NOTE_CRASH_CYMBAL_1, midi));
-        this->nodes.add(new MIDIDrumOutput("Tamb",          GM_NOTE_TAMBOURINE, midi));
-        this->nodes.add(new MIDIDrumOutput("HiTom",         GM_NOTE_HIGH_TOM, midi));
-        this->nodes.add(new MIDIDrumOutput("LoTom",         GM_NOTE_LOW_TOM, midi));
-        this->nodes.add(new MIDIDrumOutput("PHH",           GM_NOTE_PEDAL_HI_HAT, midi));
-        this->nodes.add(new MIDIDrumOutput("OHH",           GM_NOTE_OPEN_HI_HAT, midi));
-        this->nodes.add(new MIDIDrumOutput("CHH",           GM_NOTE_CLOSED_HI_HAT, midi));
-        this->nodes.add(new MIDIDrumOutput("Cymbal 2",      GM_NOTE_CRASH_CYMBAL_2, midi));
-        this->nodes.add(new MIDIDrumOutput("Splash",        GM_NOTE_SPLASH_CYMBAL, midi));
-        this->nodes.add(new MIDIDrumOutput("Vibra",         GM_NOTE_VIBRA_SLAP, midi));
-        this->nodes.add(new MIDIDrumOutput("Ride Bell",     GM_NOTE_RIDE_BELL, midi));
-        this->nodes.add(new MIDIDrumOutput("Ride Cymbal",   GM_NOTE_RIDE_CYMBAL_1, midi));
-        this->nodes.add(new MIDINoteTriggerCountOutput("Bass", &this->nodes, midi));
+        this->addDrumNode("Kick",          GM_NOTE_ELECTRIC_BASS_DRUM);
+        this->addDrumNode("Stick",         GM_NOTE_SIDE_STICK);
+        this->addDrumNode("Clap",          GM_NOTE_HAND_CLAP);
+        this->addDrumNode("Snare",         GM_NOTE_ELECTRIC_SNARE);
+        this->addDrumNode("Cymbal 1",      GM_NOTE_CRASH_CYMBAL_1);
+        this->addDrumNode("Tamb",          GM_NOTE_TAMBOURINE);
+        this->addDrumNode("HiTom",         GM_NOTE_HIGH_TOM);
+        this->addDrumNode("LoTom",         GM_NOTE_LOW_TOM);
+        this->addDrumNode("PHH",           GM_NOTE_PEDAL_HI_HAT);
+        this->addDrumNode("OHH",           GM_NOTE_OPEN_HI_HAT);
+        this->addDrumNode("CHH",           GM_NOTE_CLOSED_HI_HAT);
+        this->addDrumNode("Cymbal 2",      GM_NOTE_CRASH_CYMBAL_2); // todo: turn these into something like an EnvelopeOutput?
+        this->addDrumNode("Splash",        GM_NOTE_SPLASH_CYMBAL);  // todo: turn these into something like an EnvelopeOutput?
+        this->addDrumNode("Vibra",         GM_NOTE_VIBRA_SLAP);     // todo: turn these into something like an EnvelopeOutput?
+        this->addDrumNode("Ride Bell",     GM_NOTE_RIDE_BELL);      // todo: turn these into something like an EnvelopeOutput?
+        this->addDrumNode("Ride Cymbal",   GM_NOTE_RIDE_CYMBAL_1);  // todo: turn these into something like an EnvelopeOutput?
+        this->addNode(new MIDINoteTriggerCountOutput("Bass", &this->nodes, output_wrapper));
+    }
+
+    void addNode(BaseOutput* node) {
+        this->nodes.add(node);
+    }
+    void addDrumNode(const char *label, byte note_number) {
+        this->addNode(new MIDIDrumOutput(label, note_number, this->output_wrapper));
     }
 
     //virtual void on_tick(uint32_t ticks) {
@@ -245,5 +290,11 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         //sequencer->configure_pattern_output(0, this->nodes.get(0));
     }
 };
+
+
+void setup_output();
+
+extern MIDIOutputWrapper *output_wrapper;
+extern MIDIOutputProcessor *output_processer;
 
 #endif

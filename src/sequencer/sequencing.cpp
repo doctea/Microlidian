@@ -13,8 +13,6 @@
 #ifdef ENABLE_EUCLIDIAN
     EuclidianSequencer sequencer = EuclidianSequencer();
 
-    extern MIDIOutputProcessor output_processer;
-
     // call this after the menu has already been set up
     void setup_sequencer() {
         sequencer.initialise_patterns();
