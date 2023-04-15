@@ -145,15 +145,18 @@ void setup_menu() {
     #endif
 
     // debug bpm selector
-    SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");
+    /*SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");
     bpm_selector->available_values = bpm_selector_values;
     bpm_selector->num_values = sizeof(bpm_selector_values)/sizeof(float);
     bpm_selector->f_setter = set_bpm;
     bpm_selector->f_getter = get_bpm;
-    menu->add(bpm_selector);
+    menu->add(bpm_selector);*/
 
+    // debug scales page
+    /*
     menu->add_page("Scales");
     menu->add(new ScaleMenuItem("Scales"));
+    */
 
     //menu->add(&test_item_1);
 

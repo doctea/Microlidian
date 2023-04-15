@@ -5,6 +5,9 @@
 
 #include "mymenu/menuitems_outputselectorcontrol.h"
 
+#include "outputs/output.h"
+extern MIDIOutputProcessor output_processer;
+
 // compound control for Euclidian Patterns; shows step sequence view, animated circle sequence view, and controls 
 class EuclidianPatternControl : public SubMenuItemBar {
     public:
@@ -13,9 +16,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
     PatternDisplay *step_display = nullptr;
     EuclidianPattern *pattern = nullptr;
 
-    EuclidianPatternControl(const char *label, EuclidianPattern *pattern) : SubMenuItemBar(label), pattern(pattern) {
-
-        
+    EuclidianPatternControl(const char *label, EuclidianPattern *pattern) : SubMenuItemBar(label), pattern(pattern) {        
         this->circle_display = new SingleCircleDisplay(label, pattern);     // circle display first - don't add this as a submenu item, because it isn't selectable
         this->step_display = new PatternDisplay(label, pattern);    // step sequence view next
 
@@ -90,7 +91,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
 
             bool wrap = item_index==0 || column==1 || item_index==items_size-2;
             //start_x += width;
-            Serial.printf("for item %i '%s':\tgot column=\t%i, wrap=\t%s => start_x=%i\t, start_y=%i\t((item_index-1)%%2=%i\n", item_index, this->items->get(item_index)->label, column, wrap?"Y":"N", start_x, start_y, (item_index-1)%2);
+            //Serial.printf("for item %i '%s':\tgot column=\t%i, wrap=\t%s => start_x=%i\t, start_y=%i\t((item_index-1)%%2=%i\n", item_index, this->items->get(item_index)->label, column, wrap?"Y":"N", start_x, start_y, (item_index-1)%2);
             //if (item_index==0 || (item_index-1)%2==0 || item_index==this->items->size()-2)
             if (wrap)
                 start_y = temp_y;

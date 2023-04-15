@@ -89,6 +89,12 @@ XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - Ability to boot up as a USB flash drive, for copying files to/from the LittleFS flash?
 - Allow holding a button to go into firmware update mode before running much code at all as a failsafe against bad code that won't complete setup() or first loop()
 
+### Known problems/gotchas
+
+- Trying to Serial.print() from the second core (screen+CV input) while serial is connected will hang the display!
+- Trying to Serial.print() generally seems to be unreliable and likely to cause crashes
+- Screen doesn't turn on first time on the revision 1 hardware, don't know why.  Hold the 'back' button for 4+ seconds to force a reboot and it will usually start working!
+
 ## Done
 
 - Basic engine for BPM and internal/external clock (based on midihelpers/usb_midi_clocker code)

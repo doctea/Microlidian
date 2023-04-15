@@ -68,13 +68,6 @@ void setup_debug_menu() {
     ActionConfirmItem *reset_bootloader = new ActionConfirmItem("FIRMWARE UPLOAD?", reset_upload_firmware);
     menu->add(reset_bootloader);
 
-    /*SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");
-    bpm_selector->available_values = bpm_selector_values;
-    bpm_selector->num_values = sizeof(bpm_selector_values)/sizeof(float);
-    bpm_selector->setter = set_bpm;
-    bpm_selector->getter = get_bpm;
-    menu->add(bpm_selector);*/
-
     SubMenuItemBar *bar = new SubMenuItemBar("Debug");
 
     ObjectToggleControl<Menu> *debug_times_control = new ObjectToggleControl<Menu>("Render times", menu, &Menu::setDebugTimes, &Menu::isDebugTimes, nullptr);

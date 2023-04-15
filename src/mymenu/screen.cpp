@@ -75,7 +75,7 @@ void draw_screen() {
     //if (locked || menu==nullptr) 
     //    return;
     while (locked || ticked || frame_ready) {
-        delay(MENU_MS_BETWEEN_REDRAW/2);
+        //delay(MENU_MS_BETWEEN_REDRAW/8);
     };
     locked = true;
     //uint32_t interrupts = save_and_disable_interrupts();
@@ -98,7 +98,7 @@ void loop1() {
     static unsigned long last_pushed = 0;
     //if (last_pushed==0) delay(5000);
     while(locked) {
-        delay(MENU_MS_BETWEEN_REDRAW/2);
+        //delay(MENU_MS_BETWEEN_REDRAW/8);
     }
     if (menu!=nullptr && millis() - last_pushed > MENU_MS_BETWEEN_REDRAW) {
         draw_screen();
