@@ -55,7 +55,7 @@ class MIDIOutputWrapper {
 
     void sendNoteOn(byte pitch, byte velocity, byte channel) {
         //Serial.printf("MIDIOutputWrapper#sendNoteOn(%i, %i, %i)\n", pitch, velocity, channel);
-        usbmidi->sendNoteOff(pitch, velocity, channel);
+        usbmidi->sendNoteOn(pitch, velocity, channel);
         if (channel==GM_CHANNEL_DRUMS)
             dinmidi->sendNoteOn(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
     }
