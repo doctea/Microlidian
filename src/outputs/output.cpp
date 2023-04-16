@@ -31,9 +31,9 @@ byte get_muso_note_for_drum(byte drum_note) {
 }
 
 MIDIOutputWrapper *output_wrapper;
-MIDIOutputProcessor *output_processer;
+MIDIOutputProcessor *output_processor;
 
 void setup_output() {
     output_wrapper = new MIDIOutputWrapper();
-    output_processer = new MIDIOutputProcessor(output_wrapper);     // todo: set this up dynamically, probably reading from a config file
+    output_processor = new MIDIOutputProcessor(output_wrapper);     // todo: set this up dynamically, probably reading from a config file
 }

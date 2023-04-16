@@ -7,6 +7,7 @@
 
 #include "sequencer/sequencing.h"
 #include "sequencer/Euclidian.h"
+#include "outputs/output.h"
 
 #ifdef ENABLE_SCREEN
 
@@ -153,8 +154,17 @@ void setup_menu() {
     menu->add(bpm_selector);*/
 
     // debug scales page
-    menu->add_page("Scales");
-    menu->add(new ScaleMenuItem("Scales"));
+    /*menu->add_page("Scales");
+    menu->add(new ScaleMenuItem("Scales"));*/
+
+    menu->add_page("Bass Quantiser");
+    menu->add(new ObjectScaleMenuItem<MIDINoteTriggerCountOutput>("Bass scale", 
+        (MIDINoteTriggerCountOutput*)output_processor->nodes.get(output_processor->nodes.size()-1),
+        &MIDINoteTriggerCountOutput::set_scale_number, 
+        &MIDINoteTriggerCountOutput::get_scale_number, 
+        &MIDINoteTriggerCountOutput::set_scale_root, 
+        &MIDINoteTriggerCountOutput::get_scale_root
+    ));
 
     //menu->add(&test_item_1);
 

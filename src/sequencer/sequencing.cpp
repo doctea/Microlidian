@@ -33,8 +33,8 @@
 
         //using option=ObjectSelectorControl<EuclidianPattern,BaseOutput*>::option;
         /*LinkedList<BaseOutput*> *nodes = new LinkedList<BaseOutput*>();
-        for (int i = 0 ; i < output_processer.nodes.size() ; i++) {
-            nodes->add(output_processer.nodes.get(i));
+        for (int i = 0 ; i < output_processor.nodes.size() ; i++) {
+            nodes->add(output_processor.nodes.get(i));
         }*/
 
         for (int i = 0 ; i < sequencer.number_patterns ; i++) {

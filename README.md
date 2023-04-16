@@ -94,6 +94,7 @@ XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - Trying to Serial.print() from the second core (screen+CV input) while serial is connected will hang the display!
 - Trying to Serial.print() generally seems to be unreliable and likely to cause crashes
 - Screen doesn't turn on first time on the revision 1 hardware, don't know why.  Hold the 'back' button for 4+ seconds to force a reboot and it will usually start working!
+  - To try: adding a 47k pullup resistor from CS->BLK
 
 ## Done
 

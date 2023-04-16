@@ -21,6 +21,46 @@
 
 byte get_muso_note_for_drum(byte drum_note);
 
+// todo: port usb_midi_clocker's OutputWrapper to work here?
+// wrapper class to wrap different MIDI output types
+class MIDIOutputWrapper {
+    public:
+
+    midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *usbmidi = &USBMIDI;
+    midi::MidiInterface<midi::SerialMIDI<SerialPIO>> *dinmidi = &DINMIDI;
+
+    void sendNoteOn(byte pitch, byte velocity, byte channel) {
+        //Serial.printf("MIDIOutputWrapper#sendNoteOn(%i, %i, %i)\n", pitch, velocity, channel);
+        if (!is_valid_note(pitch)) 
+            return;
+
+        usbmidi->sendNoteOn(pitch, velocity, channel);
+        if (channel==GM_CHANNEL_DRUMS)
+            dinmidi->sendNoteOn(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
+    }
+    void sendNoteOff(byte pitch, byte velocity, byte channel) {
+        if (!is_valid_note(pitch)) 
+            return;
+
+        usbmidi->sendNoteOff(pitch, velocity, channel);
+        if (channel==GM_CHANNEL_DRUMS)
+            dinmidi->sendNoteOff(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
+    }
+    void sendClock() {
+        usbmidi->sendClock();
+        dinmidi->sendClock(); // todo: make able to send divisions of clock to muso, to make the clock output more useful
+    }
+    void sendStart() {
+        usbmidi->sendStart();
+        dinmidi->sendStart();
+    }
+    void sendStop() {
+        usbmidi->sendStop();
+        dinmidi->sendStop();
+    }
+};
+
+
 // class to receive triggers from a sequencer and return values to the owner Processor
 class BaseOutput {
     public:
@@ -45,38 +85,6 @@ class BaseOutput {
     virtual void process() {};
 };
 
-// todo: port usb_midi_clocker's OutputWrapper to work here?
-// wrapper class to wrap different MIDI output types
-class MIDIOutputWrapper {
-    public:
-
-    midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *usbmidi = &USBMIDI;
-    midi::MidiInterface<midi::SerialMIDI<SerialPIO>> *dinmidi = &DINMIDI;
-
-    void sendNoteOn(byte pitch, byte velocity, byte channel) {
-        //Serial.printf("MIDIOutputWrapper#sendNoteOn(%i, %i, %i)\n", pitch, velocity, channel);
-        usbmidi->sendNoteOn(pitch, velocity, channel);
-        if (channel==GM_CHANNEL_DRUMS)
-            dinmidi->sendNoteOn(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
-    }
-    void sendNoteOff(byte pitch, byte velocity, byte channel) {
-        usbmidi->sendNoteOff(pitch, velocity, channel);
-        if (channel==GM_CHANNEL_DRUMS)
-            dinmidi->sendNoteOff(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
-    }
-    void sendClock() {
-        usbmidi->sendClock();
-        dinmidi->sendClock(); // todo: make able to send divisions of clock to muso, to make the clock output more useful
-    }
-    void sendStart() {
-        usbmidi->sendStart();
-        dinmidi->sendStart();
-    }
-    void sendStop() {
-        usbmidi->sendStop();
-        dinmidi->sendStop();
-    }
-};
 
 // track basic monophonic MIDI output
 class MIDIBaseOutput : public BaseOutput {
@@ -180,7 +188,7 @@ class MIDINoteTriggerCountOutput : public MIDIBaseOutput {
         SCALE scale_number = SCALE::MAJOR;
         int base_note = scale_root * octave;
 
-        MIDINoteTriggerCountOutput(const char *name, LinkedList<BaseOutput*> *nodes, MIDIOutputWrapper *output_wrapper, byte channel = 1, byte scale_root = SCALE_ROOT_A, SCALE scale_number = SCALE::MAJOR, byte octave = 3) 
+        MIDINoteTriggerCountOutput(const char *label, LinkedList<BaseOutput*> *nodes, MIDIOutputWrapper *output_wrapper, byte channel = 1, byte scale_root = SCALE_ROOT_A, SCALE scale_number = SCALE::MAJOR, byte octave = 3) 
             : MIDIBaseOutput(label, 0, output_wrapper) {
             this->channel = channel;
             this->nodes = nodes;
@@ -192,6 +200,8 @@ class MIDINoteTriggerCountOutput : public MIDIBaseOutput {
         }
 
         virtual byte get_note_number() override {
+            // count all the triggering notes and add that value ot the root note
+            // then quantise according to selected scale to get final note number
             int count = 0;
             for (int i = 0 ; i < this->nodes->size() ; i++) {
                 BaseOutput *o = this->nodes->get(i);
@@ -200,7 +210,28 @@ class MIDINoteTriggerCountOutput : public MIDIBaseOutput {
             }
             Debug_printf("get_note_number in MIDINoteTriggerCountOutput is %i\n", count);
             //return base_note + quantise_pitch(count);
+
+            // test mode, increment over 2 octaves to test scale quantisation
+            // best used with pulses = 6 so that it loops round
+            /*static int count = 0;
+            count++;
+            count %= 24;*/
             return quantise_pitch(base_note + count, scale_root, scale_number);
+        }
+
+        SCALE get_scale_number() {
+            return scale_number;
+        }
+        void set_scale_number(SCALE scale_number) {
+            this->scale_number = scale_number;
+        }
+
+        int get_scale_root() {
+            return this->scale_root;
+        }
+        void set_scale_root(int scale_root) {
+            this->scale_root = scale_root;
+            base_note = scale_root * octave;
         }
 };
 
@@ -295,6 +326,6 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
 void setup_output();
 
 extern MIDIOutputWrapper *output_wrapper;
-extern MIDIOutputProcessor *output_processer;
+extern MIDIOutputProcessor *output_processor;
 
 #endif

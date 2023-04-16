@@ -74,6 +74,10 @@ void setup() {
         set_clock_mode_changed_callback(clock_mode_changed);
     #endif
 
+    setup_midi();
+    setup_usb();
+    setup_output();
+
     #ifdef ENABLE_SCREEN
         //delay(1000);    // see if giving 1 second to calm down will help reliability of screen initialisation... it does not. :(
         setup_screen();
@@ -86,10 +90,6 @@ void setup() {
     if (pushButtonA.read() && pushButtonB.read()) {
         reset_upload_firmware();
     }
-
-    setup_midi();
-    setup_usb();
-    setup_output();
 
     #ifdef ENABLE_STORAGE
         setup_storage();
@@ -107,7 +107,7 @@ void setup() {
     #ifdef ENABLE_EUCLIDIAN
         //Serial.println("setting up sequencer..");
         setup_sequencer();
-        output_processer->configure_sequencer(&sequencer);
+        output_processor->configure_sequencer(&sequencer);
         setup_sequencer_menu();
         if (Serial) Serial.printf("after setup_sequencer_menu, free RAM is %u\n", freeRam());
     #endif
@@ -196,7 +196,7 @@ void loop() {
         #ifdef ENABLE_EUCLIDIAN
             sequencer.on_tick(ticks);
             if (is_bpm_on_sixteenth(ticks)) {
-                output_processer->process();
+                output_processor->process();
             }
         #endif
     }

@@ -6,7 +6,7 @@
 #include "mymenu/menuitems_outputselectorcontrol.h"
 
 #include "outputs/output.h"
-extern MIDIOutputProcessor *output_processer;
+extern MIDIOutputProcessor *output_processor;
 
 // compound control for Euclidian Patterns; shows step sequence view, animated circle sequence view, and controls 
 class EuclidianPatternControl : public SubMenuItemBar {
@@ -25,7 +25,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
             pattern,
             &EuclidianPattern::set_output,
             &EuclidianPattern::get_output,
-            &output_processer->nodes,
+            &output_processor->nodes,
             pattern->output
         );
         selector->go_back_on_select = true;
