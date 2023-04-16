@@ -97,7 +97,8 @@ class SingleCircleDisplay : public MenuItem {
                 uint16_t colour = target_pattern->colour;
                 if (!target_pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_PHRASE))
                     colour = tft->halfbright_565(colour);
-                for (int i = 0 ; i < max(target_pattern->get_steps(),16) ; i++) {
+                // todo: if STEPS_PER_PHRASE is a multiple of get_steps, should be able to limit number of loops we do here?
+                for (int i = 0 ; i < STEPS_PER_PHRASE/*max(target_pattern->get_steps(),16*/ ; i++) {
                     int_fast8_t coord_x = circle_center_x + coordinates_x[i%16];
                     int_fast8_t coord_y = circle_center_y + coordinates_y[i%16];
                     if (target_pattern->query_note_on_for_step(i)) {
