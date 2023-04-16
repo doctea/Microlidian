@@ -124,16 +124,21 @@ class MIDIBaseOutput : public BaseOutput {
             //Serial.printf("Sending note off for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
             if (is_valid_note(note_number)) {
                 output_wrapper->sendNoteOff(note_number, 0, get_channel());
+                set_last_note_number(NOTE_OFF);
+                //this->went_off();
             }
-            //this->nodes.get(i)->went_off();
         }
         if (should_go_on()) {
+            this->stop();
+
             int note_number = get_note_number();
             Debug_printf("\t\tgoes on note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
             //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
-            set_last_note_number(note_number);
-            output_wrapper->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
-            //this->nodes.get(i)->went_on();
+            if (is_valid_note(note_number)) {
+                set_last_note_number(note_number);
+                output_wrapper->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
+                //this->went_on();
+            }
             //count += i;
         }
     }
@@ -289,10 +294,10 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         Debug_println("process-->");
         static int count = 0;
         //midi->sendNoteOff(35 + count, 0, 1);
-        for (int i = 0 ; i < this->nodes.size() ; i++) {
+        /*for (int i = 0 ; i < this->nodes.size() ; i++) {
             BaseOutput *n = this->nodes.get(i);
             n->stop();
-        }
+        }*/
         count = 0;
         for (int i = 0 ; i < this->nodes.size() ; i++) {
             BaseOutput *o = this->nodes.get(i);
