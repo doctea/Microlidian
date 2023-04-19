@@ -33,7 +33,7 @@
     #endif
 #endif
 
-#include "outputs/output.h"
+#include "outputs/output_processor.h"
 
 // serial console to host, for debug etc
 void setup_serial() {
@@ -219,6 +219,8 @@ void loop() {
             //last_tick = ticks;
         }
     #endif
+
+    output_processor->loop();
 
     if (clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0 && micros() + loop_average >= last_ticked_at_micros + micros_per_tick) {
         // don't process anything else this loop, since we probably don't have time before the next tick arrives

@@ -1,5 +1,6 @@
 #include "Drums.h"
 #include "outputs/output.h"
+#include "outputs/output_processor.h"
 
 byte get_muso_note_for_drum(byte drum_note) {
     byte retval = 60;

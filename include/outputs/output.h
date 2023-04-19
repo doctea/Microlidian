@@ -46,6 +46,14 @@ class MIDIOutputWrapper {
         if (channel==GM_CHANNEL_DRUMS)
             dinmidi->sendNoteOff(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
     }
+
+    void sendControlChange(byte number, byte value, byte channel) {
+        if (!is_valid_note(number))
+            return;
+        usbmidi->sendControlChange(number, value, channel);
+        dinmidi->sendControlChange(number, value, channel);
+    }
+
     void sendClock() {
         usbmidi->sendClock();
         dinmidi->sendClock(); // todo: make able to send divisions of clock to muso, to make the clock output more useful
@@ -83,6 +91,8 @@ class BaseOutput {
 
     virtual void stop() {};
     virtual void process() {};
+
+    virtual void loop() {};
 };
 
 
@@ -239,98 +249,5 @@ class MIDINoteTriggerCountOutput : public MIDIBaseOutput {
             base_note = scale_root * octave;
         }
 };
-
-// holds individual output nodes and processes them (eg queries them for the pitch and sends note on/offs)
-class BaseOutputProcessor {
-    public:
-        virtual void process() = 0;
-};
-
-// handles MIDI output; 
-// possibly todo: move MIDIOutputWrapper stuff out of usb_midi_clocker and into a library and use that here?
-class MIDIOutputProcessor : public BaseOutputProcessor {
-    public:
-
-    LinkedList<BaseOutput*> nodes = LinkedList<BaseOutput*>();
-    MIDIOutputWrapper *output_wrapper = nullptr;
-
-    MIDIOutputProcessor(MIDIOutputWrapper *output_wrapper) : BaseOutputProcessor(), output_wrapper(output_wrapper) {
-        /*this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_BASS_DRUM));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_SNARE));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_OPEN_HI_HAT));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_PEDAL_HI_HAT));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_CLOSED_HI_HAT));*/
-        this->addDrumNode("Kick",          GM_NOTE_ELECTRIC_BASS_DRUM);
-        this->addDrumNode("Stick",         GM_NOTE_SIDE_STICK);
-        this->addDrumNode("Clap",          GM_NOTE_HAND_CLAP);
-        this->addDrumNode("Snare",         GM_NOTE_ELECTRIC_SNARE);
-        this->addDrumNode("Cymbal 1",      GM_NOTE_CRASH_CYMBAL_1);
-        this->addDrumNode("Tamb",          GM_NOTE_TAMBOURINE);
-        this->addDrumNode("HiTom",         GM_NOTE_HIGH_TOM);
-        this->addDrumNode("LoTom",         GM_NOTE_LOW_TOM);
-        this->addDrumNode("PHH",           GM_NOTE_PEDAL_HI_HAT);
-        this->addDrumNode("OHH",           GM_NOTE_OPEN_HI_HAT);
-        this->addDrumNode("CHH",           GM_NOTE_CLOSED_HI_HAT);
-        this->addDrumNode("Cymbal 2",      GM_NOTE_CRASH_CYMBAL_2); // todo: turn these into something like an EnvelopeOutput?
-        this->addDrumNode("Splash",        GM_NOTE_SPLASH_CYMBAL);  // todo: turn these into something like an EnvelopeOutput?
-        this->addDrumNode("Vibra",         GM_NOTE_VIBRA_SLAP);     // todo: turn these into something like an EnvelopeOutput?
-        this->addDrumNode("Ride Bell",     GM_NOTE_RIDE_BELL);      // todo: turn these into something like an EnvelopeOutput?
-        this->addDrumNode("Ride Cymbal",   GM_NOTE_RIDE_CYMBAL_1);  // todo: turn these into something like an EnvelopeOutput?
-        this->addNode(new MIDINoteTriggerCountOutput("Bass", &this->nodes, output_wrapper));
-    }
-
-    void addNode(BaseOutput* node) {
-        this->nodes.add(node);
-    }
-    void addDrumNode(const char *label, byte note_number) {
-        this->addNode(new MIDIDrumOutput(label, note_number, this->output_wrapper));
-    }
-
-    //virtual void on_tick(uint32_t ticks) {
-        //if (is_bpm_on_sixteenth(ticks)) {
-
-    // ask all the nodes to do their thing; send the results out to our output device
-    virtual void process() {
-        Debug_println("process-->");
-        static int count = 0;
-        //midi->sendNoteOff(35 + count, 0, 1);
-        /*for (int i = 0 ; i < this->nodes.size() ; i++) {
-            BaseOutput *n = this->nodes.get(i);
-            n->stop();
-        }*/
-        count = 0;
-        for (int i = 0 ; i < this->nodes.size() ; i++) {
-            BaseOutput *o = this->nodes.get(i);
-            Debug_printf("\tnode %i\n", i);
-            o->process();
-            Debug_println();
-        }
-        /*if (count>0) {
-            Serial.printf("sending combo note %i\n", count);
-            midi->sendNoteOn(35 + count, 127, 1);
-            //count = 35;
-        }*/
-
-        for (int i = 0 ; i < this->nodes.size() ; i++) {
-            this->nodes.get(i)->reset();
-        }
-
-        Debug_println(".end.");
-    }
-
-    // configure target sequencer to use the output nodes held by this OutputProcessor
-    virtual void configure_sequencer(BaseSequencer *sequencer) {
-        for (int i = 0 ; i < this->nodes.size() ; i++) {
-            sequencer->configure_pattern_output(i, this->nodes.get(i));
-        }
-        //sequencer->configure_pattern_output(0, this->nodes.get(0));
-    }
-};
-
-
-void setup_output();
-
-extern MIDIOutputWrapper *output_wrapper;
-extern MIDIOutputProcessor *output_processor;
 
 #endif

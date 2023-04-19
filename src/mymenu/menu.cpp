@@ -7,7 +7,7 @@
 
 #include "sequencer/sequencing.h"
 #include "sequencer/Euclidian.h"
-#include "outputs/output.h"
+#include "outputs/output_processor.h"
 
 #ifdef ENABLE_SCREEN
 
