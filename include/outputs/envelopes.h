@@ -12,6 +12,12 @@
 #define ENV_MAX_DECAY     (PPQN*2) //48 // maximum decay stage length
 #define ENV_MAX_RELEASE   (PPQN*4) //96 // maximum release stage length
 
+#ifdef ENABLE_SCREEN
+#include <LinkedList.h>
+#include "mymenu.h"
+#include "menuitems_object.h"
+#endif
+
 class EnvelopeOutput : public MIDIDrumOutput {
     public:
 
@@ -74,13 +80,13 @@ class EnvelopeOutput : public MIDIDrumOutput {
     }
 
     void randomise() {
-        this->lfo_sync_ratio_hold_and_decay = (byte)random(0,127);
-        this->lfo_sync_ratio_sustain_and_release = (byte)random(0,127);
-        this->attack_length = (byte)random(0,64);
-        this->hold_length = (byte)random(0,127);
-        this->decay_length = (byte)random(0,127);
-        this->sustain_ratio = 1.0/(float)random(64,127);
-        this->release_length = (byte)random(0,127);
+        //this->lfo_sync_ratio_hold_and_decay = (byte)random(0,127);
+        //this->lfo_sync_ratio_sustain_and_release = (byte)random(0,127);
+        this->set_attack((byte)random(0,64));
+        this->set_hold((byte)random(0,127));
+        this->set_decay((byte)random(0,127));
+        this->set_sustain(random(64,127));
+        this->set_release((byte)random(0,127));
         this->invert = (byte)random(0,10) < 2;
     }
 
@@ -261,7 +267,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
             }
         } else if (s==RELEASE) {
             if (this->sustain_ratio==0.0f) {
-            this->stage_start_level = this->velocity;
+                this->stage_start_level = this->velocity;
             }
 
             // the length of time to decay down to 0
@@ -295,36 +301,36 @@ class EnvelopeOutput : public MIDIDrumOutput {
         // if lfo_sync_ratio is >=16 for this envelope then apply lfo modulation to the level
         // TODO: make this actually more useful... set upper/lower limits to modulation, elapsed-based scaling of modulation, only modulate during eg RELEASE stage
         if (this->stage!=OFF) {  // this is where we would enable them for constant LFO i think?
-        // modulate the level
-        // TODO: FIX THIS SO RATIO WORKS !
-        //lvl = (lvl*(0.5+isin(elapsed * ((this->lfo_sync_ratio / 16) * PPQN)))); 
-        //lvl = (lvl * (0.5 + isin(elapsed * (((this->lfo_sync_ratio) / 16 ))))); // * PPQN)))); ///((float)(cc_value_sync_modifier^2)/127.0))));  // TODO: find good parameters to use here, cc to adjust the modulation level etc
-        
-        int sync = (this->stage==DECAY || this->stage==HOLD) 
-                        ?
-                        this->lfo_sync_ratio_hold_and_decay
-                        :
-                    (this->stage==SUSTAIN || this->stage==RELEASE)
-                        ?
-                        this->lfo_sync_ratio_sustain_and_release : 
-                    -1;
-                        
-        //NUMBER_DEBUG(12, 0, 127 * isin(elapsed
-        if (sync>=0) {            
-            sync *= 4; // multiply sync value so that it gives us possibility to modulate much faster
-
-            float mod_amp = (float)lvl/4.0f; //32.0; // modulation amplitude is a quarter of the current level
-
-            float mod_result = mod_amp * isin((float)elapsed * PPQN * ((float)sync/127.0f));
-            //Serial.printf("mod_result is %3.1f, elapsed is %i, sync is %i\r\n", mod_result, elapsed, sync);
+            // modulate the level
+            // TODO: FIX THIS SO RATIO WORKS !
+            //lvl = (lvl*(0.5+isin(elapsed * ((this->lfo_sync_ratio / 16) * PPQN)))); 
+            //lvl = (lvl * (0.5 + isin(elapsed * (((this->lfo_sync_ratio) / 16 ))))); // * PPQN)))); ///((float)(cc_value_sync_modifier^2)/127.0))));  // TODO: find good parameters to use here, cc to adjust the modulation level etc
             
-            lvl = constrain(
-                lvl + mod_result,
-                0,
-                127
-            );
-            //Serial.printf("sync of %i resulted in lvl %i\r\n", sync, lvl);
-        } 
+            int sync = (this->stage==DECAY || this->stage==HOLD) 
+                            ?
+                            this->lfo_sync_ratio_hold_and_decay
+                            :
+                        (this->stage==SUSTAIN || this->stage==RELEASE)
+                            ?
+                            this->lfo_sync_ratio_sustain_and_release : 
+                        -1;
+                            
+            //NUMBER_DEBUG(12, 0, 127 * isin(elapsed
+            if (sync>=0) {            
+                sync *= 4; // multiply sync value so that it gives us possibility to modulate much faster
+
+                float mod_amp = (float)lvl/4.0f; //32.0; // modulation amplitude is a quarter of the current level
+
+                float mod_result = mod_amp * isin((float)elapsed * PPQN * ((float)sync/127.0f));
+                //Serial.printf("mod_result is %3.1f, elapsed is %i, sync is %i\r\n", mod_result, elapsed, sync);
+                
+                lvl = constrain(
+                    lvl + mod_result,
+                    0,
+                    127
+                );
+                //Serial.printf("sync of %i resulted in lvl %i\r\n", sync, lvl);
+            } 
         } else {
             // envelope is stopped - restart it if in lfo mode!
             if (this->loop_mode) { //trigger_on>=TRIGGER_CHANNEL_LFO) {
@@ -359,6 +365,67 @@ class EnvelopeOutput : public MIDIDrumOutput {
                 Serial.printf("not sending for envelope %i cos already sent %i\n", i, this->last_sent_actual_lvl);*/
         }
     }
+
+    int attack_value, hold_value, decay_value, sustain_value, release_value;
+
+    virtual void set_attack(byte attack) {
+        this->attack_value = attack;
+        this->attack_length = (ENV_MAX_ATTACK) * ((float)attack/127.0f);
+    }
+    virtual byte get_attack() {
+        return this->attack_value;
+    }
+    virtual void set_hold(byte hold) {
+        this->hold_value = hold;
+        this->hold_length = (ENV_MAX_HOLD) * ((float)hold/127.0f);
+    }
+    virtual byte get_hold() {
+        return this->hold_value;
+    }
+    virtual void set_decay(byte decay) {
+        this->decay_value = decay;
+        decay_length   = (ENV_MAX_DECAY) * ((float)decay/127.0f);
+    }
+    virtual byte get_decay() {
+        return this->decay_value;
+    }
+    virtual void set_sustain(byte sustain) {
+        this->sustain_value = sustain; //(((float)value/127.0f) * (float)(128-SUSTAIN_MINIMUM)) / 127.0f;
+        sustain_ratio = (((float)sustain/127.0f) * (float)(128-SUSTAIN_MINIMUM)) / 127.0f;
+    }
+    virtual byte get_sustain() {
+        return this->sustain_value;
+    }
+    virtual void set_release(byte release) {
+        this->release_value = release;
+        release_length = (ENV_MAX_RELEASE) * ((float)release/127.0f);
+    }
+    virtual byte get_release() {
+        return this->release_value;
+    }
+    virtual bool is_invert() {
+        return invert;
+    }
+    virtual void set_invert(bool i) {
+        this->invert = i;
+    }
+
+    #ifdef ENABLE_SCREEN
+        virtual void make_menu_items(Menu *menu, int index) override {
+            #ifdef ENABLE_ENVELOPE_MENUS
+                char label[40];
+                snprintf(label, 40, "Envelope %i", index);
+                menu->add_page(label);
+
+                menu->add(new ObjectNumberControl<EnvelopeOutput,byte>("Attack", this, &EnvelopeOutput::set_attack,     &EnvelopeOutput::get_attack,    nullptr, 0, 127, true, true));
+                menu->add(new ObjectNumberControl<EnvelopeOutput,byte>("Hold", this, &EnvelopeOutput::set_hold,         &EnvelopeOutput::get_hold,      nullptr, 0, 127, true, true));
+                menu->add(new ObjectNumberControl<EnvelopeOutput,byte>("Decay", this, &EnvelopeOutput::set_decay,       &EnvelopeOutput::get_decay,     nullptr, 0, 127, true, true));
+                menu->add(new ObjectNumberControl<EnvelopeOutput,byte>("Sustain", this, &EnvelopeOutput::set_sustain,   &EnvelopeOutput::get_sustain,   nullptr, 0, 127, true, true));
+                menu->add(new ObjectNumberControl<EnvelopeOutput,byte>("Release", this, &EnvelopeOutput::set_release,   &EnvelopeOutput::get_release,   nullptr, 0, 127, true, true));
+                menu->add(new ObjectToggleControl<EnvelopeOutput>("Invert", this, &EnvelopeOutput::set_invert,          &EnvelopeOutput::is_invert,    nullptr));
+            #endif
+        }
+    #endif
 
 
 };

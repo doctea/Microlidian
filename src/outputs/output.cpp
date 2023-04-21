@@ -38,3 +38,19 @@ void setup_output() {
     output_wrapper = new MIDIOutputWrapper();
     output_processor = new MIDIOutputProcessor(output_wrapper);     // todo: set this up dynamically, probably reading from a config file
 }
+
+#ifdef ENABLE_SCREEN
+    #include "mymenu.h"
+
+    void setup_output_menu() {
+        output_processor->create_menu_items();
+    }
+
+    void MIDIOutputProcessor::create_menu_items() {
+        for (unsigned int i = 0 ; i < this->nodes.size() ; i++) {
+            BaseOutput *node = this->nodes.get(i);
+            node->make_menu_items(menu, i);
+        }
+    }
+
+#endif

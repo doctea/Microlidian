@@ -69,6 +69,10 @@ class MIDIOutputWrapper {
 };
 
 
+#ifdef ENABLE_SCREEN
+    class Menu;
+#endif
+
 // class to receive triggers from a sequencer and return values to the owner Processor
 class BaseOutput {
     public:
@@ -93,6 +97,10 @@ class BaseOutput {
     virtual void process() {};
 
     virtual void loop() {};
+
+    #ifdef ENABLE_SCREEN
+        virtual void make_menu_items(Menu *menu, int index) {}
+    #endif
 };
 
 
@@ -249,5 +257,9 @@ class MIDINoteTriggerCountOutput : public MIDIBaseOutput {
             base_note = scale_root * octave;
         }
 };
+
+#ifdef ENABLE_SCREEN
+    void setup_output_menu();
+#endif
 
 #endif

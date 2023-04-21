@@ -31,11 +31,11 @@ bool actual_check_cv_clock_ticked() {
     //Serial.printf("\tgot value %3.3f\n", parameter_manager->voltage_sources->get(0)->get_voltage()); 
     if (!already_high && v >= 3.0) {
         already_high = true;
-        Serial.printf("%u: rise, got value %3.3f, ticking!\n", millis(), v);
+        //Serial.printf("%u: rise, got value %3.3f, ticking!\n", millis(), v);
         last_checked_time = millis();
         return true;
     } else if (already_high && v <= 0.5) {
-        Serial.printf("%u: fall!\n", millis());
+        //Serial.printf("%u: fall!\n", millis());
         already_high = false;
     } else {
         //Serial.printf("%u: neither rose nor fell? value is %3.3f!\n", millis(), v);

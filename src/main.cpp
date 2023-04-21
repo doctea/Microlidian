@@ -132,6 +132,8 @@ void setup() {
         if (Serial) Serial.printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
     #endif
 
+    setup_output_menu();
+
     setup_debug_menu();
     debug_free_ram();
 
