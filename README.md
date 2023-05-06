@@ -62,6 +62,7 @@ XIAO RP2040 pins.  Counting clockwise starting from top-right:-
   - ~~basic cv input parameter~~
   - for controlling parameters
   - low-memory version of the mapping tool, since providing options for all options of 20 tracks uses 100K+ and takes us over the available RAM!
+    - worked around for now by not allowing the sources for a slot to be changed
   - ~~maybe for clock too?~~
   - implement CV input 'reset'
   - Setting a per-parameter range for modulation
@@ -72,7 +73,7 @@ XIAO RP2040 pins.  Counting clockwise starting from top-right:-
   - ~~just save to the internal flash via LittleFS!~~ DONE
   - ~~rudimentary save/load of parameter mappings~~ DONE
   - allow configuration of the output devices/channels..
-  - add other settings things to be saved/recalled..?
+  - add other settings+things to be saved/recalled..?
   - Load/save settings and presets to the flash
 - Other sequencer types
   - eg raga sequencer that loads .mid files
@@ -105,3 +106,6 @@ XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - Menu options and hotkeys to force reboot + firmware update modes:
   - Hold BACK button for 4 seconds to reboot (useful if the screen hasn't started up after a cold boot, or similar)
   - Hold BACK button for 4 seconds while holding encoder button for 3 seconds to go into firmware update mode
+- Screen doesn't turn on first time on the revision 1 hardware, ~~don't know why~~ needed RES connecting to VCC via 100ohm resistor!.  Hold the 'back' button for 4+ seconds to force a reboot and it will usually start working!
+  - To try: adding a 47k pullup resistor from CS->BLK (didn't help by itself)
+
