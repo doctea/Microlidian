@@ -93,9 +93,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 
 - Trying to Serial.print() from the second core (screen+CV input) while serial is connected will hang the display!
 - Trying to Serial.print() generally seems to be unreliable and likely to cause crashes
-- Screen doesn't turn on first time on the revision 1 hardware, don't know why.  Hold the 'back' button for 4+ seconds to force a reboot and it will usually start working!
-  - Tried: adding a 47k pullup resistor from CS->BLK
-  - Tried: adding a delay before setup
+- Glitching of output name display when on some track pages; intermittent crashes; probably caused by something overwriting selected output slot or something similar?
 
 ## Done
 
@@ -106,3 +104,8 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - Menu options and hotkeys to force reboot + firmware update modes:
   - Hold BACK button for 4 seconds to reboot (useful if the screen hasn't started up after a cold boot, or similar)
   - Hold BACK button for 4 seconds while holding encoder button for 3 seconds to go into firmware update mode
+- FIXED: Screen doesn't turn on first time on the revision 1 hardware, don't know why.  Hold the 'back' button for 4+ seconds to force a reboot and it will usually start working!
+  - Tried: adding a 47k pullup resistor from CS->BLK
+  - Tried: adding a delay before setup
+  - Tried+fixed: added pullup resistor to display RES pin
+
