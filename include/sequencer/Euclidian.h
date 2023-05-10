@@ -3,6 +3,8 @@
 
 #include "Config.h"
 
+#include "debug.h"
+
 #include <LinkedList.h>
 
 #include "Patterns.h"
@@ -105,8 +107,10 @@ class EuclidianPattern : public SimplePattern {
         int temp_pulses = arguments.pulses * (1.5f*(MINIMUM_DENSITY+*global_density));
         //this->arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
 
-        if (arguments.steps>maximum_steps)
+        if (arguments.steps > maximum_steps) {
+            messages_log_add(String("arguments.steps (") + String(arguments.steps) + String(") is more than maximum steps (") + String(maximum_steps) + String(")"));
             maximum_steps = arguments.steps;
+        }
 
         int bucket = 0;
         for (int i = 0 ; i < this->arguments.steps ; i++) {

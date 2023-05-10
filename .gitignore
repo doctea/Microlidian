@@ -10,3 +10,4 @@ ffs/
 *.orig
 *.rej
 *.patch
+hardware

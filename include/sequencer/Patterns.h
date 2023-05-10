@@ -61,13 +61,13 @@ class SimplePattern : public BasePattern {
     public:
 
     struct event {
-        short note = NOTE_OFF;
-        short velocity = DEFAULT_VELOCITY;
-        short channel = 0;
+        byte note = NOTE_OFF;
+        byte velocity = DEFAULT_VELOCITY;
+        byte channel = 0;
     };
 
-    event *events = nullptr;
     BaseOutput *output = nullptr;
+    event *events = nullptr;
 
     SimplePattern() : BasePattern() {
         this->events = (event*)calloc(sizeof(event), steps);

@@ -89,5 +89,7 @@ void setup_debug_menu() {
         menu->add(new ToggleControl<bool>("CV Input", &cv_input_enabled, nullptr));
     #endif
     
+    menu->add_page("Message history");
+
     menu->add(new ListViewerMenuItem("Message history", messages_log));
 }
