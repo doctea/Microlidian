@@ -94,7 +94,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 
 - Trying to Serial.print() from the second core (screen+CV input) while serial is connected will hang the display!
 - Trying to Serial.print() generally seems to be unreliable and likely to cause crashes
-- Occasional glitching of output name display when on some track pages; ~~intermittent crashes; probably caused by something overwriting selected output slot or something similar?~~
+- Occasional glitching of output name display when on some track pages; intermittent crashes; probably caused by something overwriting selected output slot or something similar?
 
 ## Done
 
