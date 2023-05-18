@@ -25,13 +25,13 @@ class EuclidianPatternControl : public SubMenuItemBar {
             pattern,
             &EuclidianPattern::set_output,
             &EuclidianPattern::get_output,
-            &output_processor->nodes,
+            output_processor->nodes,
             pattern->output
         );
         selector->go_back_on_select = true;
         this->add(selector);
 
-        //menu->add(new ObjectToggleControl<EuclidianPattern> ("Locked", p, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
+        this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
 
         //SubMenuItemBar *bar = new SubMenuItemBar("Arguments");
         //Menu *bar = menu;
@@ -45,10 +45,14 @@ class EuclidianPatternControl : public SubMenuItemBar {
 
     virtual void on_add() override {
         SubMenuItemBar::on_add();
-        this->circle_display->set_tft(this->tft);
-        this->circle_display->on_add();
-        this->step_display->set_tft(this->tft);
-        this->step_display->on_add();
+        if (this->circle_display!=nullptr) {
+            this->circle_display->set_tft(this->tft);
+            this->circle_display->on_add();
+        }
+        if (this->step_display!=nullptr) {
+            this->step_display->set_tft(this->tft);
+            this->step_display->on_add();
+        }
     }
 
 
@@ -57,7 +61,8 @@ class EuclidianPatternControl : public SubMenuItemBar {
         tft->setCursor(pos.x, pos.y);
         colours(opened, opened ? GREEN : this->default_fg, this->default_bg);
 
-        pos.y = this->step_display->display(pos, selected, opened); // display the step sequencer across the top
+        if (this->step_display!=nullptr)
+            pos.y = this->step_display->display(pos, selected, opened); // display the step sequencer across the top
 
         int start_y = pos.y;        // y to start drawing at (just under header)
         int finish_y = pos.y;       // highest y that we finished drawing at
@@ -99,7 +104,8 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 finish_y = temp_y;
         }
 
-        this->circle_display->display(pos, selected, opened);
+        if (this->circle_display!=nullptr)
+            this->circle_display->display(pos, selected, opened);
 
         return finish_y;
     }

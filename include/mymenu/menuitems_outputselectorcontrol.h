@@ -116,7 +116,7 @@ class OutputSelectorControl : public SelectorControl<int> {
     virtual void setter(int new_value) override {
         //if (this->debug) Serial.printf(F("ParameterSelectorControl changing from %i to %i\n"), this->actual_value_index, new_value);
         selected_value_index = actual_value_index = new_value;
-        if(new_value>=0 && this->target_object!=nullptr && this->setter_func!=nullptr) {
+        if(new_value>=0 && new_value<num_values && this->target_object!=nullptr && this->setter_func!=nullptr) {
             (this->target_object->*this->setter_func)(this->available_objects->get(new_value));
         }
     }

@@ -159,7 +159,7 @@ void setup_menu() {
 
     menu->add_page("Bass Quantiser");
     menu->add(new ObjectScaleMenuItem<MIDINoteTriggerCountOutput>("Bass scale", 
-        (MIDINoteTriggerCountOutput*)output_processor->nodes.get(output_processor->nodes.size()-1),
+        (MIDINoteTriggerCountOutput*)output_processor->nodes->get(output_processor->nodes->size()-1),
         &MIDINoteTriggerCountOutput::set_scale_number, 
         &MIDINoteTriggerCountOutput::get_scale_number, 
         &MIDINoteTriggerCountOutput::set_scale_root, 

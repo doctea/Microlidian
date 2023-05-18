@@ -31,8 +31,8 @@ byte get_muso_note_for_drum(byte drum_note) {
     return retval;
 }
 
-MIDIOutputWrapper *output_wrapper;
-MIDIOutputProcessor *output_processor;
+MIDIOutputWrapper *output_wrapper = nullptr;
+MIDIOutputProcessor *output_processor = nullptr;
 
 void setup_output() {
     output_wrapper = new MIDIOutputWrapper();
@@ -47,8 +47,8 @@ void setup_output() {
     }
 
     void MIDIOutputProcessor::create_menu_items() {
-        for (unsigned int i = 0 ; i < this->nodes.size() ; i++) {
-            BaseOutput *node = this->nodes.get(i);
+        for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
+            BaseOutput *node = this->nodes->get(i);
             node->make_menu_items(menu, i);
         }
     }

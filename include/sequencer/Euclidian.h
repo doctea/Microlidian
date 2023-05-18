@@ -108,7 +108,7 @@ class EuclidianPattern : public SimplePattern {
         //this->arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
 
         if (arguments.steps > maximum_steps) {
-            messages_log_add(String("arguments.steps (") + String(arguments.steps) + String(") is more than maximum steps (") + String(maximum_steps) + String(")"));
+            //messages_log_add(String("arguments.steps (") + String(arguments.steps) + String(") is more than maximum steps (") + String(maximum_steps) + String(")"));
             maximum_steps = arguments.steps;
         }
 

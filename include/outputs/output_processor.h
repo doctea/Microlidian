@@ -18,7 +18,7 @@ class BaseOutputProcessor {
 class MIDIOutputProcessor : public BaseOutputProcessor {
     public:
 
-    LinkedList<BaseOutput*> nodes = LinkedList<BaseOutput*>();
+    LinkedList<BaseOutput*> *nodes = new LinkedList<BaseOutput*>();
     MIDIOutputWrapper *output_wrapper = nullptr;
 
     MIDIOutputProcessor(MIDIOutputWrapper *output_wrapper) : BaseOutputProcessor(), output_wrapper(output_wrapper) {
@@ -52,13 +52,13 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
             this->addDrumNode("Ride Cymbal",   GM_NOTE_RIDE_CYMBAL_1);  // todo: turn these into something like an EnvelopeOutput?
         #endif
 
-        this->addNode(new MIDINoteTriggerCountOutput("Bass", &this->nodes, output_wrapper));
+        this->addNode(new MIDINoteTriggerCountOutput("Bass", this->nodes, output_wrapper));
     }
 
-    void addNode(BaseOutput* node) {
-        this->nodes.add(node);
+    virtual void addNode(BaseOutput* node) {
+        this->nodes->add(node);
     }
-    void addDrumNode(const char *label, byte note_number) {
+    virtual void addDrumNode(const char *label, byte note_number) {
         this->addNode(new MIDIDrumOutput(label, note_number, this->output_wrapper));
     }
 
@@ -68,15 +68,16 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
     // ask all the nodes to do their thing; send the results out to our output device
     virtual void process() {
         Debug_println("process-->");
-        static int count = 0;
+        //static int count = 0;
         //midi->sendNoteOff(35 + count, 0, 1);
         /*for (int i = 0 ; i < this->nodes.size() ; i++) {
             BaseOutput *n = this->nodes.get(i);
             n->stop();
         }*/
-        count = 0;
-        for (int i = 0 ; i < this->nodes.size() ; i++) {
-            BaseOutput *o = this->nodes.get(i);
+        //count = 0;
+        const unsigned int size = this->nodes->size();
+        for (unsigned int i = 0 ; i < size ; i++) {
+            BaseOutput *o = this->nodes->get(i);
             Debug_printf("\tnode %i\n", i);
             o->process();
             Debug_println();
@@ -87,16 +88,16 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
             //count = 35;
         }*/
 
-        for (int i = 0 ; i < this->nodes.size() ; i++) {
-            this->nodes.get(i)->reset();
+        for (int i = 0 ; i < this->nodes->size() ; i++) {
+            this->nodes->get(i)->reset();
         }
 
         Debug_println(".end.");
     }
 
     virtual void loop() {
-        for (int i = 0 ; i < this->nodes.size() ; i++) {
-            BaseOutput *o = this->nodes.get(i);
+        for (int i = 0 ; i < this->nodes->size() ; i++) {
+            BaseOutput *o = this->nodes->get(i);
             Debug_printf("\tnode %i\n", i);
             o->loop();
             Debug_println();
@@ -105,14 +106,14 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
 
     // configure target sequencer to use the output nodes held by this OutputProcessor
     virtual void configure_sequencer(BaseSequencer *sequencer) {
-        for (int i = 0 ; i < this->nodes.size() ; i++) {
-            sequencer->configure_pattern_output(i, this->nodes.get(i));
+        for (int i = 0 ; i < this->nodes->size() ; i++) {
+            sequencer->configure_pattern_output(i, this->nodes->get(i));
         }
         //sequencer->configure_pattern_output(0, this->nodes.get(0));
     }
 
     #ifdef ENABLE_SCREEN
-        void create_menu_items();
+        virtual void create_menu_items();
     #endif
 };
 
