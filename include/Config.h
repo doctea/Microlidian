@@ -47,6 +47,7 @@
 #define TFT_SCLK D8
 #define TFT_MOSI D10*/
 
+#define MIDI_SERIAL_OUT_PIN D6
 
 #define ENABLE_CV_INPUT 0x48
 //#define ENABLE_PARAMETER_MAPPING
