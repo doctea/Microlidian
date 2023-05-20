@@ -35,6 +35,11 @@
 
 #include "outputs/output_processor.h"
 
+#include <atomic>
+std::atomic<bool> started = false;
+std::atomic<bool> ticked = false;
+std::atomic<bool> locked = false;
+
 // serial console to host, for debug etc
 void setup_serial() {
     Serial.begin(115200);
@@ -64,6 +69,10 @@ void setup() {
     //set_sys_clock_khz(230000, true);
     set_sys_clock_khz(200000, true);
 
+    locked = false;
+    ticked = false;
+    started = false;
+
     setup_serial();
     Debug_println("setup() starting");
 
@@ -85,11 +94,13 @@ void setup() {
     #endif
 
     // check if the two buttons are held down, if so, enter firmware reset mode as quickly as possible!
-    pushButtonA.update(); 
-    pushButtonB.update();
-    if (pushButtonA.read() && pushButtonB.read()) {
-        reset_upload_firmware();
-    }
+    #ifdef ENABLE_SCREEN
+        pushButtonA.update(); 
+        pushButtonB.update();
+        if (pushButtonA.read() && pushButtonB.read()) {
+            reset_upload_firmware();
+        }
+    #endif
 
     #ifdef ENABLE_STORAGE
         setup_storage();
@@ -108,8 +119,10 @@ void setup() {
         //Serial.println("setting up sequencer..");
         setup_sequencer();
         output_processor->configure_sequencer(&sequencer);
-        setup_sequencer_menu();
-        if (Serial) Serial.printf("after setup_sequencer_menu, free RAM is %u\n", freeRam());
+        #ifdef ENABLE_SCREEN
+            setup_sequencer_menu();
+            if (Serial) Serial.printf("after setup_sequencer_menu, free RAM is %u\n", freeRam());
+        #endif
     #endif
 
     #if defined(ENABLE_CV_INPUT) && defined(ENABLE_EUCLIDIAN)
@@ -132,12 +145,13 @@ void setup() {
         if (Serial) Serial.printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
     #endif
 
-    setup_output_menu();
+    #ifdef ENABLE_SCREEN
+        setup_output_menu();
+        setup_debug_menu();
+        menu->select_page(0);
+    #endif
 
-    setup_debug_menu();
     debug_free_ram();
-
-    menu->select_page(0);
 
     started = true;
 
@@ -181,7 +195,9 @@ void loop() {
     uint32_t mics_start = micros();
     //Serial.println("loop()");
     
-    USBMIDI.read();
+    #ifdef USE_TINYUSB
+        USBMIDI.read();
+    #endif
 
     ticked = update_clock_ticks();
 
@@ -231,13 +247,16 @@ void loop() {
     } else {
         //read_serial_buffer();
 
+        #ifdef ENABLE_SCREEN
         if (!locked)
             menu->update_inputs();
+        #endif
 
         add_loop_length(micros()-mics_start);
     }
 
     // if the back button is held down for 4 seconds, do a soft reboot
+    #ifdef ENABLE_SCREEN
     if (!pushButtonA.read() && pushButtonB.read() && pushButtonB.currentDuration() >= 4000) {
         //#define AIRCR_Register (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C)))
         //AIRCR_Register = 0x5FA0004;
@@ -247,5 +266,6 @@ void loop() {
     ) {
         reset_upload_firmware();
     }
+    #endif
 }
 

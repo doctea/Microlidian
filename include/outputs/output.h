@@ -6,7 +6,9 @@
 
 #include "debug.h"
 
-#include <Adafruit_TinyUSB.h>
+#ifdef USE_TINYUSB
+    #include <Adafruit_TinyUSB.h>
+#endif
 #include "MIDI.h"
 #include "Drums.h"
 #include "bpm.h"
@@ -25,8 +27,9 @@ byte get_muso_note_for_drum(byte drum_note);
 // wrapper class to wrap different MIDI output types
 class MIDIOutputWrapper {
     public:
-
-    midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *usbmidi = &USBMIDI;
+    #ifdef USE_TINYUSB
+        midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *usbmidi = &USBMIDI;
+    #endif
     midi::MidiInterface<midi::SerialMIDI<SerialPIO>> *dinmidi = &DINMIDI;
 
     void sendNoteOn(byte pitch, byte velocity, byte channel) {
@@ -34,15 +37,18 @@ class MIDIOutputWrapper {
         if (!is_valid_note(pitch)) 
             return;
 
-        usbmidi->sendNoteOn(pitch, velocity, channel);
+        #ifdef USE_TINYUSB
+            usbmidi->sendNoteOn(pitch, velocity, channel);
+        #endif
         if (channel==GM_CHANNEL_DRUMS)
             dinmidi->sendNoteOn(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
     }
     void sendNoteOff(byte pitch, byte velocity, byte channel) {
         if (!is_valid_note(pitch)) 
             return;
-
-        usbmidi->sendNoteOff(pitch, velocity, channel);
+        #ifdef USE_TINYUSB
+            usbmidi->sendNoteOff(pitch, velocity, channel);
+        #endif
         if (channel==GM_CHANNEL_DRUMS)
             dinmidi->sendNoteOff(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
     }
@@ -50,20 +56,28 @@ class MIDIOutputWrapper {
     void sendControlChange(byte number, byte value, byte channel) {
         if (!is_valid_note(number))
             return;
-        usbmidi->sendControlChange(number, value, channel);
+        #ifdef USE_TINYUSB
+            usbmidi->sendControlChange(number, value, channel);
+        #endif
         dinmidi->sendControlChange(number, value, channel);
     }
 
     void sendClock() {
-        usbmidi->sendClock();
+        #ifdef USE_TINYUSB
+            usbmidi->sendClock();
+        #endif
         dinmidi->sendClock(); // todo: make able to send divisions of clock to muso, to make the clock output more useful
     }
     void sendStart() {
-        usbmidi->sendStart();
+        #ifdef USE_TINYUSB
+            usbmidi->sendStart();
+        #endif
         dinmidi->sendStart();
     }
     void sendStop() {
-        usbmidi->sendStop();
+        #ifdef USE_TINYUSB
+            usbmidi->sendStop();
+        #endif
         dinmidi->sendStop();
     }
 };

@@ -9,8 +9,10 @@
 
 #include <SoftwareSerial.h>
 
-Adafruit_USBD_MIDI usb_midi;
-MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, USBMIDI);
+#ifdef USE_TINYUSB
+    Adafruit_USBD_MIDI usb_midi;
+    MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, USBMIDI);
+#endif
 
 #ifdef MIDI_SERIAL_SOFTWARE
     #include <SoftwareSerial.h>
@@ -50,14 +52,16 @@ void auto_handle_start() {
 
 void setup_midi() {
     // setup USB MIDI connection
-    USBMIDI.begin(MIDI_CHANNEL_OMNI);
-    USBMIDI.turnThruOff();
+    #ifdef USE_TINYUSB
+        USBMIDI.begin(MIDI_CHANNEL_OMNI);
+        USBMIDI.turnThruOff();
 
-    // callbacks for messages recieved from USB MIDI host
-    USBMIDI.setHandleClock(pc_usb_midi_handle_clock);
-    USBMIDI.setHandleStart(auto_handle_start); //pc_usb_midi_handle_start);
-    USBMIDI.setHandleStop(pc_usb_midi_handle_stop);
-    USBMIDI.setHandleContinue(pc_usb_midi_handle_continue);
+        // callbacks for messages recieved from USB MIDI host
+        USBMIDI.setHandleClock(pc_usb_midi_handle_clock);
+        USBMIDI.setHandleStart(auto_handle_start); //pc_usb_midi_handle_start);
+        USBMIDI.setHandleStop(pc_usb_midi_handle_stop);
+        USBMIDI.setHandleContinue(pc_usb_midi_handle_continue);
+    #endif
 
     // setup serial MIDI output on standard UART pins; send only
     DINMIDI.begin(0);

@@ -23,7 +23,9 @@ class BasePattern {
     int ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
     bool note_held = false;
 
-    int16_t colour = C_WHITE;
+    #ifdef ENABLE_SCREEN
+        int16_t colour = C_WHITE;
+    #endif
 
     virtual const char *get_summary() {
         return "??";

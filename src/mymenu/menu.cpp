@@ -92,14 +92,16 @@ FLASHMEM
 
 float bpm_selector_values[] = { 60, 90, 120, 150, 180, 500, 1000, 2000, 3000 };
 uint32_t external_cv_ticks_per_pulse_values[] = { 1, 2, 3, 4, 6, 8, 12, 16, 24 };
-void set_external_cv_ticks_per_pulse_values(uint32_t new_value) {
-    external_cv_ticks_per_pulse = new_value;
-    //reset_clock();
-    ticks = 0;
-}
-uint32_t get_external_cv_ticks_per_pulse_values() {
-    return external_cv_ticks_per_pulse;
-}
+#ifdef ENABLE_CLOCK_INPUT_CV
+    void set_external_cv_ticks_per_pulse_values(uint32_t new_value) {
+        external_cv_ticks_per_pulse = new_value;
+        //reset_clock();
+        ticks = 0;
+    }
+    uint32_t get_external_cv_ticks_per_pulse_values() {
+        return external_cv_ticks_per_pulse;
+    }
+#endif
 
 void setup_menu() {
     Debug_println(F("Starting setup_menu()..")); Serial_flush();
@@ -154,17 +156,21 @@ void setup_menu() {
     menu->add(bpm_selector);*/
 
     // debug scales page
-    /*menu->add_page("Scales");
-    menu->add(new ScaleMenuItem("Scales"));*/
+    /*#ifdef ENABLE_SCALES
+        menu->add_page("Scales");
+        menu->add(new ScaleMenuItem("Scales"));
+    #endif*/
 
-    menu->add_page("Bass Quantiser");
-    menu->add(new ObjectScaleMenuItem<MIDINoteTriggerCountOutput>("Bass scale", 
-        (MIDINoteTriggerCountOutput*)output_processor->nodes->get(output_processor->nodes->size()-1),
-        &MIDINoteTriggerCountOutput::set_scale_number, 
-        &MIDINoteTriggerCountOutput::get_scale_number, 
-        &MIDINoteTriggerCountOutput::set_scale_root, 
-        &MIDINoteTriggerCountOutput::get_scale_root
-    ));
+    #ifdef ENABLE_SCALES
+        menu->add_page("Bass Quantiser");
+        menu->add(new ObjectScaleMenuItem<MIDINoteTriggerCountOutput>("Bass scale", 
+            (MIDINoteTriggerCountOutput*)output_processor->nodes->get(output_processor->nodes->size()-1),
+            &MIDINoteTriggerCountOutput::set_scale_number, 
+            &MIDINoteTriggerCountOutput::get_scale_number, 
+            &MIDINoteTriggerCountOutput::set_scale_root, 
+            &MIDINoteTriggerCountOutput::get_scale_root
+        ));
+    #endif
 
     //menu->add(&test_item_1);
 

@@ -11,3 +11,5 @@ ffs/
 *.rej
 *.patch
 hardware
+*.uf2
+disabled-lib

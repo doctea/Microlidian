@@ -18,7 +18,12 @@
 Encoder encoder(D2, D3);
 Bounce pushButton = Bounce(D1, 10); // 10ms debounce
 
-std::atomic<bool> ticked = false;
+
+#include <atomic>
+extern std::atomic<bool> started;
+extern std::atomic<bool> locked;
+extern std::atomic<bool> ticked;
+std::atomic<bool> frame_ready = false;
 
 void setup_screen() {
     #ifdef ENABLE_SCREEN
@@ -44,10 +49,6 @@ void setup_screen() {
     #endif
 }
 
-#include <atomic>
-std::atomic<bool> started;
-std::atomic<bool> locked;
-std::atomic<bool> frame_ready;
 
 void push_display() {
     static unsigned long last_drawn;

@@ -48,9 +48,9 @@
 #define TFT_MOSI D10
 
 //#define ENABLE_DEBUG_SERIAL
-#define ENABLE_STORAGE
+//#define ENABLE_STORAGE
 
-#define ENABLE_CV_INPUT 0x48
+//#define ENABLE_CV_INPUT 0x48
 //#define ENABLE_PARAMETER_MAPPING
 /*
 // defined in platformio.ini build flags

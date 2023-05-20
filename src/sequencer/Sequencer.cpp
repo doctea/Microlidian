@@ -7,8 +7,8 @@
 
 void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     if (index >= this->number_patterns) {
-        char message[MAX_MESSAGE_LOG*2];
-        snprintf(message, MAX_MESSAGE_LOG*2, "Attempted to configure pattern with invalid index %i!", index);
+        char message[MAX_MESSAGES_LOG*2];
+        snprintf(message, MAX_MESSAGES_LOG*2, "Attempted to configure pattern with invalid index %i!", index);
         messages_log_add(message);
         return;
     }

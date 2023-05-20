@@ -1,6 +1,8 @@
 #ifndef MENUITEMS_SEQUENCER_CIRCLE__H
 #define MENUITEMS_SEQUENCER_CIRCLE__H
 
+#ifdef ENABLE_SCREEN
+
 #include "sequencer/Sequencer.h"
 #include "sequencer/Patterns.h"
 
@@ -153,5 +155,7 @@ class CircleDisplay : public MenuItem {
             return tft->height();
         }
 };
+
+#endif
 
 #endif
