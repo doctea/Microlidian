@@ -16,11 +16,11 @@
 
 #ifdef MIDI_SERIAL_SOFTWARE
     #include <SoftwareSerial.h>
-    SoftwareSerial SoftSerial(D6, -1, false);
+    SoftwareSerial SoftSerial(MIDI_SERIAL_OUT_PIN, -1, false);
     MIDI_CREATE_INSTANCE(SoftwareSerial, SoftSerial, DINMIDI);
 #endif
 #ifdef MIDI_SERIAL_SPIO
-    SerialPIO spio(D6, SerialPIO::NOPIN);
+    SerialPIO spio(MIDI_SERIAL_OUT_PIN, SerialPIO::NOPIN);
     MIDI_CREATE_INSTANCE(SerialPIO, spio, DINMIDI);
 #endif
 #ifdef MIDI_SERIAL_HARDWARE

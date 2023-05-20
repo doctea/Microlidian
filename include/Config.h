@@ -40,26 +40,26 @@
 
 //#define DEFAULT_CLOCK_MODE  CLOCK_EXTERNAL_USB_HOST      
 
-#define SCREEN_WIDTH 135
+/*#define SCREEN_WIDTH 135
 #define SCREEN_HEIGHT 240
 #define SCREEN_ROTATION 3
 
 #define TFT_SCLK D8
-#define TFT_MOSI D10
+#define TFT_MOSI D10*/
 
+
+#define ENABLE_CV_INPUT 0x48
+//#define ENABLE_PARAMETER_MAPPING
+
+// defined in platformio.ini build flags
 //#define ENABLE_DEBUG_SERIAL
 //#define ENABLE_STORAGE
+//#define ENABLE_CALIBRATION_STORAGE  
+//#define LOAD_CALIBRATION_ON_BOOT
+//#define ENABLE_EUCLIDIAN
 
-//#define ENABLE_CV_INPUT 0x48
-//#define ENABLE_PARAMETER_MAPPING
-/*
-// defined in platformio.ini build flags
-#define ENABLE_CALIBRATION_STORAGE  
-#define LOAD_CALIBRATION_ON_BOOT
-*/
 #define TIME_BETWEEN_CV_INPUT_UPDATES 5
 
-#define ENABLE_EUCLIDIAN
 #define MUTATE_EVERY_TICK
 
 //#define Serial_println(X) { if (Serial) Serial.println(x); }
