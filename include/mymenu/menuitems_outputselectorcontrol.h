@@ -14,7 +14,7 @@ class OutputSelectorControl : public SelectorControl<int> {
     LinkedList<BaseOutput*> *available_objects = nullptr;
 
     TargetClass *target_object = nullptr;
-    void(TargetClass::*setter_func)(BaseOutput*);
+    void(TargetClass::*setter_func)(BaseOutput*) = nullptr;
 
     bool show_values = false;   // whether to display the incoming values or not
 
@@ -59,15 +59,6 @@ class OutputSelectorControl : public SelectorControl<int> {
 
     virtual int find_index_for_object(BaseOutput *input)  {
         return this->find_index_for_label(input->label);
-        /*if (this->available_parameter_inputs==nullptr)
-            return -1;
-        unsigned const int size = this->available_parameter_inputs->size();
-        for (unsigned int i = 0 ; i < size ; i++) {
-            if (available_parameter_inputs->get(i)==input)
-                return i;
-        }
-        return -1;*/
-        //return parameter_manager->getInputIndexForName(name);
     }
 
     virtual void on_add() override {
@@ -116,7 +107,7 @@ class OutputSelectorControl : public SelectorControl<int> {
     virtual void setter(int new_value) override {
         //if (this->debug) Serial.printf(F("ParameterSelectorControl changing from %i to %i\n"), this->actual_value_index, new_value);
         selected_value_index = actual_value_index = new_value;
-        if(new_value>=0 && new_value<num_values && this->target_object!=nullptr && this->setter_func!=nullptr) {
+        if(new_value>=0 && new_value<this->available_objects->size() && this->target_object!=nullptr && this->setter_func!=nullptr) {
             (this->target_object->*this->setter_func)(this->available_objects->get(new_value));
         }
     }
@@ -142,7 +133,7 @@ class OutputSelectorControl : public SelectorControl<int> {
             //tft->setTextSize((strlen(txt) < max_character_width/2) ? 2 : 1);
             tft->setTextSize(2);
 
-            if (this->actual_value_index>=0) {
+            if (this->actual_value_index>=0 && this->actual_value_index < num_values) {
                 //Serial.printf(F("\tactual value index %i\n"), this->actual_value_index); Serial_flush();
                 tft->printf((char*)"Output: %s\n", (char*)this->get_label_for_index(this->actual_value_index));
                 //Serial.printf(F("\tdrew selected %i\n"), this->actual_value_index); Serial_flush();
@@ -181,6 +172,9 @@ class OutputSelectorControl : public SelectorControl<int> {
         return tft->getCursorY();
     }
 
+    int crash_flag = 0;
+    BaseOutput *last_found = nullptr;
+
     virtual int renderValue(bool selected, bool opened, uint16_t max_character_width) override {
         const int index_to_display = opened ? selected_value_index : actual_value_index;
         const int col = selected_value_index==this->actual_value_index && opened ? 
@@ -189,11 +183,25 @@ class OutputSelectorControl : public SelectorControl<int> {
         
         colours(selected, col, BLACK);
         char txt[MAX_LABEL];
-        if (index_to_display>=0 && index_to_display<this->available_objects->size())
+        if (index_to_display>=0 && index_to_display<this->available_objects->size()) {
+            BaseOutput *obj = this->available_objects->get(index_to_display);
+            if (last_found!=nullptr && obj!=last_found) {
+                crash_flag++;
+            }
             // todo: sprintf to correct number of max_character_width characters
+            if (crash_flag) {
+                tft->println("crash_flag!!");
+                snprintf(txt, MAX_LABEL, "%p changed to ", last_found);
+                tft->println(txt);
+                snprintf(txt, MAX_LABEL, "%p", obj);
+                tft->println(txt);
+                return tft->getCursorY();
+            }
+            last_found = obj;
             snprintf(txt, MAX_LABEL, "%6s", this->get_label_for_index(index_to_display)); //->available_objects->get(index_to_display)->label);
-        else
+        } else {
             snprintf(txt, MAX_LABEL, "None");
+        }
         tft->setTextSize((strlen(txt) < max_character_width/2) ? 2 : 1);
         tft->println(txt);
         return tft->getCursorY();
@@ -206,7 +214,7 @@ class OutputSelectorControl : public SelectorControl<int> {
 
         char msg[MENU_MESSAGE_MAX];
         //Serial.printf("about to build msg string...\n");
-        const char *name = selected_value_index>=0 ? this->get_label_for_index(selected_value_index) : "None";
+        const char *name = this->get_label_for_index(selected_value_index);
         //if (selected_value_index>=0)
         snprintf(msg, MENU_MESSAGE_MAX, "Set %s to %s (%i)", label, name, selected_value_index);
         //Serial.printf("about to set_last_message!");
@@ -218,6 +226,7 @@ class OutputSelectorControl : public SelectorControl<int> {
 
     virtual void set_available_values(LinkedList<BaseOutput*> *available_values) {
         this->available_objects = available_values;
+        this->num_values = this->available_objects->size();
     }
 
 };
