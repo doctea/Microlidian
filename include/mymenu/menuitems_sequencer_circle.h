@@ -90,7 +90,7 @@ class CircleDisplay : public MenuItem {
             static const int_fast8_t circle_center_y = tft->width()/3;
 
             // draw circle
-            for (int_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++ ) {
+            for (int_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
                 int_fast8_t first_x, first_y;
                 int_fast8_t last_x, last_y;
                 int_fast8_t count = 0;

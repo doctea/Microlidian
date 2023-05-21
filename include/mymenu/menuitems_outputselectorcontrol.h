@@ -30,8 +30,8 @@ class OutputSelectorControl : public SelectorControl<int> {
         bool show_values = false
     ) : SelectorControl(label, 0) {
         this->show_values = show_values;
-        this->initial_selected_object = initial_selected_object,
-        this->available_objects = available_objects,
+        this->initial_selected_object = initial_selected_object;    // hot damn .. 
+        this->available_objects = available_objects;
         this->target_object = target_object;
         this->setter_func = setter_func;
         this->num_values = available_objects->size();
