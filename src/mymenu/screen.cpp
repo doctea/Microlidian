@@ -15,13 +15,15 @@
 #include "mymenu/screen.h"
 #include "mymenu/menu_debug.h"
 
+#include "core_safe.h"
+
 Encoder encoder(D2, D3);
 Bounce pushButton = Bounce(D1, 10); // 10ms debounce
 
 
 #include <atomic>
 extern std::atomic<bool> started;
-extern std::atomic<bool> menu_locked;
+//extern std::atomic<bool> menu_locked;
 extern std::atomic<bool> ticked;
 std::atomic<bool> frame_ready = false;
 
@@ -56,8 +58,8 @@ void push_display() {
     if (millis() - last_drawn < MENU_MS_BETWEEN_REDRAW) return;
     if (!menu->tft->ready()) return;
     if (!frame_ready) return;
-    if (menu_locked) return;
-    menu_locked = true;
+    if (is_locked()) return;
+    acquire_lock();
         
     //uint32_t interrupts = save_and_disable_interrupts();
     menu->updateDisplay();
@@ -65,7 +67,8 @@ void push_display() {
     last_drawn = millis();
 
     frame_ready = false;
-    menu_locked = false;
+    //menu_locked = false;
+    release_lock();
 }
 
 void update_screen_dontcare() {
@@ -75,16 +78,18 @@ void update_screen_dontcare() {
 void draw_screen() {
     //if (locked || menu==nullptr) 
     //    return;
-    while (menu_locked || ticked || frame_ready) {
+    while (is_locked() || ticked || frame_ready) {
         delay(MENU_MS_BETWEEN_REDRAW/8);
     };
-    menu_locked = true;
+    //menu_locked = true;
+    acquire_lock();
     //uint32_t interrupts = save_and_disable_interrupts();
     frame_ready = false;
     menu->display();
     frame_ready = true;
     //restore_interrupts(interrupts);
-    menu_locked = false;    
+    //menu_locked = false;    
+    release_lock();
 
     push_display();
 }
@@ -98,7 +103,7 @@ void setup1() {
 void loop1() {
     static unsigned long last_pushed = 0;
     //if (last_pushed==0) delay(5000);
-    while(menu_locked) {
+    while(is_locked()) {
         delay(MENU_MS_BETWEEN_REDRAW/8);
     }
     if (menu!=nullptr && millis() - last_pushed > MENU_MS_BETWEEN_REDRAW) {
@@ -107,8 +112,10 @@ void loop1() {
     }
     #ifdef ENABLE_CV_INPUT
         static unsigned long last_cv_update = 0;
-        if (!menu_locked && millis() - last_cv_update > time_between_cv_input_updates) {
+        if (millis() - last_cv_update > time_between_cv_input_updates && !is_locked()) {
+            acquire_lock();
             update_cv_input();
+            release_lock();
             last_cv_update = millis();
         }
     #endif

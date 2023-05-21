@@ -35,10 +35,11 @@
 
 #include "outputs/output_processor.h"
 
+#include "core_safe.h"
+
 #include <atomic>
 std::atomic<bool> started = false;
 std::atomic<bool> ticked = false;
-std::atomic<bool> menu_locked = false;
 
 // serial console to host, for debug etc
 void setup_serial() {
@@ -69,7 +70,7 @@ void setup() {
     //set_sys_clock_khz(230000, true);
     set_sys_clock_khz(200000, true);
 
-    menu_locked = false;
+    //menu_locked = false;
     ticked = false;
     started = false;
 
@@ -227,11 +228,11 @@ void loop() {
             menu->update_ticks(ticks);
             last_tick = ticks;
         }*/
-        if ((ticked || menu_tick_pending) && !menu_locked) {     // don't block, assume that we can make up for the missed tick next loop; much less jitter when at very very high BPMs
+        if ((ticked || menu_tick_pending) && !is_locked()) {     // don't block, assume that we can make up for the missed tick next loop; much less jitter when at very very high BPMs
             menu->update_ticks(ticks);
             last_tick = ticks;
             menu_tick_pending = false;
-        } else if (ticked && menu_locked) {
+        } else if (ticked && is_locked()) {
             menu_tick_pending = true;
             //menu->update_ticks(ticks);
             //last_tick = ticks;

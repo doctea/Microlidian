@@ -60,9 +60,12 @@ void messages_log_add(String msg) {
   #include "mymenu.h"
   #include "mymenu/screen.h"
 
+  #include "core_safe.h"
+
   void reset_upload_firmware() {
-    while(menu_locked) {}; // wait until current screen drawing on other core has finished
-    menu_locked = true;    // lock so that other core won't trash what we're about to draw to the screen
+    acquire_lock();
+    //while(menu_locked) {}; // wait until current screen drawing on other core has finished
+    //menu_locked = true;    // lock so that other core won't trash what we're about to draw to the screen
     if (menu!=nullptr && menu->tft) {
       menu->tft->clear();
       menu->tft->setTextSize(3);
