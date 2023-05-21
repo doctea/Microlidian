@@ -18,8 +18,8 @@ class SingleCircleDisplay : public MenuItem {
         //DeviceBehaviour_Beatstep *behaviour_beatstep = nullptr;
         //BaseSequencer *target_sequencer = nullptr;
         EuclidianPattern *target_pattern = nullptr;
-        int coordinates_x[16];
-        int coordinates_y[16];
+        int_fast8_t coordinates_x[16];
+        int_fast8_t coordinates_y[16];
         SingleCircleDisplay(const char *label, EuclidianPattern *target_pattern) : MenuItem(label) {
             this->set_target(target_pattern);
         }

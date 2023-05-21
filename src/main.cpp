@@ -79,6 +79,7 @@ void setup() {
 
     setup_cheapclock();
     set_global_restart_callback(global_on_restart);
+
     #if defined(ENABLE_CV_INPUT) && defined(ENABLE_CLOCK_INPUT_CV)
         set_check_cv_clock_ticked_callback(actual_check_cv_clock_ticked);
         set_clock_mode_changed_callback(clock_mode_changed);
@@ -229,7 +230,9 @@ void loop() {
             last_tick = ticks;
         }*/
         if ((ticked || menu_tick_pending) && !is_locked()) {     // don't block, assume that we can make up for the missed tick next loop; much less jitter when at very very high BPMs
+            //acquire_lock();
             menu->update_ticks(ticks);
+            //release_lock();
             last_tick = ticks;
             menu_tick_pending = false;
         } else if (ticked && is_locked()) {
@@ -249,8 +252,11 @@ void loop() {
         //read_serial_buffer();
 
         #ifdef ENABLE_SCREEN
-        if (!menu_locked)
+        if (!is_locked()) {
+            //acquire_lock();
             menu->update_inputs();
+            //release_lock();
+        }
         #endif
 
         add_loop_length(micros()-mics_start);
