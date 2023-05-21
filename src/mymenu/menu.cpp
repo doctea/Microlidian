@@ -156,12 +156,10 @@ void setup_menu() {
     menu->add(bpm_selector);*/
 
     // debug scales page
-    /*#ifdef ENABLE_SCALES
-        menu->add_page("Scales");
-        menu->add(new ScaleMenuItem("Scales"));
-    #endif*/
-
     #ifdef ENABLE_SCALES
+        //menu->add_page("Scales");
+        //menu->add(new ScaleMenuItem("Scales"));
+
         menu->add_page("Bass Quantiser");
         menu->add(new ObjectScaleMenuItem<MIDINoteTriggerCountOutput>("Bass scale", 
             (MIDINoteTriggerCountOutput*)output_processor->nodes->get(output_processor->nodes->size()-1),

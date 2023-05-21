@@ -213,64 +213,66 @@ class MIDIDrumOutput : public MIDIBaseOutput {
     }
 };
 
-#include "scales.h"
+#ifdef ENABLE_SCALES
+    #include "scales.h"
 
-// class that counts up all active triggers from passed-in nodes, and calculates a note from that, for eg monophonic basslines
-class MIDINoteTriggerCountOutput : public MIDIBaseOutput {
-    public:
-        LinkedList<BaseOutput*> *nodes = nullptr;   // output nodes that will count towards the note calculation
+    // class that counts up all active triggers from passed-in nodes, and calculates a note from that, for eg monophonic basslines
+    class MIDINoteTriggerCountOutput : public MIDIBaseOutput {
+        public:
+            LinkedList<BaseOutput*> *nodes = nullptr;   // output nodes that will count towards the note calculation
 
-        byte octave = 3;
-        byte scale_root = SCALE_ROOT_A;
-        SCALE scale_number = SCALE::MAJOR;
-        int base_note = scale_root * octave;
+            byte octave = 3;
+            byte scale_root = SCALE_ROOT_A;
+            SCALE scale_number = SCALE::MAJOR;
+            int base_note = scale_root * octave;
 
-        MIDINoteTriggerCountOutput(const char *label, LinkedList<BaseOutput*> *nodes, MIDIOutputWrapper *output_wrapper, byte channel = 1, byte scale_root = SCALE_ROOT_A, SCALE scale_number = SCALE::MAJOR, byte octave = 3) 
-            : MIDIBaseOutput(label, 0, output_wrapper) {
-            this->channel = channel;
-            this->nodes = nodes;
+            MIDINoteTriggerCountOutput(const char *label, LinkedList<BaseOutput*> *nodes, MIDIOutputWrapper *output_wrapper, byte channel = 1, byte scale_root = SCALE_ROOT_A, SCALE scale_number = SCALE::MAJOR, byte octave = 3) 
+                : MIDIBaseOutput(label, 0, output_wrapper) {
+                this->channel = channel;
+                this->nodes = nodes;
 
-            this->octave = octave;
-            this->scale_root = scale_root;
-            this->scale_number = scale_number;
-            this->base_note = scale_root * octave;
-        }
-
-        virtual byte get_note_number() override {
-            // count all the triggering notes and add that value ot the root note
-            // then quantise according to selected scale to get final note number
-            int count = 0;
-            for (int i = 0 ; i < this->nodes->size() ; i++) {
-                BaseOutput *o = this->nodes->get(i);
-                if (o==this) continue;
-                count += o->should_go_on() ? (i%12) : 0;
+                this->octave = octave;
+                this->scale_root = scale_root;
+                this->scale_number = scale_number;
+                this->base_note = scale_root * octave;
             }
-            Debug_printf("get_note_number in MIDINoteTriggerCountOutput is %i\n", count);
-            //return base_note + quantise_pitch(count);
 
-            // test mode, increment over 2 octaves to test scale quantisation
-            // best used with pulses = 6 so that it loops round
-            /*static int count = 0;
-            count++;
-            count %= 24;*/
-            return quantise_pitch(base_note + count, scale_root, scale_number);
-        }
+            virtual byte get_note_number() override {
+                // count all the triggering notes and add that value ot the root note
+                // then quantise according to selected scale to get final note number
+                int count = 0;
+                for (int i = 0 ; i < this->nodes->size() ; i++) {
+                    BaseOutput *o = this->nodes->get(i);
+                    if (o==this) continue;
+                    count += o->should_go_on() ? (i%12) : 0;
+                }
+                Debug_printf("get_note_number in MIDINoteTriggerCountOutput is %i\n", count);
+                //return base_note + quantise_pitch(count);
 
-        SCALE get_scale_number() {
-            return scale_number;
-        }
-        void set_scale_number(SCALE scale_number) {
-            this->scale_number = scale_number;
-        }
+                // test mode, increment over 2 octaves to test scale quantisation
+                // best used with pulses = 6 so that it loops round
+                /*static int count = 0;
+                count++;
+                count %= 24;*/
+                return quantise_pitch(base_note + count, scale_root, scale_number);
+            }
 
-        int get_scale_root() {
-            return this->scale_root;
-        }
-        void set_scale_root(int scale_root) {
-            this->scale_root = scale_root;
-            base_note = scale_root * octave;
-        }
-};
+            SCALE get_scale_number() {
+                return scale_number;
+            }
+            void set_scale_number(SCALE scale_number) {
+                this->scale_number = scale_number;
+            }
+
+            int get_scale_root() {
+                return this->scale_root;
+            }
+            void set_scale_root(int scale_root) {
+                this->scale_root = scale_root;
+                base_note = scale_root * octave;
+            }
+    };
+#endif
 
 #ifdef ENABLE_SCREEN
     void setup_output_menu();

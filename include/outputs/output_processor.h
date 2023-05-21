@@ -52,7 +52,9 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
             this->addDrumNode("Ride Cymbal",   GM_NOTE_RIDE_CYMBAL_1);  // todo: turn these into something like an EnvelopeOutput?
         #endif
 
-        this->addNode(new MIDINoteTriggerCountOutput("Bass", this->nodes, output_wrapper));
+        #ifdef ENABLE_SCALES
+            this->addNode(new MIDINoteTriggerCountOutput("Bass", this->nodes, output_wrapper));
+        #endif
     }
 
     virtual void addNode(BaseOutput* node) {
