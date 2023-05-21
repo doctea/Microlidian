@@ -2,6 +2,7 @@
 
 //#define LOCK_USE_SPINLOCKS
 //#define LOCK_NO_LOCKING
+#define LOCK_MUTEX
 //#define ATOMIC_WITH_INTERRUPTS
 
 #ifdef LOCK_USE_SPINLOCKS
@@ -26,6 +27,41 @@
     void release_lock() {}
     bool is_locked() { 
         return false; 
+    }
+#elif defined(LOCK_MUTEX)
+    #include "pico/sync.h"
+    #include <atomic>
+
+    struct Mutex {
+        mutex_t mutex;
+        std::atomic<bool> locked = false;
+        Mutex() {
+            mutex_init(&mutex);
+        }
+        public:
+        void lock() {
+            mutex_enter_blocking(&mutex);
+            locked = true;
+        }
+        void unlock() {
+            mutex_exit(&mutex);
+            locked = false;
+        }
+        bool is_locked() {
+            return locked;
+        }
+    };
+
+    Mutex menu_locked;
+
+    void acquire_lock() {
+        menu_locked.lock();
+    }
+    void release_lock() {
+        menu_locked.unlock();
+    }
+    bool is_locked() { 
+        return menu_locked.is_locked(); 
     }
 #else
     #include "hardware/sync.h"
