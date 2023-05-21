@@ -21,7 +21,7 @@ Bounce pushButton = Bounce(D1, 10); // 10ms debounce
 
 #include <atomic>
 extern std::atomic<bool> started;
-extern std::atomic<bool> locked;
+extern std::atomic<bool> menu_locked;
 extern std::atomic<bool> ticked;
 std::atomic<bool> frame_ready = false;
 
@@ -56,8 +56,8 @@ void push_display() {
     if (millis() - last_drawn < MENU_MS_BETWEEN_REDRAW) return;
     if (!menu->tft->ready()) return;
     if (!frame_ready) return;
-    if (locked) return;
-    locked = true;
+    if (menu_locked) return;
+    menu_locked = true;
         
     //uint32_t interrupts = save_and_disable_interrupts();
     menu->updateDisplay();
@@ -65,7 +65,7 @@ void push_display() {
     last_drawn = millis();
 
     frame_ready = false;
-    locked = false;
+    menu_locked = false;
 }
 
 void update_screen_dontcare() {
@@ -75,16 +75,16 @@ void update_screen_dontcare() {
 void draw_screen() {
     //if (locked || menu==nullptr) 
     //    return;
-    while (locked || ticked || frame_ready) {
+    while (menu_locked || ticked || frame_ready) {
         delay(MENU_MS_BETWEEN_REDRAW/8);
     };
-    locked = true;
+    menu_locked = true;
     //uint32_t interrupts = save_and_disable_interrupts();
     frame_ready = false;
     menu->display();
     frame_ready = true;
     //restore_interrupts(interrupts);
-    locked = false;    
+    menu_locked = false;    
 
     push_display();
 }
@@ -98,7 +98,7 @@ void setup1() {
 void loop1() {
     static unsigned long last_pushed = 0;
     //if (last_pushed==0) delay(5000);
-    while(locked) {
+    while(menu_locked) {
         delay(MENU_MS_BETWEEN_REDRAW/8);
     }
     if (menu!=nullptr && millis() - last_pushed > MENU_MS_BETWEEN_REDRAW) {
@@ -107,7 +107,7 @@ void loop1() {
     }
     #ifdef ENABLE_CV_INPUT
         static unsigned long last_cv_update = 0;
-        if (!locked && millis() - last_cv_update > time_between_cv_input_updates) {
+        if (!menu_locked && millis() - last_cv_update > time_between_cv_input_updates) {
             update_cv_input();
             last_cv_update = millis();
         }

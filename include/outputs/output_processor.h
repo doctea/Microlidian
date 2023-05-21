@@ -109,7 +109,6 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         for (int i = 0 ; i < this->nodes->size() ; i++) {
             sequencer->configure_pattern_output(i, this->nodes->get(i));
         }
-        //sequencer->configure_pattern_output(0, this->nodes.get(0));
     }
 
     #ifdef ENABLE_SCREEN

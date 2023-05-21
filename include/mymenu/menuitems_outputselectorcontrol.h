@@ -147,7 +147,7 @@ class OutputSelectorControl : public SelectorControl<int> {
                 selected_value_index = actual_value_index;
             const int start_value = tft->will_x_rows_fit_to_height(selected_value_index, tft->height()-pos.y) ? 0 : selected_value_index;
             
-            for (int i = start_value ; i < (int)num_values ; i++) {
+            for (unsigned int i = start_value ; i < num_values ; i++) {
                 //Serial.printf("%s#display() looping over parameterinput number %i of %i...\n", this->label, i, this->available_parameter_inputs->size()); Serial.flush();
                 const BaseOutput *param_input = this->available_objects->get(i);
                 if (param_input==nullptr) {
@@ -190,19 +190,23 @@ class OutputSelectorControl : public SelectorControl<int> {
             }
             // todo: sprintf to correct number of max_character_width characters
             if (crash_flag) {
-                tft->println("crash_flag!!");
+                tft->printf("index %i, crash_flag %i!!\n", index_to_display, crash_flag);
                 snprintf(txt, MAX_LABEL, "%p changed to ", last_found);
                 tft->println(txt);
-                snprintf(txt, MAX_LABEL, "%p", obj);
+                snprintf(txt, MAX_LABEL, "%p (diff %i)", obj, (last_found-obj));
+                tft->setTextSize(2);
                 tft->println(txt);
+                last_found = obj;
                 return tft->getCursorY();
+            } else {
+                last_found = obj;
             }
-            last_found = obj;
-            snprintf(txt, MAX_LABEL, "%6s", this->get_label_for_index(index_to_display)); //->available_objects->get(index_to_display)->label);
+            snprintf(txt, MAX_LABEL, "%6s", this->get_label_for_index(index_to_display));
         } else {
             snprintf(txt, MAX_LABEL, "None");
         }
-        tft->setTextSize((strlen(txt) < max_character_width/2) ? 2 : 1);
+        if (!crash_flag) 
+            tft->setTextSize((strlen(txt) < max_character_width/2) ? 2 : 1);
         tft->println(txt);
         return tft->getCursorY();
     }

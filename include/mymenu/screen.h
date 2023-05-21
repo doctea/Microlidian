@@ -17,7 +17,7 @@ extern Bounce pushButton;
 
 #include <atomic>
 extern std::atomic<bool> ticked;
-extern std::atomic<bool> locked;
+extern std::atomic<bool> menu_locked;
 extern std::atomic<bool> started;
 
 
