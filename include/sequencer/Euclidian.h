@@ -23,16 +23,22 @@ class Menu;
 
 //float effective_euclidian_density = 0.75f;
 
+#define SEQUENCE_LENGTH_STEPS 16
+const int LEN = SEQUENCE_LENGTH_STEPS;
+    
+struct arguments_t {
+    int steps = 16;
+    int pulses = steps/2;
+    int rotation = 1;
+    int duration = 1;
+    float effective_euclidian_density = 0.75;
+    int tie_on = -1;
+};
+
+extern arguments_t initial_arguments[];
+
 class EuclidianPattern : public SimplePattern {
     public:
-    
-    struct arguments_t {
-        int steps = 16;
-        int pulses = steps/2;
-        int rotation = 1;
-        int duration = 1;
-        float effective_euclidian_density = 0.75;
-    };
 
     bool locked = false;
 
@@ -44,7 +50,7 @@ class EuclidianPattern : public SimplePattern {
     arguments_t last_arguments;
     arguments_t default_arguments;
     int maximum_steps = steps;
-    int tie_on = 0;
+    //int tie_on = 0;
 
     float *global_density = nullptr;
 
@@ -52,7 +58,7 @@ class EuclidianPattern : public SimplePattern {
 
     EuclidianPattern(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
         //: arguments.pulses(pulses), arguments.rotation(arguments.rotation), arguments.duration(arguments.duration), tie_on(tie_on)
-        : default_arguments { .steps = steps, .pulses = pulses, .rotation = rotation, .duration = duration }, tie_on(tie_on)
+        : SimplePattern(), default_arguments { .steps = steps, .pulses = pulses, .rotation = rotation, .duration = duration, .tie_on = tie_on }
         {
             /*arguments.steps = steps;
             arguments.pulses = pulses;
@@ -88,12 +94,22 @@ class EuclidianPattern : public SimplePattern {
         return summary;
     }
 
-    void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1) { //}, float effective_euclidian_density = 0.75f) {
+    void make_euclid(arguments_t arguments) {
+        this->make_euclid(
+            arguments.steps,
+            arguments.pulses,
+            arguments.rotation,
+            arguments.duration,
+            arguments.tie_on
+        );
+    }
+
+    void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, /*, int trigger = -1,*/ int tie_on = -1) { //}, float effective_euclidian_density = 0.75f) {
         if (steps > 0)      this->arguments.steps = steps;
         if (pulses > 0)     this->arguments.pulses = pulses;
         if (rotation >= 0)  this->arguments.rotation = rotation;
         if (duration >= 0)  this->arguments.duration = duration;
-        if (tie_on >= 0)    this->tie_on = tie_on;
+        if (tie_on >= 0)    this->arguments.tie_on = tie_on;
 
         this->arguments.effective_euclidian_density = *this->global_density;
 
@@ -226,18 +242,22 @@ class EuclidianPattern : public SimplePattern {
 
 class EuclidianSequencer : public BaseSequencer {
     // todo: list of EuclidianPatterns...
-    EuclidianPattern **patterns = nullptr;
+    //EuclidianPattern **patterns = nullptr;
+    EuclidianPattern *patterns[21];
 
     int seed = 0;
     int mutate_minimum_pattern = 0, mutate_maximum_pattern = number_patterns;
-    bool reset_before_mutate = true, mutate_enabled = true, fills_enabled = true, add_phrase_to_seed = true;
+    bool    reset_before_mutate = false, 
+            mutate_enabled = false, 
+            fills_enabled = false, 
+            add_phrase_to_seed = true;
 
     float global_density = 0.75f;
 
     public:
     EuclidianSequencer() : BaseSequencer() {
         EuclidianPattern *p = nullptr;
-        this->patterns = (EuclidianPattern**) calloc(number_patterns, sizeof(p));
+        //this->patterns = (EuclidianPattern**) calloc(number_patterns, sizeof(p));
         for (int i = 0 ; i < number_patterns ; i++) {
             this->patterns[i] = new EuclidianPattern();
             this->patterns[i]->global_density = &this->global_density;
@@ -287,14 +307,13 @@ class EuclidianSequencer : public BaseSequencer {
     }
     
     SimplePattern *get_pattern(int pattern) {
+        if (pattern < 0 || pattern >= number_patterns)
+            return nullptr;
         return this->patterns[pattern];
     }
 
     void initialise_patterns() {
-        #define SEQUENCE_LENGTH_STEPS 16
-        const int LEN = SEQUENCE_LENGTH_STEPS;
-        int i = 0;
-        this->patterns[i++]->make_euclid(LEN,    4, 1,   DEFAULT_DURATION); //, TRIGGER_KICK);// get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM));    // kick
+        /*this->patterns[i++]->make_euclid(LEN,    4, 1,   DEFAULT_DURATION); //, TRIGGER_KICK);// get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM));    // kick
         this->patterns[i++]->make_euclid(LEN,    5, 1,   DEFAULT_DURATION); //, TRIGGER_SIDESTICK); //get_trigger_for_pitch(GM_NOTE_SIDE_STICK));    // stick
         this->patterns[i++]->make_euclid(LEN,    2, 5,   DEFAULT_DURATION); //, TRIGGER_CLAP); //get_trigger_for_pitch(GM_NOTE_HAND_CLAP));    // clap
         this->patterns[i++]->make_euclid(LEN,    3, 1,   DEFAULT_DURATION); //, TRIGGER_SNARE); //get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE));   // snare
@@ -313,7 +332,10 @@ class EuclidianSequencer : public BaseSequencer {
         this->patterns[i++]->make_euclid(LEN,    4, 3,   2); //, PATTERN_BASS, 6);  // bass (neutron) offbeat with 6ie of 6
         this->patterns[i++]->make_euclid(LEN,    4, 3,   1); //, PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
         this->patterns[i++]->make_euclid(LEN,    4, 1,   4); //, PATTERN_PAD_ROOT); // root pad
-        this->patterns[i++]->make_euclid(LEN,    4, 5,   4); //,   PATTERN_PAD_PITCH); // root pad
+        this->patterns[i++]->make_euclid(LEN,    4, 5,   4); //,   PATTERN_PAD_PITCH); // root pad*/
+        for (int i = 0 ; i < number_patterns ; i++) {
+            this->patterns[i]->make_euclid(initial_arguments[i]);
+        }
     }
     void reset_patterns() {
         for (int i = 0 ; i < number_patterns ; i++) {
