@@ -45,7 +45,7 @@ void auto_handle_start() {
             __clock_mode_changed_callback(clock_mode, CLOCK_EXTERNAL_USB_HOST);
         clock_mode = CLOCK_EXTERNAL_USB_HOST;
         //ticks = 0;
-        messages_log_add("Auto-switched to CLOCK_EXTERNAL_USB_HOST");
+        messages_log_add(String("Auto-switched to CLOCK_EXTERNAL_USB_HOST"));
     }
     pc_usb_midi_handle_start();
 }

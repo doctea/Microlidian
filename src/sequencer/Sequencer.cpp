@@ -7,11 +7,11 @@
 
 void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     if (index >= this->number_patterns) {
-        char message[MAX_MESSAGES_LOG*2];
-        snprintf(message, MAX_MESSAGES_LOG*2, "Attempted to configure pattern with invalid index %i!", index);
+        String message = String("Attempted to configure pattern with invalid index ") + String(index);
         messages_log_add(message);
         return;
     }
     SimplePattern *p = this->get_pattern(index);
-    p->set_output(output);
+    if (p!=nullptr)
+        p->set_output(output);
 }

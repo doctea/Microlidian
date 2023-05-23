@@ -128,7 +128,8 @@ class MIDIBaseOutput : public BaseOutput {
 
     MIDIOutputWrapper *output_wrapper = nullptr;
 
-    MIDIBaseOutput(const char *label, byte note_number, MIDIOutputWrapper *output_wrapper) : BaseOutput(label), note_number(note_number), output_wrapper(output_wrapper) {}
+    MIDIBaseOutput(const char *label, byte note_number, MIDIOutputWrapper *output_wrapper) 
+        : BaseOutput(label), note_number(note_number), output_wrapper(output_wrapper) {}
 
     virtual byte get_note_number() {
         return this->note_number;
@@ -208,7 +209,8 @@ class MIDIBaseOutput : public BaseOutput {
 // an output that tracks MIDI drum triggers
 class MIDIDrumOutput : public MIDIBaseOutput {
     public:
-    MIDIDrumOutput(const char *label, byte note_number, MIDIOutputWrapper *output_wrapper) : MIDIBaseOutput(label, note_number, output_wrapper) {
+    MIDIDrumOutput(const char *label, byte note_number, MIDIOutputWrapper *output_wrapper) 
+        : MIDIBaseOutput(label, note_number, output_wrapper) {
         this->channel = GM_CHANNEL_DRUMS;
     }
 };
