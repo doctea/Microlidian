@@ -55,8 +55,8 @@ DisplayTranslator_Configured *tft = nullptr;
 Menu *menu = nullptr; // = Menu();
 
 #ifdef ENCODER_KNOB_L
-    Encoder knob(ENCODER_KNOB_L, ENCODER_KNOB_R);
-    //extern Encoder knob;
+    //Encoder knob(ENCODER_KNOB_L, ENCODER_KNOB_R); // earlephilhower core trashes interrupts after static initialisation, so set up Encoder in setup() instead now
+    Encoder *knob = nullptr;
 #endif
 #ifdef PIN_BUTTON_A
     Bounce pushButtonA = Bounce(PIN_BUTTON_A, 10); // 10ms debounce
@@ -105,6 +105,10 @@ uint32_t external_cv_ticks_per_pulse_values[] = { 1, 2, 3, 4, 6, 8, 12, 16, 24 }
 
 void setup_menu() {
     Debug_println(F("Starting setup_menu()..")); Serial_flush();
+
+    #ifdef ENCODER_KNOB_L
+        knob = new Encoder(ENCODER_KNOB_L, ENCODER_KNOB_R);
+    #endif
 
     tft = &displaytranslator; 
     tft->init();

@@ -17,15 +17,16 @@
 
 #include "core_safe.h"
 
-Encoder encoder(D2, D3);
-Bounce pushButton = Bounce(D1, 10); // 10ms debounce
-
-
 #include <atomic>
 extern std::atomic<bool> started;
 //extern std::atomic<bool> menu_locked;
 extern std::atomic<bool> ticked;
 std::atomic<bool> frame_ready = false;
+
+#include "menu.h"
+
+//extern DisplayTranslator_Configured *tft;
+//extern DisplayTranslator_Configured displaytranslator;
 
 void setup_screen() {
     #ifdef ENABLE_SCREEN
@@ -33,8 +34,11 @@ void setup_screen() {
         pinMode(ENCODER_KNOB_R, INPUT_PULLUP);
         pinMode(PIN_BUTTON_A, INPUT_PULLDOWN);
         pinMode(PIN_BUTTON_B, INPUT_PULLDOWN);
+    
+        //tft = &displaytranslator; 
+        //tft->init();
 
-        tft_print((char*)"Ready!"); 
+        tft_print((char*)"Ready!");
         tft_clear();
 
         setup_menu();

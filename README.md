@@ -13,14 +13,19 @@ The aim here is to have a flexible and extensible MIDI generator based on the mu
 - [mymenu](https://github.com/doctea/mymenu)
 - [midihelpers](https://github.com/doctea/midihelpers)
 - [parameters](httpa://github.com/doctea/parameters)
+- [patched Encoder library](https://github.com/doctea/Encoder) 
+- [Vortigont LinkedList library](https://github.com/vortigont/LinkedList)
 - vscode+platformio
 - the gfx library by Bodmer for fast DMA writes
 
-## Hardware/wiring
+## Hardware/PCB wiring
 
+- Use env:pcb with -DBUILD_PCB
 - WIP PCB & panels in KiCAD and Gerber format [here](https://github.com/doctea/Microlidian-hardware) - don't use these yet without checking with the author for any problems/new versions!
 
 ### Breadboard wiring
+
+- Use env:pcb with -DBUILD_BREADBOARD
 
 Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 
@@ -94,7 +99,8 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 
 - Trying to Serial.print() from the second core (screen+CV input) while serial is connected will hang the display!
 - Trying to Serial.print() generally seems to be unreliable and likely to cause crashes
-- Occasional glitching of output name display when on some track pages; intermittent crashes; probably caused by something overwriting selected output slot or something similar?
+- Occasional glitching of output name display when on some track pages; intermittent crashes bizarrely happening when rendering output labels on pattern page; ~~probably caused by something overwriting selected output slot or something similar?~~ ????
+- Slow loading presets causing pauses and problems
 
 ## Done
 
