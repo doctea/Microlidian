@@ -1,3 +1,7 @@
+#define ENABLE_OUTPUT_SELECTOR      // euclidian output selector control that is causing us so many crashy problems
+#define ENABLE_STEP_DISPLAYS
+#define ENABLE_OTHER_CONTROLS
+
 #include "submenuitem_bar.h"
 
 #include "mymenu/menuitems_sequencer.h"
@@ -12,47 +16,57 @@ extern MIDIOutputProcessor *output_processor;
 class EuclidianPatternControl : public SubMenuItemBar {
     public:
 
-    SingleCircleDisplay *circle_display = nullptr;
-    PatternDisplay *step_display = nullptr;
+    #ifdef ENABLE_STEP_DISPLAYS
+        SingleCircleDisplay *circle_display = nullptr;
+        PatternDisplay *step_display = nullptr;
+    #endif
     EuclidianPattern *pattern = nullptr;
 
     EuclidianPatternControl(const char *label, EuclidianPattern *pattern) : SubMenuItemBar(label), pattern(pattern) {        
-        this->circle_display = new SingleCircleDisplay(label, pattern);     // circle display first - don't add this as a submenu item, because it isn't selectable
-        this->step_display = new PatternDisplay(label, pattern);    // step sequence view next
+        #ifdef ENABLE_STEP_DISPLAYS
+            this->circle_display = new SingleCircleDisplay(label, pattern);     // circle display first - don't add this as a submenu item, because it isn't selectable
+            this->step_display = new PatternDisplay(label, pattern);    // step sequence view next
+        #endif
 
-        OutputSelectorControl<EuclidianPattern> *selector = new OutputSelectorControl<EuclidianPattern>(
-            "Output",
-            pattern,
-            &EuclidianPattern::set_output,
-            &EuclidianPattern::get_output,
-            output_processor->nodes,
-            pattern->output
-        );
-        selector->go_back_on_select = true;
-        this->add(selector);
+        #ifdef ENABLE_OUTPUT_SELECTOR
+            OutputSelectorControl<EuclidianPattern> *selector = new OutputSelectorControl<EuclidianPattern>(
+                "Output",
+                pattern,
+                &EuclidianPattern::set_output,
+                &EuclidianPattern::get_output,
+                output_processor->nodes,
+                pattern->output
+            );
+            selector->go_back_on_select = true;
+            this->add(selector);
+        #endif
 
-        this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
+        #ifdef ENABLE_OTHER_CONTROLS
+            this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
 
-        //SubMenuItemBar *bar = new SubMenuItemBar("Arguments");
-        //Menu *bar = menu;
-        this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Steps",    pattern, &EuclidianPattern::set_steps,      &EuclidianPattern::get_steps,    nullptr, 1, pattern->maximum_steps, true, true));
-        this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Pulses",   pattern, &EuclidianPattern::set_pulses,     &EuclidianPattern::get_pulses,   nullptr, 1, STEPS_PER_BAR, true, true));
-        this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Rotation", pattern, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, pattern->maximum_steps, true, true));
-        //menu->add(new ObjectNumberControl<EuclidianPattern,byte> ("Duration", p, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, 1, STEPS_PER_BAR, true, true));
-        //menu->debug = true;
-        this->add(new ObjectActionConfirmItem<EuclidianPattern> ("Store as default", pattern, &EuclidianPattern::store_current_arguments_as_default));
+            //SubMenuItemBar *bar = new SubMenuItemBar("Arguments");
+            //Menu *bar = menu;
+            this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Steps",    pattern, &EuclidianPattern::set_steps,      &EuclidianPattern::get_steps,    nullptr, 1, pattern->maximum_steps, true, true));
+            this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Pulses",   pattern, &EuclidianPattern::set_pulses,     &EuclidianPattern::get_pulses,   nullptr, 1, STEPS_PER_BAR, true, true));
+            this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Rotation", pattern, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, pattern->maximum_steps, true, true));
+            //menu->add(new ObjectNumberControl<EuclidianPattern,byte> ("Duration", p, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, 1, STEPS_PER_BAR, true, true));
+            //menu->debug = true;
+            this->add(new ObjectActionConfirmItem<EuclidianPattern> ("Store as default", pattern, &EuclidianPattern::store_current_arguments_as_default));
+        #endif
     }
 
     virtual void on_add() override {
         SubMenuItemBar::on_add();
-        if (this->circle_display!=nullptr) {
-            this->circle_display->set_tft(this->tft);
-            this->circle_display->on_add();
-        }
-        if (this->step_display!=nullptr) {
-            this->step_display->set_tft(this->tft);
-            this->step_display->on_add();
-        }
+        #ifdef ENABLE_STEP_DISPLAYS
+            if (this->circle_display!=nullptr) {
+                this->circle_display->set_tft(this->tft);
+                this->circle_display->on_add();
+            }
+            if (this->step_display!=nullptr) {
+                this->step_display->set_tft(this->tft);
+                this->step_display->on_add();
+            }
+        #endif
     }
 
 
@@ -61,8 +75,10 @@ class EuclidianPatternControl : public SubMenuItemBar {
         tft->setCursor(pos.x, pos.y);
         colours(opened, opened ? GREEN : this->default_fg, this->default_bg);
 
-        if (this->step_display!=nullptr)
-            pos.y = this->step_display->display(pos, selected, opened); // display the step sequencer across the top
+        #ifdef ENABLE_STEP_DISPLAYS
+            if (this->step_display!=nullptr)
+                pos.y = this->step_display->display(pos, selected, opened); // display the step sequencer across the top
+        #endif
 
         int start_y = pos.y;        // y to start drawing at (just under header)
         int finish_y = pos.y;       // highest y that we finished drawing at
@@ -104,8 +120,10 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 finish_y = temp_y;
         }
 
-        if (this->circle_display!=nullptr)
-            this->circle_display->display(pos, selected, opened);
+        #ifdef ENABLE_STEP_DISPLAYS
+            if (this->circle_display!=nullptr)
+                this->circle_display->display(pos, selected, opened);
+        #endif
 
         return finish_y;
     }

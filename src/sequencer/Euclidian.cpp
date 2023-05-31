@@ -94,8 +94,20 @@ arguments_t initial_arguments[] = {
         snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
         menu->add_page(label);
 
-        //EuclidianPattern *p = (EuclidianPattern *)sequencer.get_pattern(pattern_index);
         EuclidianPatternControl *epc = new EuclidianPatternControl(label, this);
         menu->add(epc);
+        
+        #ifdef SIMPLE_SELECTOR
+        OutputSelectorControl<EuclidianPattern> *selector = new OutputSelectorControl<EuclidianPattern>(
+            "Output",
+            this,
+            &EuclidianPattern::set_output,
+            &EuclidianPattern::get_output,
+            output_processor->nodes,
+            this->output
+        );
+        selector->go_back_on_select = true;
+        menu->add(selector);
+        #endif
     }
 #endif

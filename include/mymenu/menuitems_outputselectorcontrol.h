@@ -2,8 +2,10 @@
 #define OUTPUTSELECTOR_MENUITEMS__INCLUDED
 
 #include "menuitems.h"
-
 #include "outputs/output.h"
+#include "debug.h"
+
+#include <LinkedList.h>
 
 //class BaseOutput;
 
@@ -28,17 +30,18 @@ class OutputSelectorControl : public SelectorControl<int> {
         LinkedList<BaseOutput*> *available_objects,
         BaseOutput *initial_selected_object = nullptr,
         bool show_values = false
-    ) : SelectorControl(label, 0) {
+    ) : SelectorControl(label, -1) {
         this->show_values = show_values;
-        this->initial_selected_object = initial_selected_object;    // hot damn .. 
-        this->available_objects = available_objects;
+        this->initial_selected_object = initial_selected_object;
         this->target_object = target_object;
         this->setter_func = setter_func;
-        this->num_values = available_objects->size();
+        //this->f_getter = getter_func;
+        //this->num_values = available_objects->size();
+        this->set_available_values(available_objects);
     };
 
     virtual void configure (LinkedList<BaseOutput*> *available_objects) {
-        this->available_objects = available_objects;
+        this->set_available_values(available_objects);
         const char *initial_name = (char*)"None";
         if (this->initial_selected_object!=nullptr)
             initial_name = this->initial_selected_object->label;
@@ -86,15 +89,69 @@ class OutputSelectorControl : public SelectorControl<int> {
         //Serial.printf(F("#on_add returning"));
     }
 
+    BaseOutput *last_object = nullptr;
+    int last_index = -1;
+    char last_label[MAX_LABEL];
+    virtual const char *get_label_for_index(int index) {
+        if (index<0 || index >= this->available_objects->size())
+            return "None";
+
+        if (last_index!=index) {
+            last_object = this->available_objects->get(index);
+            last_index = index;
+            snprintf(last_label, MAX_LABEL, "%s", last_object->label);
+        }
+
+        return last_label;
+    }
+
+    #ifdef CRASHY_CODE
     char label_for_index[MAX_LABEL];
-    virtual const char *get_label_for_index(int index)  {
+    char *last_output_label = nullptr;
+    BaseOutput *last_output_object = nullptr;
+    bool crash_detected = false;
+    LinkedList<BaseOutput*> *last_available_objects = nullptr;
+    virtual const char *get_label_for_index_crashes(int index)  {
         //static char label_for_index[MENU_C_MAX];
         // todo: this is currently unused + untested
         if (index<0 || index >= this->available_objects->size())
             return "None";
-        snprintf(label_for_index, MAX_LABEL, "%s", this->available_objects->get(index)->label);
-        return label_for_index;
+
+        if (crash_detected)
+            return "crash detected!";
+
+        if (last_available_objects!=nullptr && this->available_objects!=last_available_objects) { 
+            crash_detected = true;
+            return "available_objects changed!";
+        }
+        last_available_objects = this->available_objects;
+
+        //BaseOutput *obj = this->available_objects->get(index);
+        /*if (last_output_object!=nullptr && obj!=last_output_object) {
+            crash_detected = true;
+            return "!!! object changed !!!";
+        }*/
+        
+        //last_output_object = obj;
+        return "harrumph";
+
+        /*if (obj==nullptr) {
+            crash_detected = true;
+            return "*** obj is null! ***";
+        }
+
+        if (last_output_label!=nullptr && last_output_label!=obj->label) {
+            crash_detected = true;
+            return "OOOOOOF!!!";
+        }
+
+        last_output_object = obj;
+        last_output_label = obj->label;
+
+        snprintf(label_for_index, MAX_LABEL, "%s", obj->label);
+        return label_for_index;*/
     }
+    #endif
 
     // update the control to reflect changes to selection (eg, called when new value is loaded from project file)
     virtual void update_source(BaseOutput *new_source)  {
@@ -172,36 +229,84 @@ class OutputSelectorControl : public SelectorControl<int> {
         return tft->getCursorY();
     }
 
-    int crash_flag = 0;
-    BaseOutput *last_found = nullptr;
+    //int crash_flag = 0;
+    //BaseOutput *last_found = nullptr;
+    //BaseOutput *stranger_last_found = nullptr;
+    //int last_index = -1;
+
+    #ifdef CRASHY_CODE
+    virtual int renderValue_debug_crashy(bool selected, bool opened, uint16_t max_character_width) override {
+        char label[MAX_LABEL_LENGTH] = "basic label";
+        /*const char *src_label = opened ?
+            this->get_label_for_value(available_values[selected_value_index])
+            :
+            this->get_label_for_value(this->getter());*/
+        char *lbl = nullptr;
+
+        if (selected_value_index<0 || selected_value_index>=this->available_objects->size()) {
+            //snprintf(label, max_character_width, "None");
+            lbl = "None";
+        } else {
+            lbl = this->get_label_for_index(selected_value_index);
+            const char *src_label = this->get_label_for_index(
+                opened ? selected_value_index : this->getter()
+            );
+
+            //strcpy(label, get_label_for_value(available_values[opened ? selected_value_index : this->getter()]));
+            /*if (strlen(label) > max_character_width) {
+                label[max_character_width] = '\0';
+            }*/
+
+            snprintf(label, MAX_LABEL_LENGTH, "%s", src_label);      
+        }
+    }
+    #endif
 
     virtual int renderValue(bool selected, bool opened, uint16_t max_character_width) override {
+        const char *lbl = this->get_label_for_index(selected_value_index);
+
+        tft->setTextSize((strlen(lbl) < max_character_width/2) ? 2 : 1);
+        tft->println(lbl);
+
+        return tft->getCursorY();
+    }
+
+    /*virtual int renderValue(bool selected, bool opened, uint16_t max_character_width) override {
         const int index_to_display = opened ? selected_value_index : actual_value_index;
         const int col = selected_value_index==this->actual_value_index && opened ? 
                 GREEN : C_WHITE;
                 //(index_to_display>=0 ? this->available_objects->get(index_to_display)->colour : YELLOW/2);
         
+        tft->printf("Free RAM: %i\n", freeRam());
+
         colours(selected, col, BLACK);
         char txt[MAX_LABEL];
         if (index_to_display>=0 && index_to_display<this->available_objects->size()) {
+            if (last_index!=-1 && last_index!=index_to_display) {
+                tft->printf("index changed from %i to %i!\n", last_index, index_to_display);
+            } else {
+                last_index = index_to_display;
+            }
+
             BaseOutput *obj = this->available_objects->get(index_to_display);
             if (last_found!=nullptr && obj!=last_found) {
+                stranger_last_found = obj;
                 crash_flag++;
             }
             // todo: sprintf to correct number of max_character_width characters
             if (crash_flag) {
                 tft->printf("index %i, crash_flag %i!!\n", index_to_display, crash_flag);
-                snprintf(txt, MAX_LABEL, "%p changed to ", last_found);
+                snprintf(txt, MAX_LABEL, "%p changed to ", stranger_last_found);
                 tft->println(txt);
-                snprintf(txt, MAX_LABEL, "%p (diff %i)", obj, (last_found-obj));
+                snprintf(txt, MAX_LABEL, "%p (diff %i)", obj, (stranger_last_found-obj));
                 tft->setTextSize(2);
                 tft->println(txt);
-                last_found = obj;
+                //last_found = obj;
                 return tft->getCursorY();
             } else {
                 last_found = obj;
             }
-            snprintf(txt, MAX_LABEL, "%6s", this->get_label_for_index(index_to_display));
+            //snprintf(txt, MAX_LABEL, "%6s", this->get_label_for_index(index_to_display));
         } else {
             snprintf(txt, MAX_LABEL, "None");
         }
@@ -209,7 +314,7 @@ class OutputSelectorControl : public SelectorControl<int> {
             tft->setTextSize((strlen(txt) < max_character_width/2) ? 2 : 1);
         tft->println(txt);
         return tft->getCursorY();
-    }
+    }*/
 
     virtual bool button_select() override {
         //Serial.printf("button_select with selected_value_index %i\n", selected_value_index);

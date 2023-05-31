@@ -17,7 +17,7 @@
 
 #include "midi_helpers.h"
 
-#define MAX_LABEL 20
+#define MAX_LABEL 40
 
 #include "midi/midi_usb.h"
 
