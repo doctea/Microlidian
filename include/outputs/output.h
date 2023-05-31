@@ -66,7 +66,8 @@ class MIDIOutputWrapper {
         #ifdef USE_TINYUSB
             usbmidi->sendClock();
         #endif
-        dinmidi->sendClock(); // todo: make able to send divisions of clock to muso, to make the clock output more useful
+        if (is_bpm_on_beat(ticks))  // todo: make clock tick sends to din MIDI use custom divisor value
+            dinmidi->sendClock();   // send divisions of clock to muso, to make the clock output more useful
     }
     void sendStart() {
         #ifdef USE_TINYUSB
@@ -123,7 +124,7 @@ class MIDIBaseOutput : public BaseOutput {
     public:
 
     byte note_number = -1, last_note_number = -1;
-    byte channel = 10;
+    byte channel = GM_CHANNEL_DRUMS;
     byte event_value_1, event_value_2, event_value_3;
 
     MIDIOutputWrapper *output_wrapper = nullptr;
@@ -212,6 +213,10 @@ class MIDIDrumOutput : public MIDIBaseOutput {
     MIDIDrumOutput(const char *label, byte note_number, MIDIOutputWrapper *output_wrapper) 
         : MIDIBaseOutput(label, note_number, output_wrapper) {
         this->channel = GM_CHANNEL_DRUMS;
+    }
+    MIDIDrumOutput(const char *label, byte note_number, byte channel, MIDIOutputWrapper *output_wrapper) 
+        : MIDIBaseOutput(label, note_number, output_wrapper) {
+        this->channel = channel;
     }
 };
 
