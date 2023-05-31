@@ -70,7 +70,6 @@ void setup() {
     //set_sys_clock_khz(230000, true);
     set_sys_clock_khz(200000, true);
 
-    //menu_locked = false;
     ticked = false;
     started = false;
 

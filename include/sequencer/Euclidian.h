@@ -27,7 +27,7 @@ class Menu;
 const int LEN = SEQUENCE_LENGTH_STEPS;
     
 struct arguments_t {
-    int steps = 16;
+    int steps = SEQUENCE_LENGTH_STEPS;
     int pulses = steps/2;
     int rotation = 1;
     int duration = 1;
@@ -242,14 +242,13 @@ class EuclidianPattern : public SimplePattern {
 
 class EuclidianSequencer : public BaseSequencer {
     // todo: list of EuclidianPatterns...
-    //EuclidianPattern **patterns = nullptr;
-    EuclidianPattern *patterns[21];
+    EuclidianPattern **patterns = nullptr;
 
     int seed = 0;
     int mutate_minimum_pattern = 0, mutate_maximum_pattern = number_patterns;
-    bool    reset_before_mutate = false, 
-            mutate_enabled = false, 
-            fills_enabled = false, 
+    bool    reset_before_mutate = true, 
+            mutate_enabled = true, 
+            fills_enabled = true, 
             add_phrase_to_seed = true;
 
     float global_density = 0.75f;
@@ -257,7 +256,7 @@ class EuclidianSequencer : public BaseSequencer {
     public:
     EuclidianSequencer() : BaseSequencer() {
         EuclidianPattern *p = nullptr;
-        //this->patterns = (EuclidianPattern**) calloc(number_patterns, sizeof(p));
+        this->patterns = (EuclidianPattern**) calloc(number_patterns, sizeof(p));
         for (int i = 0 ; i < number_patterns ; i++) {
             this->patterns[i] = new EuclidianPattern();
             this->patterns[i]->global_density = &this->global_density;
@@ -313,26 +312,6 @@ class EuclidianSequencer : public BaseSequencer {
     }
 
     void initialise_patterns() {
-        /*this->patterns[i++]->make_euclid(LEN,    4, 1,   DEFAULT_DURATION); //, TRIGGER_KICK);// get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM));    // kick
-        this->patterns[i++]->make_euclid(LEN,    5, 1,   DEFAULT_DURATION); //, TRIGGER_SIDESTICK); //get_trigger_for_pitch(GM_NOTE_SIDE_STICK));    // stick
-        this->patterns[i++]->make_euclid(LEN,    2, 5,   DEFAULT_DURATION); //, TRIGGER_CLAP); //get_trigger_for_pitch(GM_NOTE_HAND_CLAP));    // clap
-        this->patterns[i++]->make_euclid(LEN,    3, 1,   DEFAULT_DURATION); //, TRIGGER_SNARE); //get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE));   // snare
-        this->patterns[i++]->make_euclid(LEN,    3, 3,   DEFAULT_DURATION); //, TRIGGER_CRASH_1); //get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_1));    // crash 1
-        this->patterns[i++]->make_euclid(LEN,    7, 1,   DEFAULT_DURATION); //, TRIGGER_TAMB); //get_trigger_for_pitch(GM_NOTE_TAMBOURINE));    // tamb
-        this->patterns[i++]->make_euclid(LEN,    9, 1,   DEFAULT_DURATION); //, TRIGGER_HITOM); //get_trigger_for_pitch(GM_NOTE_HIGH_TOM));    // hi tom!
-        this->patterns[i++]->make_euclid(LEN/4,  2, 3,   DEFAULT_DURATION); //, TRIGGER_LOTOM); //get_trigger_for_pitch(GM_NOTE_LOW_TOM));    // low tom
-        this->patterns[i++]->make_euclid(LEN/2,  2, 3,   DEFAULT_DURATION); //, TRIGGER_PEDALHAT); //get_trigger_for_pitch(GM_NOTE_PEDAL_HI_HAT));    // pedal hat
-        this->patterns[i++]->make_euclid(LEN,    4, 3,   DEFAULT_DURATION); //, TRIGGER_OPENHAT); //get_trigger_for_pitch(GM_NOTE_OPEN_HI_HAT));    // open hat
-        this->patterns[i++]->make_euclid(LEN,    16, 0,  0               ); //, TRIGGER_CLOSEDHAT); //get_trigger_for_pitch(GM_NOTE_CLOSED_HI_HAT)); //DEFAULT_DURATION);   // closed hat
-        this->patterns[i++]->make_euclid(LEN*2,  1, 1,   DEFAULT_DURATION); //, TRIGGER_CRASH_2); //get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_2));   // crash 2
-        this->patterns[i++]->make_euclid(LEN*2,  1, 5,   DEFAULT_DURATION); //, TRIGGER_SPLASH); //get_trigger_for_pitch(GM_NOTE_SPLASH_CYMBAL));   // splash
-        this->patterns[i++]->make_euclid(LEN*2,  1, 9,   DEFAULT_DURATION); //, TRIGGER_VIBRA); //get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP));    // vibra
-        this->patterns[i++]->make_euclid(LEN*2,  1, 13,  DEFAULT_DURATION); //, TRIGGER_RIDE_BELL); //get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
-        this->patterns[i++]->make_euclid(LEN*2,  5, 13,  DEFAULT_DURATION); //, TRIGGER_RIDE_CYM); //get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
-        this->patterns[i++]->make_euclid(LEN,    4, 3,   2); //, PATTERN_BASS, 6);  // bass (neutron) offbeat with 6ie of 6
-        this->patterns[i++]->make_euclid(LEN,    4, 3,   1); //, PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
-        this->patterns[i++]->make_euclid(LEN,    4, 1,   4); //, PATTERN_PAD_ROOT); // root pad
-        this->patterns[i++]->make_euclid(LEN,    4, 5,   4); //,   PATTERN_PAD_PITCH); // root pad*/
         for (int i = 0 ; i < number_patterns ; i++) {
             this->patterns[i]->make_euclid(initial_arguments[i]);
         }

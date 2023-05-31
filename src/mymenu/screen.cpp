@@ -71,7 +71,7 @@ void push_display() {
     last_drawn = millis();
 
     frame_ready = false;
-    //menu_locked = false;
+
     release_lock();
 }
 
@@ -92,7 +92,6 @@ void draw_screen() {
     menu->display();
     frame_ready = true;
     //restore_interrupts(interrupts);
-    //menu_locked = false;    
     release_lock();
 
     push_display();

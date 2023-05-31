@@ -55,8 +55,8 @@ DisplayTranslator_Configured *tft = nullptr;
 Menu *menu = nullptr; // = Menu();
 
 #ifdef ENCODER_KNOB_L
-    //Encoder knob(ENCODER_KNOB_L, ENCODER_KNOB_R); // earlephilhower core trashes interrupts after static initialisation, so set up Encoder in setup() instead now
-    Encoder *knob = nullptr;
+    //Encoder knob(ENCODER_KNOB_L, ENCODER_KNOB_R);
+    Encoder *knob = nullptr; // earlephilhower core trashes interrupts after static initialisation, so set up Encoder in setup() instead now
 #endif
 #ifdef PIN_BUTTON_A
     Bounce pushButtonA = Bounce(PIN_BUTTON_A, 10); // 10ms debounce
