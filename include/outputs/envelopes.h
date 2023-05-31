@@ -21,9 +21,10 @@
 class EnvelopeOutput : public MIDIDrumOutput {
     public:
 
-    EnvelopeOutput(const char *label, byte note_number, byte cc_number, MIDIOutputWrapper *output_wrapper) : 
-        MIDIDrumOutput(label, note_number, output_wrapper), midi_cc(cc_number) {
-        this->randomise();
+    EnvelopeOutput(const char *label, byte note_number, byte cc_number, byte channel, MIDIOutputWrapper *output_wrapper) : 
+        MIDIDrumOutput(label, note_number, channel, output_wrapper), midi_cc(cc_number) {
+        //this->randomise();
+        this->initialise_parameters();
     }
 
     enum stage : byte {
@@ -76,13 +77,24 @@ class EnvelopeOutput : public MIDIDrumOutput {
     byte cc_value_sync_modifier = 1;
 
     void send_envelope_level(byte level) {
-        output_wrapper->sendControlChange(midi_cc, level, 1);
+        output_wrapper->sendControlChange(midi_cc, level, channel);
     }
 
     void randomise() {
         //this->lfo_sync_ratio_hold_and_decay = (byte)random(0,127);
         //this->lfo_sync_ratio_sustain_and_release = (byte)random(0,127);
         this->set_attack((byte)random(0,64));
+        this->set_hold((byte)random(0,127));
+        this->set_decay((byte)random(0,127));
+        this->set_sustain(random(64,127));
+        this->set_release((byte)random(0,127));
+        this->invert = (byte)random(0,10) < 2;
+    }
+
+    void initialise_parameters() {
+        //this->lfo_sync_ratio_hold_and_decay = (byte)random(0,127);
+        //this->lfo_sync_ratio_sustain_and_release = (byte)random(0,127);
+        this->set_attack(0);
         this->set_hold((byte)random(0,127));
         this->set_decay((byte)random(0,127));
         this->set_sustain(random(64,127));
