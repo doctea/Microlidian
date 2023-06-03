@@ -53,9 +53,10 @@ bool load_from_slot(int slot) {
             line = f.readStringUntil('\n');
             String key = line.substring(0, line.indexOf("="));
             String value = line.substring(line.indexOf("=")+1);
+            value.replace("\r","");
 
             if (!parameter_manager->fast_load_parse_key_value(key,value)) {
-                messages_log_add(String("Failed to parse line '") + String(key) + " " + String(value));
+                messages_log_add(String("Failed to parse line '") + String(key) + "=" + String(value));
             }
         }
         f.close();
