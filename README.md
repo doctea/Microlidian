@@ -100,6 +100,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - Trying to Serial.print() from the second core (screen+CV input) while serial is connected will hang the display!
 - Trying to Serial.print() generally seems to be unreliable and likely to cause crashes
 - Occasional glitching of output name display when on some track pages; intermittent crashes bizarrely happening when rendering output labels on pattern page; ~~probably caused by something overwriting selected output slot or something similar?~~ ????
+  - worked around this by caching the label in OutputSelectorControl, but will probably still cause crashes if displaying a list of Output names
 - Slow loading presets causing pauses and problems
 
 ## Done
