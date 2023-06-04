@@ -56,7 +56,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
   - eg raga sequencer that loads .mid files
 - MIDI input (via USB, for setting options, ~~clock sync,~~ forwarding notes and drums)
   - options to enable/disable all this
-- MIDI output (~~via TRS/DIN, for sending clock, triggers, notes~~ and triggerable envelopes/LFO)
+- MIDI output (~~via TRS/DIN, for sending clock, triggers, notes~~ and ~triggerable envelopes~~/LFO)
   - ~~basic hacky approach is working~~
   - standard gm drum machine option with assignable drum numbers
   - midimuso cv trigger+cv modes
