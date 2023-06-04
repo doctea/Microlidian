@@ -125,25 +125,31 @@ FLASHMEM void setup_parameter_menu() {
 
 
 void update_cv_input() {
-    static int_fast8_t current_mode = 0;
-    if(debug_flag) {
-        parameter_manager->debug = true;
-        Serial.println(F("about to do parameter_manager->update_voltage_sources()..")); Serial_flush();
-    }
-    if (current_mode==0) {
+    #ifndef COMBINED_INPUT_UPDATES
+        static int_fast8_t current_mode = 0;
+        if(debug_flag) {
+            parameter_manager->debug = true;
+            Serial.println(F("about to do parameter_manager->update_voltage_sources()..")); Serial_flush();
+        }
+        if (current_mode==0) {
+            parameter_manager->update_voltage_sources();
+            current_mode++;
+        } else if (current_mode==1) {
+            //if(debug) Serial.println("just did parameter_manager->update_voltage_sources().."); Serial_flush();
+            //if(debug) Serial.println("about to do parameter_manager->update_inputs().."); Serial_flush();
+            parameter_manager->update_inputs();
+            //if(debug) Serial.println("about to do parameter_manager->update_mixers().."); Serial_flush();
+            current_mode++;
+        } else if (current_mode==2) {
+            parameter_manager->update_mixers_sliced();
+            if(debug_flag) Serial.println(F("just did parameter_manager->update_inputs()..")); Serial_flush();
+            current_mode = 0;
+        }
+    #else
         parameter_manager->update_voltage_sources();
-        current_mode++;
-    } else if (current_mode==1) {
-        //if(debug) Serial.println("just did parameter_manager->update_voltage_sources().."); Serial_flush();
-        //if(debug) Serial.println("about to do parameter_manager->update_inputs().."); Serial_flush();
         parameter_manager->update_inputs();
-        //if(debug) Serial.println("about to do parameter_manager->update_mixers().."); Serial_flush();
-        current_mode++;
-    } else if (current_mode==2) {
         parameter_manager->update_mixers_sliced();
-        if(debug_flag) Serial.println(F("just did parameter_manager->update_inputs()..")); Serial_flush();
-        current_mode = 0;
-    }
+    #endif
 }
 
 #endif
