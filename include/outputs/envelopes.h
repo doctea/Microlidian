@@ -14,9 +14,6 @@
 
 #ifdef ENABLE_SCREEN
 #include <LinkedList.h>
-#include "mymenu.h"
-#include "menuitems_object.h"
-#include "submenuitem_bar.h"
 #endif
 
 class EnvelopeOutput : public MIDIDrumOutput {
@@ -52,7 +49,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
 
     byte velocity = 127;         // triggered velocity
     byte actual_level = 0;          // right now, the level
-    byte stage_start_level = 0;     // level at start of current stage
+    //byte stage_start_level = 0;     // level at start of current stage
 
     // TODO: int delay_length = 5;                    // D - delay before atack starts
     unsigned int  attack_length   = 0;                // A - attack  - length of stage
@@ -105,7 +102,10 @@ class EnvelopeOutput : public MIDIDrumOutput {
 
     void kill() {
         this->stage = OFF;
-        this->stage_start_level = (byte)0;
+        //this->stage_start_level = (byte)0;
+        this->last_state.stage = OFF;
+        this->last_state.lvl_start = 0;
+        this->last_state.lvl_now = 0;
         send_envelope_level(0);
     }
 
@@ -116,8 +116,10 @@ class EnvelopeOutput : public MIDIDrumOutput {
         if (state == true) { //&& this->stage==OFF) {  // envelope told to be in 'on' state by note on
             this->velocity = velocity;
             this->actual_level = velocity; // TODO: start this at 0 so it can ramp / offset level feature
-            this->stage_start_level = velocity; // TODO: start this at 0 so it can ramp / offset level feature
-            this->stage = ATTACK;
+            //this->stage_start_level = velocity; // TODO: start this at 0 so it can ramp / offset level feature
+            //this->stage = ATTACK;
+            last_state.stage = ATTACK;
+            last_state.lvl_start = velocity;
             this->triggered_at = now;
             this->stage_triggered_at = now;
             this->last_sent_at = 0;  // trigger immediate sending
@@ -129,8 +131,10 @@ class EnvelopeOutput : public MIDIDrumOutput {
             switch (this->stage) {
             case RELEASE:
                 // received note off while already releasing -- cut note short
-                this->stage_start_level = 0; 
-                this->stage = OFF;
+                //this->stage_start_level = 0; 
+                //this->stage = OFF;
+                last_state.lvl_start = last_state.lvl_now;
+                last_state.stage = OFF;
                 this->stage_triggered_at = now;
                 return;
             case OFF:
@@ -151,8 +155,10 @@ class EnvelopeOutput : public MIDIDrumOutput {
                 //NOISY_DEBUG(500, 2);
                 //NUMBER_DEBUG(13, 13, 13);
 
-                this->stage = RELEASE;
-                this->stage_start_level = this->actual_level;
+                //this->stage = RELEASE;
+                last_state.stage = RELEASE;
+                //this->stage_start_level = this->actual_level;
+                last_state.lvl_start = last_state.lvl_now;
                 this->stage_triggered_at = now;
                 this->last_sent_at = 0;  // trigger immediate sending
                 break;
@@ -180,7 +186,172 @@ class EnvelopeOutput : public MIDIDrumOutput {
         this->process_envelope();
     }
 
+    struct envelope_state_t {
+        byte stage = OFF;
+        byte lvl_start = 0;
+        byte lvl_now = 0;
+    };
+    envelope_state_t calculate_envelope_level(byte stage, byte stage_elapsed, byte level_start, byte velocity = 127) {
+        float ratio = (float)PPQN / (float)cc_value_sync_modifier;  // calculate ratio of real ticks : pseudoticks
+        unsigned long elapsed = (float)stage_elapsed * ratio;   // convert real elapsed to pseudoelapsed
+
+        byte lvl;
+        envelope_state_t return_state = {
+            stage,
+            level_start,
+            level_start
+        };
+
+        if (stage == ATTACK) {
+            if (attack_length==0)
+                lvl = velocity;
+            else
+                lvl = (byte) ((float)velocity * ((float)elapsed / ((float)this->attack_length )));
+
+            if (elapsed >= this->attack_length) {
+                return_state = { .stage = ++stage, .lvl_start = lvl, .lvl_now = lvl };
+            }
+        } else if (stage == HOLD && this->hold_length>0) {
+            lvl = velocity;
+            if (elapsed >= hold_length) {
+                return_state = { .stage = ++stage, .lvl_start = lvl, .lvl_now = lvl };
+            }
+        } else if (stage == HOLD || stage == DECAY) {
+            float f_sustain_level = SUSTAIN_MINIMUM + (this->sustain_ratio * (float)level_start);
+            float f_original_level = level_start;
+
+            if (stage==HOLD)
+                return_state.stage = DECAY;
+
+            if (this->decay_length>0) {
+                float decay_position = ((float)elapsed / (float)(this->decay_length));
+        
+                // we start at stage_start_level
+                float diff = (f_original_level - (f_sustain_level));
+                // and over decay_length time
+                // we want to scale down to f_sustain_level at minimum
+        
+                lvl = f_original_level - (diff * decay_position);
+            } else {
+                // if there's no decay stage then set level to the sustain level
+                lvl = f_sustain_level; 
+            }
+            if (elapsed >= this->decay_length) {
+                return_state = { .stage = SUSTAIN, .lvl_start = (unsigned char)sustain_value, .lvl_now = lvl };
+            }
+        } else if (stage == SUSTAIN) {
+            return_state.lvl_now = (unsigned char)sustain_value;
+            if (sustain_ratio==0.0 || this->loop_mode) {
+                return_state = { .stage = RELEASE, .lvl_start =(unsigned char)sustain_value, .lvl_now = (unsigned char)sustain_value };
+            }
+        } else if (stage == RELEASE) {
+            if (this->sustain_ratio = 0.0f) {
+                // start level = velocity
+            }
+            if (this->release_length>0) {
+                float eR = (float)stage_elapsed / (float)(this->release_length); 
+                eR = constrain(eR, 0.0f, 1.0f);
+        
+                //NUMBER_DEBUG(8, this->stage, this->stage_start_level);
+                //Serial.printf("in RELEASE stage, release_length is %u, elapsed is %u, eR is %3.3f, lvl is %i ....", this->release_length, elapsed, eR, lvl);
+                lvl = (byte)((float)level_start * (1.0f-eR));                
+            } else {
+                lvl = 0;
+            }
+            if (elapsed > this->release_length || this->release_length==0 || lvl==0) {
+                return_state = { .stage = OFF, .lvl_start = lvl, .lvl_now = lvl };
+            }
+        } else if (stage == OFF) {
+            return_state = { .stage = OFF, .lvl_start = 0, .lvl_now = 0 };
+        }
+
+        if (stage!=OFF) {
+            byte lvl = return_state.lvl_now;
+            int sync = (this->stage==DECAY || this->stage==HOLD) 
+                            ?
+                            this->lfo_sync_ratio_hold_and_decay
+                            :
+                        (this->stage==SUSTAIN || this->stage==RELEASE)
+                            ?
+                            this->lfo_sync_ratio_sustain_and_release : 
+                        -1;
+            if (sync>=0) {            
+                sync *= 4; // multiply sync value so that it gives us possibility to modulate much faster
+
+                float mod_amp = (float)lvl/4.0f; //32.0; // modulation amplitude is a quarter of the current level
+
+                float mod_result = mod_amp * isin((float)elapsed * PPQN * ((float)sync/127.0f));
+                //Serial.printf("mod_result is %3.1f, elapsed is %i, sync is %i\r\n", mod_result, elapsed, sync);
+                
+                lvl = constrain(
+                    lvl + mod_result,
+                    0,
+                    127
+                );
+                //Serial.printf("sync of %i resulted in lvl %i\r\n", sync, lvl);
+                return_state.lvl_now = lvl;
+            }           
+        } else {
+            if (this->loop_mode)
+                return_state.stage = ATTACK;
+        }
+
+        return_state.lvl_now = this->invert ? 127-return_state.lvl_now : return_state.lvl_now;
+
+        return return_state;
+    }
+
+    struct graph_t {
+        byte value = 0;
+        char stage = -1;
+    };
+    graph_t graph[240];
+
+    void calculate_graph() {
+        envelope_state_t graph_state = {
+            .stage = ATTACK,
+            .lvl_start = 0,
+            .lvl_now = 0
+        };
+        int stage_elapsed = 0;
+        for (int i = 0 ; i < 240 ; i++) {
+            envelope_state_t result = calculate_envelope_level(graph_state.stage, stage_elapsed, graph_state.lvl_start, velocity);
+            if (result.stage!=graph_state.stage) {
+                graph_state.lvl_start = result.lvl_now;
+                stage_elapsed = 0;
+            } else {
+                stage_elapsed++;
+            }
+            graph[i].value = result.lvl_now;
+            graph[i].stage = result.stage;
+            graph_state.stage = result.stage;
+            if (result.stage==SUSTAIN)
+                graph_state.stage = RELEASE;    // move to release immediately if we are calculating the graph
+        }
+    }
+
+    envelope_state_t last_state = {
+        .stage = OFF,
+        .lvl_start = 0,
+        .lvl_now = 0
+    };
     void process_envelope(unsigned long now = millis()) {
+        now = ticks;
+        unsigned long elapsed = now - this->stage_triggered_at;
+        unsigned long real_elapsed = elapsed;    // elapsed is currently the number of REAL ticks that have passed
+
+        envelope_state_t new_state = calculate_envelope_level(last_state.stage, elapsed, last_state.lvl_start, velocity);
+        if (new_state.stage!=last_state.stage)
+            this->stage_triggered_at = now;
+
+        if (this->last_sent_actual_lvl != new_state.lvl_now){
+            send_envelope_level(new_state.lvl_now);
+            last_sent_actual_lvl = new_state.lvl_now;
+        }
+    }
+
+    #ifdef ORIGINAL_PROCESS_ENVELOPE
+    void process_envelope_original(unsigned long now = millis()) {
         now = ticks;
         unsigned long elapsed = now - this->stage_triggered_at;
         unsigned long real_elapsed = elapsed;    // elapsed is currently the number of REAL ticks that have passed
@@ -229,7 +400,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
             }
         } else if (s==HOLD) {
             lvl = this->velocity; //stage_start_level;
-                if (elapsed >= this->hold_length || this->hold_length == 0) {
+            if (elapsed >= this->hold_length || this->hold_length == 0) {
                 this->stage++; // = DECAY;
                 this->stage_triggered_at = now;
                 this->stage_start_level = lvl;
@@ -378,12 +549,14 @@ class EnvelopeOutput : public MIDIDrumOutput {
                 Serial.printf("not sending for envelope %i cos already sent %i\n", i, this->last_sent_actual_lvl);*/
         }
     }
+    #endif
 
     int attack_value, hold_value, decay_value, sustain_value, release_value;
 
     virtual void set_attack(byte attack) {
         this->attack_value = attack;
         this->attack_length = (ENV_MAX_ATTACK) * ((float)attack/127.0f);
+        calculate_graph();
     }
     virtual byte get_attack() {
         return this->attack_value;
@@ -391,6 +564,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
     virtual void set_hold(byte hold) {
         this->hold_value = hold;
         this->hold_length = (ENV_MAX_HOLD) * ((float)hold/127.0f);
+        calculate_graph();
     }
     virtual byte get_hold() {
         return this->hold_value;
@@ -398,6 +572,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
     virtual void set_decay(byte decay) {
         this->decay_value = decay;
         decay_length   = (ENV_MAX_DECAY) * ((float)decay/127.0f);
+        calculate_graph();
     }
     virtual byte get_decay() {
         return this->decay_value;
@@ -405,6 +580,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
     virtual void set_sustain(byte sustain) {
         this->sustain_value = sustain; //(((float)value/127.0f) * (float)(128-SUSTAIN_MINIMUM)) / 127.0f;
         sustain_ratio = (((float)sustain/127.0f) * (float)(128-SUSTAIN_MINIMUM)) / 127.0f;
+        calculate_graph();
     }
     virtual byte get_sustain() {
         return this->sustain_value;
@@ -412,6 +588,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
     virtual void set_release(byte release) {
         this->release_value = release;
         release_length = (ENV_MAX_RELEASE) * ((float)release/127.0f);
+        calculate_graph();
     }
     virtual byte get_release() {
         return this->release_value;
@@ -421,27 +598,11 @@ class EnvelopeOutput : public MIDIDrumOutput {
     }
     virtual void set_invert(bool i) {
         this->invert = i;
+        calculate_graph();
     }
 
     #ifdef ENABLE_SCREEN
-        virtual void make_menu_items(Menu *menu, int index) override {
-            //#ifdef ENABLE_ENVELOPE_MENUS
-                char label[40];
-                snprintf(label, 40, "Envelope %i: %s", index, this->label);
-                menu->add_page(label);
-
-                SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 6);
-
-                sub_menu_item_columns->add(new ObjectNumberControl<EnvelopeOutput,byte>("Attack",  this, &EnvelopeOutput::set_attack,  &EnvelopeOutput::get_attack,    nullptr, 0, 127, true, true));
-                sub_menu_item_columns->add(new ObjectNumberControl<EnvelopeOutput,byte>("Hold",    this, &EnvelopeOutput::set_hold,    &EnvelopeOutput::get_hold,      nullptr, 0, 127, true, true));
-                sub_menu_item_columns->add(new ObjectNumberControl<EnvelopeOutput,byte>("Decay",   this, &EnvelopeOutput::set_decay,   &EnvelopeOutput::get_decay,     nullptr, 0, 127, true, true));
-                sub_menu_item_columns->add(new ObjectNumberControl<EnvelopeOutput,byte>("Sustain", this, &EnvelopeOutput::set_sustain, &EnvelopeOutput::get_sustain,   nullptr, 0, 127, true, true));
-                sub_menu_item_columns->add(new ObjectNumberControl<EnvelopeOutput,byte>("Release", this, &EnvelopeOutput::set_release, &EnvelopeOutput::get_release,   nullptr, 0, 127, true, true));
-                sub_menu_item_columns->add(new ObjectToggleControl<EnvelopeOutput>     ("Invert",  this, &EnvelopeOutput::set_invert,  &EnvelopeOutput::is_invert,     nullptr));
-
-                menu->add(sub_menu_item_columns);
-            //#endif
-        }
+        virtual void make_menu_items(Menu *menu, int index) override;
     #endif
 
 
