@@ -102,6 +102,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - Occasional glitching of output name display when on some track pages; intermittent crashes bizarrely happening when rendering output labels on pattern page; ~~probably caused by something overwriting selected output slot or something similar?~~ ????
   - worked around this by caching the label in OutputSelectorControl, but will probably still cause crashes if displaying a list of Output names
 - Slow loading presets causing pauses and problems
+- we don't seem to get around to doing a menu update_ticks() for every tick, so the ParameterInputDisplay graph appears very noisy unless backfilling values.  even updating it from a callback for every parameter input read() didnt seem to be fast enough.  so might mean that very fast changes are being missed..
 
 ## Done
 
