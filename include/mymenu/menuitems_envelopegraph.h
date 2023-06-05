@@ -104,6 +104,10 @@ class EnvelopeDisplay : public MenuItem
                     //int last_y = GRAPH_HEIGHT - (this->logged[tick_for_screen_X] * GRAPH_HEIGHT);
                     //actual->drawLine(screen_x-1, base_row + last_y, screen_x, base_row + y, YELLOW);                    
                     actual->drawLine(screen_x-1, base_row + last_y, screen_x, base_row + y, stage_colours[stage]); //parameter_input->colour);                    
+                    if (envelope->invert)
+                        actual->drawLine(screen_x, base_row, screen_x, base_row + y, stage_colours[stage]);
+                    else
+                        actual->drawLine(screen_x, base_row + y, screen_x, base_row + PARAMETER_INPUT_GRAPH_HEIGHT, stage_colours[stage]);
                 }
                 //actual->drawFastHLine(screen_x, base_row + y, 1, GREEN);
                 last_y = y;
@@ -116,8 +120,33 @@ class EnvelopeDisplay : public MenuItem
 
             return tft->getCursorY();
         }
+};
 
+class EnvelopeIndicator : public MenuItem {
+    public:
+    EnvelopeOutput *envelope = nullptr;
 
+    const char *stage_labels[6] = {
+        "Off",
+        "Attack",
+        "Hold",
+        "Decay",
+        "Sustain",
+        "Release"
+    };
+
+    EnvelopeIndicator(const char *label, EnvelopeOutput *envelope) : MenuItem(label) {
+        this->envelope = envelope;
+    }
+
+    virtual int display(Coord pos, bool selected, bool opened) override {
+        tft->printf(" Name: %s    ", envelope->label);
+        tft->printf("   CC: %i\n", envelope->midi_cc);
+        tft->printf("Stage: %7s   ", (char*)stage_labels[envelope->last_state.stage]);
+        tft->printf("Level: %i\n", envelope->last_state.lvl_now);
+        
+        return tft->getCursorY();
+    }
 };
 
 #endif
