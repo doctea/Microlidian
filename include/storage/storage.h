@@ -43,11 +43,13 @@ void setup_storage() {
 #define FILEPATH_CALIBRATION_FORMAT       "calib_volt_src_%i.txt"
 
 bool load_from_slot(int slot) {
+    uint32_t millis_at_start_of_load = millis();
     char filename[MAXFILEPATH];
     snprintf(filename, MAXFILEPATH, PRESET_SLOT_FILEPATH_FORMAT, slot);
     File f = LittleFS.open(filename, FILE_READ_MODE);
     if (f) {
         messages_log_add(String("load_from_slot opened ") + String(filename));
+        int lines_parsed_count = 0;
         String line;
         while (f.available()) {
             line = f.readStringUntil('\n');
@@ -58,9 +60,11 @@ bool load_from_slot(int slot) {
             if (!parameter_manager->fast_load_parse_key_value(key,value)) {
                 messages_log_add(String("Failed to parse line '") + String(key) + "=" + String(value));
             }
+            lines_parsed_count++;
         }
         f.close();
-        return false;
+        messages_log_add(String("load_from_slot took ") + String(millis()-millis_at_start_of_load) + "ms to parse " + String(lines_parsed_count) + " lines.");
+        return true;
     } else {
         messages_log_add(String("load_from_slot failed to open ") + String(filename));
         return false;
