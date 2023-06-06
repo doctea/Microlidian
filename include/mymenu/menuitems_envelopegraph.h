@@ -105,7 +105,7 @@ class EnvelopeDisplay : public MenuItem
                     //actual->drawLine(screen_x-1, base_row + last_y, screen_x, base_row + y, YELLOW);                    
                     actual->drawLine(screen_x-1, base_row + last_y, screen_x, base_row + y, stage_colours[stage]); //parameter_input->colour);                    
                     if (envelope->invert)
-                        actual->drawLine(screen_x, base_row, screen_x, base_row + y, stage_colours[stage]);
+                        actual->drawLine(screen_x, base_row,     screen_x, base_row + y, stage_colours[stage]);
                     else
                         actual->drawLine(screen_x, base_row + y, screen_x, base_row + PARAMETER_INPUT_GRAPH_HEIGHT, stage_colours[stage]);
                 }
