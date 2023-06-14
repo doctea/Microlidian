@@ -33,7 +33,7 @@ void setup_usb() {
         TinyUSB_Device_Init(0);
     #endif
 
-    USBDevice.setID(USB_VID, USB_PID);
+    USBDevice.setID(MY_USB_VID, MY_USB_PID);
     USBDevice.setManufacturerDescriptor("TyrellCorp");
     USBDevice.setProductDescriptor("Microlidian");
 
