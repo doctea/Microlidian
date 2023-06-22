@@ -12,7 +12,7 @@ The aim here is to have a flexible and extensible MIDI generator based on the mu
 
 - [mymenu](https://github.com/doctea/mymenu)
 - [midihelpers](https://github.com/doctea/midihelpers)
-- [parameters](httpa://github.com/doctea/parameters)
+- [parameters](https://github.com/doctea/parameters)
 - [patched Encoder library](https://github.com/doctea/Encoder) 
 - [Vortigont LinkedList library](https://github.com/vortigont/LinkedList)
 - vscode+platformio
