@@ -6,7 +6,12 @@ Project for XIAO RP2040 mcu with st7789 screen and rotary encoder.  Using compon
 
 The aim here is to have a flexible and extensible MIDI generator based on the mutating Euclidian features from [drum2musocv](https://github.com/doctea/drum2musocv), but aiming to be a bit more modular and extensible.
 
-8hp Eurorack panel with USB-Type C input for USB MIDI, 3 bipolar CV inputs (using Pimoroni ADC board), with TRS MIDI out for sending 16+ rhythm tracks to a MIDIMUSO-CV12 board (or other MIDI devices!).
+## Features
+
+- 8hp Eurorack panel
+- USB-Type C input for syncing to USB MIDI clock and sending out MIDI
+- 3 bipolar CV inputs (using Pimoroni ADC board)
+- TRS MIDI out for sending 16+ rhythm tracks to a MIDIMUSO-CV12 board (or other MIDI devices!).
 
 ## Requirements
 
@@ -24,6 +29,7 @@ The aim here is to have a flexible and extensible MIDI generator based on the mu
 - WIP PCB & panels in KiCAD and Gerber format [here](https://github.com/doctea/Microlidian-hardware) - don't use these yet without checking with the author for any problems/new versions!
 - I'm using [These small TFT screens](https://www.aliexpress.com/item/4000661571044.html)
 - And [These encoders](https://www.aliexpress.com/item/33022441687.html)
+- [These +/-24v ADC breakout boards](https://thepihut.com/products/ads1015-24v-adc-breakout)
 
 ### Breadboard wiring
 
