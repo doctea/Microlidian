@@ -22,6 +22,8 @@ The aim here is to have a flexible and extensible MIDI generator based on the mu
 
 - Use env:pcb with -DBUILD_PCB
 - WIP PCB & panels in KiCAD and Gerber format [here](https://github.com/doctea/Microlidian-hardware) - don't use these yet without checking with the author for any problems/new versions!
+- I'm using [These small TFT screens](https://www.aliexpress.com/item/4000661571044.html)
+- And [These encoders](https://www.aliexpress.com/item/33022441687.html)
 
 ### Breadboard wiring
 
