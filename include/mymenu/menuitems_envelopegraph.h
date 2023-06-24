@@ -74,15 +74,6 @@ class EnvelopeDisplay : public MenuItem
             //static float ticks_per_pixel = (float)memory_size / (float)tft->width();
             static float tickers_per_pixel = 1;
 
-            // we're going to use direct access to the underlying Adafruit library here
-            #ifdef TFT_ST7789_T3
-                const DisplayTranslator_STeensy *tft2 = (DisplayTranslator_STeensy*)tft;
-                ST7789_t3 *actual = tft2->tft;
-            #elif defined(TFT_BODMER)
-                const DisplayTranslator_Bodmer *tft2 = (DisplayTranslator_Bodmer*)tft;
-                TFT_eSprite *actual = tft2->tft;
-            #endif
-
             int stage_colours[] = {
                 0x8080,
                 GREEN,
@@ -103,11 +94,11 @@ class EnvelopeDisplay : public MenuItem
                 if (screen_x != 0) {
                     //int last_y = GRAPH_HEIGHT - (this->logged[tick_for_screen_X] * GRAPH_HEIGHT);
                     //actual->drawLine(screen_x-1, base_row + last_y, screen_x, base_row + y, YELLOW);                    
-                    actual->drawLine(screen_x-1, base_row + last_y, screen_x, base_row + y, stage_colours[stage]); //parameter_input->colour);                    
+                    tft->drawLine(screen_x-1, base_row + last_y, screen_x, base_row + y, stage_colours[stage]); //parameter_input->colour);                    
                     if (envelope->invert)
-                        actual->drawLine(screen_x, base_row,     screen_x, base_row + y, stage_colours[stage]);
+                        tft->drawLine(screen_x, base_row,     screen_x, base_row + y, stage_colours[stage]);
                     else
-                        actual->drawLine(screen_x, base_row + y, screen_x, base_row + PARAMETER_INPUT_GRAPH_HEIGHT, stage_colours[stage]);
+                        tft->drawLine(screen_x, base_row + y, screen_x, base_row + PARAMETER_INPUT_GRAPH_HEIGHT, stage_colours[stage]);
                 }
                 //actual->drawFastHLine(screen_x, base_row + y, 1, GREEN);
                 last_y = y;

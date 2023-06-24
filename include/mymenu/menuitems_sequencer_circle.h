@@ -73,19 +73,6 @@ class CircleDisplay : public MenuItem {
 
             tft->setCursor(pos.x, pos.y);
 
-            // we're going to use direct access to the underlying library here
-            #ifdef TFT_BODMER
-                static const DisplayTranslator_Bodmer *tft2 = (DisplayTranslator_Bodmer*)tft;
-                #ifdef BODMER_SPRITE
-                    static TFT_eSprite *actual = tft2->tft;
-                #else
-                    static TFT_eSPI *actual = tft2->tft;
-                #endif
-            #else
-                static const DisplayTranslator_ST7789 *tft2 = (DisplayTranslator_ST7789*)tft;
-                static Adafruit_ST7789 *actual = tft2->tft;
-            #endif
-
             static const int_fast8_t circle_center_x = tft->width()/4;
             static const int_fast8_t circle_center_y = tft->width()/3;
 
@@ -104,7 +91,7 @@ class CircleDisplay : public MenuItem {
                     int_fast8_t coord_y = circle_center_y + coordinates_y[i];
                     if (pattern->query_note_on_for_step(i)) {
                         if (count>0) {
-                            actual->drawLine(
+                            tft->drawLine(
                                 last_x, last_y, coord_x, coord_y,
                                 colour
                             );
@@ -118,7 +105,7 @@ class CircleDisplay : public MenuItem {
                     }
                 }
                 if (count>1) {
-                    actual->drawLine(last_x, last_y, first_x, first_y, colour);
+                    tft->drawLine(last_x, last_y, first_x, first_y, colour);
                 }
             }
 
@@ -126,7 +113,7 @@ class CircleDisplay : public MenuItem {
             const int_fast8_t radius = 2;
             for (int_fast8_t i = 0 ; i < 16 ; i++) {
                 int16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : BLUE;
-                actual->fillCircle(
+                tft->fillCircle(
                     circle_center_x + coordinates_x[i], 
                     circle_center_y + coordinates_y[i], 
                     radius, 

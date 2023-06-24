@@ -52,6 +52,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
   - menus for controlling such
     - modulate the parameters from ~~cv or~~ midi input 
   - ~~make a nice graphical display widget for it~~
+- 'screensaver' mode with big indicators of position and triggering notes
 - Other sequencer types
   - eg raga sequencer that loads .mid files
 - MIDI input (via USB, for setting options, ~~clock sync,~~ forwarding notes and drums)

@@ -43,19 +43,6 @@ class PatternDisplay : public MenuItem {
             uint16_t base_row = pos.y;
             //static float ticks_per_pixel = (float)LOOP_LENGTH_TICKS / (float)tft->width();
 
-            // we're going to use direct access to the underlying library here
-            #ifdef TFT_BODMER
-                static const DisplayTranslator_Bodmer *tft2 = (DisplayTranslator_Bodmer*)tft;
-                #ifdef BODMER_SPRITE
-                    static TFT_eSprite *actual = tft2->tft;
-                #else
-                    static TFT_eSPI *actual = tft2->tft;
-                #endif
-            #else
-                static const DisplayTranslator_ST7789 *tft2 = (DisplayTranslator_ST7789*)tft;
-                static Adafruit_ST7789 *actual = tft2->tft;
-            #endif
-
             /*#define STEP_WIDTH 8
             #define STEP_HEIGHT 8
             #define STEP_GAP 2*/
@@ -84,9 +71,9 @@ class PatternDisplay : public MenuItem {
                     (actual_current_step == step ? RED : GREY);      // current step inactive
 
                 if (is_step_on) {  // yer twisting my melon, man
-                    actual->fillRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
+                    tft->fillRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
                 } else {        // call the cops
-                    actual->drawRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
+                    tft->drawRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
                     //actual->fillRect(x + 1, y + 1, STEP_WIDTH-2, STEP_HEIGHT-2, BLACK); // hollow out the center
                 }
             }
