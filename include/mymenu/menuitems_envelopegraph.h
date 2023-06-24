@@ -28,7 +28,7 @@ class EnvelopeDisplay : public MenuItem
         memory_log *logged = nullptr;
 
         //EnvelopeDisplay(char *label, unsigned long memory_size, EnvelopeOutput *envelope) : MenuItem(label) {
-            EnvelopeDisplay(char *label, EnvelopeOutput *envelope) : MenuItem(label) {
+            EnvelopeDisplay(const char *label, EnvelopeOutput *envelope) : MenuItem(label) {
             this->envelope = envelope;
             this->memory_size = memory_size;
             //if (parameter_input!=nullptr) 

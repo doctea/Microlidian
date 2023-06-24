@@ -67,7 +67,7 @@
 
 //#define MIDI_SERIAL_SOFTWARE    // this disnae work at all?  
 //#define MIDI_SERIAL_HARDWARE    // THIS FUCKIN WORKS LADS!!!
-#define MIDI_SERIAL_SPIO          // this fuckin works too!  
+//#define MIDI_SERIAL_SPIO          // this fuckin works too!  
 
 #define ENABLE_ENVELOPES
 

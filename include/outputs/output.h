@@ -19,7 +19,7 @@
 
 #define MAX_LABEL 40
 
-#include "midi/midi_usb.h"
+#include "midi_usb/midi_usb_rp2040.h"
 
 byte get_muso_note_for_drum(byte drum_note);
 
@@ -30,7 +30,9 @@ class MIDIOutputWrapper {
     #ifdef USE_TINYUSB
         midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *usbmidi = &USBMIDI;
     #endif
-    midi::MidiInterface<midi::SerialMIDI<SerialPIO>> *dinmidi = &DINMIDI;
+    #ifdef USE_DINMIDI
+        midi::MidiInterface<midi::SerialMIDI<SerialPIO>> *dinmidi = &DINMIDI;
+    #endif
 
     void sendNoteOn(byte pitch, byte velocity, byte channel) {
         //Serial.printf("MIDIOutputWrapper#sendNoteOn(%i, %i, %i)\n", pitch, velocity, channel);
@@ -40,8 +42,10 @@ class MIDIOutputWrapper {
         #ifdef USE_TINYUSB
             usbmidi->sendNoteOn(pitch, velocity, channel);
         #endif
-        if (channel==GM_CHANNEL_DRUMS)
-            dinmidi->sendNoteOn(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
+        #ifdef USE_DINMIDI
+            if (channel==GM_CHANNEL_DRUMS)
+                dinmidi->sendNoteOn(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
+        #endif
     }
     void sendNoteOff(byte pitch, byte velocity, byte channel) {
         if (!is_valid_note(pitch)) 
@@ -49,8 +53,10 @@ class MIDIOutputWrapper {
         #ifdef USE_TINYUSB
             usbmidi->sendNoteOff(pitch, velocity, channel);
         #endif
-        if (channel==GM_CHANNEL_DRUMS)
-            dinmidi->sendNoteOff(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
+        #ifdef USE_DINMIDI
+            if (channel==GM_CHANNEL_DRUMS)
+                dinmidi->sendNoteOff(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
+        #endif
     }
 
     void sendControlChange(byte number, byte value, byte channel) {
@@ -59,27 +65,35 @@ class MIDIOutputWrapper {
         #ifdef USE_TINYUSB
             usbmidi->sendControlChange(number, value, channel);
         #endif
-        dinmidi->sendControlChange(number, value, channel);
+        #ifdef USE_DINMIDI
+            dinmidi->sendControlChange(number, value, channel);
+        #endif
     }
 
     void sendClock() {
         #ifdef USE_TINYUSB
             usbmidi->sendClock();
         #endif
-        if (is_bpm_on_beat(ticks))  // todo: make clock tick sends to din MIDI use custom divisor value
-            dinmidi->sendClock();   // send divisions of clock to muso, to make the clock output more useful
+        #ifdef USE_DINMIDI
+            if (is_bpm_on_beat(ticks))  // todo: make clock tick sends to din MIDI use custom divisor value
+                dinmidi->sendClock();   // send divisions of clock to muso, to make the clock output more useful
+        #endif
     }
     void sendStart() {
         #ifdef USE_TINYUSB
             usbmidi->sendStart();
         #endif
-        dinmidi->sendStart();
+        #ifdef USE_DINMIDI
+            dinmidi->sendStart();
+        #endif
     }
     void sendStop() {
         #ifdef USE_TINYUSB
             usbmidi->sendStop();
         #endif
-        dinmidi->sendStop();
+        #ifdef USE_DINMIDI
+            dinmidi->sendStop();
+        #endif
     }
 };
 

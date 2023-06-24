@@ -14,7 +14,7 @@
 #include <clock.h>
 #include <bpm.h>
 
-#include "midi/midi_usb.h"
+#include "midi_usb/midi_usb_rp2040.h"
 
 #include "sequencer/sequencing.h"
 
