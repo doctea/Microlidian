@@ -50,6 +50,7 @@ class MIDIOutputWrapper {
     void sendNoteOff(byte pitch, byte velocity, byte channel) {
         if (!is_valid_note(pitch)) 
             return;
+            
         #ifdef USE_TINYUSB
             usbmidi->sendNoteOff(pitch, velocity, channel);
         #endif
@@ -105,6 +106,8 @@ class MIDIOutputWrapper {
 // class to receive triggers from a sequencer and return values to the owner Processor
 class BaseOutput {
     public:
+    bool enabled = true;
+
     char label[MAX_LABEL];
     BaseOutput (const char *label) {
         strncpy(this->label, label, MAX_LABEL);
@@ -127,6 +130,13 @@ class BaseOutput {
 
     virtual void loop() {};
 
+    void set_enabled(bool state) {
+        this->enabled = state;
+    }
+    bool is_enabled() {
+        return this->enabled;
+    }
+
     #ifdef ENABLE_SCREEN
         virtual void make_menu_items(Menu *menu, int index) {}
     #endif
@@ -136,7 +146,7 @@ class BaseOutput {
 // track basic monophonic MIDI output
 class MIDIBaseOutput : public BaseOutput {
     public:
-
+    
     byte note_number = -1, last_note_number = -1;
     byte channel = GM_CHANNEL_DRUMS;
     byte event_value_1, event_value_2, event_value_3;
@@ -170,7 +180,7 @@ class MIDIBaseOutput : public BaseOutput {
             int note_number = get_last_note_number();
             Debug_printf("\t\tgoes off note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
             //Serial.printf("Sending note off for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
-            if (is_valid_note(note_number)) {
+            if (is_enabled() && is_valid_note(note_number)) {
                 output_wrapper->sendNoteOff(note_number, 0, get_channel());
                 set_last_note_number(NOTE_OFF);
                 //this->went_off();
@@ -182,7 +192,7 @@ class MIDIBaseOutput : public BaseOutput {
             int note_number = get_note_number();
             Debug_printf("\t\tgoes on note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
             //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
-            if (is_valid_note(note_number)) {
+            if (is_enabled() && is_valid_note(note_number)) {
                 set_last_note_number(note_number);
                 output_wrapper->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
                 //this->went_on();
@@ -245,7 +255,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             byte octave = 3;
             byte scale_root = SCALE_ROOT_A;
             SCALE scale_number = SCALE::MAJOR;
-            int base_note = scale_root * octave;
+            //int base_note = scale_root * octave;
 
             MIDINoteTriggerCountOutput(const char *label, LinkedList<BaseOutput*> *nodes, MIDIOutputWrapper *output_wrapper, byte channel = 1, byte scale_root = SCALE_ROOT_A, SCALE scale_number = SCALE::MAJOR, byte octave = 3) 
                 : MIDIBaseOutput(label, 0, output_wrapper) {
@@ -255,10 +265,18 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 this->octave = octave;
                 this->scale_root = scale_root;
                 this->scale_number = scale_number;
-                this->base_note = scale_root * octave;
+                //this->base_note = scale_root * octave;
             }
 
+            int note_mode = 0;
             virtual byte get_note_number() override {
+                if (!note_mode)
+                    return get_note_number_count();
+                else
+                    return quantise_pitch(get_base_note() + BPM_CURRENT_BEAT_OF_PHRASE, scale_root, scale_number);
+            }
+
+            virtual byte get_note_number_count() {
                 // count all the triggering notes and add that value ot the root note
                 // then quantise according to selected scale to get final note number
                 int count = 0;
@@ -275,7 +293,12 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 /*static int count = 0;
                 count++;
                 count %= 24;*/
-                return quantise_pitch(base_note + count, scale_root, scale_number);
+                return quantise_pitch(get_base_note() + count, scale_root, scale_number);
+            }
+
+            virtual byte get_base_note() {
+                //return this->scale_root * octave;
+                return (octave * 12) + scale_root;
             }
 
             SCALE get_scale_number() {
@@ -290,8 +313,20 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             }
             void set_scale_root(int scale_root) {
                 this->scale_root = scale_root;
-                base_note = scale_root * octave;
+                //base_note = scale_root * octave;
             }
+
+            void set_note_mode(bool mode) {
+                this->note_mode = mode;
+            }
+            bool get_note_mode() {
+                return this->note_mode;
+            }
+
+            #ifdef ENABLE_SCREEN
+                virtual void make_menu_items(Menu *menu, int index) override;
+            #endif
+
     };
 #endif
 

@@ -177,7 +177,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
 
         //this->process_envelope(millis());
 
-        MIDIDrumOutput::process();
+        //MIDIDrumOutput::process();    // ?
     }
 
     virtual void loop() override {

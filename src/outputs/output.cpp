@@ -41,6 +41,7 @@ void setup_output() {
 
 #ifdef ENABLE_SCREEN
     #include "mymenu.h"
+    #include "menuitems_object_multitoggle.h"
 
     void setup_output_menu() {
         output_processor->create_menu_items();
@@ -51,6 +52,40 @@ void setup_output() {
             BaseOutput *node = this->nodes->get(i);
             node->make_menu_items(menu, i);
         }
+
+        menu->add_page("Outputs");
+        ObjectMultiToggleControl *toggle = new ObjectMultiToggleControl("Enable outputs", true);
+        for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
+            BaseOutput *output = this->nodes->get(i);
+            //menu->add(new ToggleControl(output->label, output->disabled));
+            // options for whether to auto-advance looper/sequencer/beatstep
+
+            MultiToggleItemClass<BaseOutput> *option = new MultiToggleItemClass<BaseOutput> (
+                output->label,
+                output,
+                &BaseOutput::set_enabled,
+                &BaseOutput::is_enabled
+            );
+            toggle->addItem(option);
+        }
+        menu->add(toggle);
+    }
+
+    #include "submenuitem_bar.h"
+    #include "menuitems_object.h"
+    #include "menuitems.h"
+    void MIDINoteTriggerCountOutput::make_menu_items(Menu *menu, int index) {
+        //#ifdef ENABLE_ENVELOPE_MENUS
+            char label[40];
+            snprintf(label, 40, "MIDINoteOutput %i: %s", index, this->label);
+            menu->add_page(label);
+
+            SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 3);
+            sub_menu_item_columns->add(new ObjectToggleControl("Note mode", this, &MIDINoteTriggerCountOutput::set_note_mode, &MIDINoteTriggerCountOutput::get_note_mode));
+            sub_menu_item_columns->add(new DirectNumberControl<byte>("Octave", &this->octave, this->octave, (byte)0, (byte)10));
+
+            menu->add(sub_menu_item_columns);
+        //#endif
     }
 
 #endif

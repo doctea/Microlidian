@@ -54,6 +54,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
 
         #ifdef ENABLE_SCALES
             this->addNode(new MIDINoteTriggerCountOutput("Bass", this->nodes, output_wrapper));
+            //this->nodes->get(this->nodes->size()-1)->disabled = false;
+            //this->nodes->get(0)->is_ = false;
         #endif
     }
 
