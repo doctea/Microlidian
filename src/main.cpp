@@ -43,10 +43,10 @@ std::atomic<bool> ticked = false;
 
 // serial console to host, for debug etc
 void setup_serial() {
-    Serial.begin(115200);
-    Serial.setTimeout(0);
-
     #ifdef WAIT_FOR_SERIAL
+        Serial.begin(115200);
+        Serial.setTimeout(0);
+
         while(!Serial) {};
     #endif
 }
@@ -106,14 +106,14 @@ void setup() {
     #ifdef ENABLE_STORAGE
         setup_storage();
         setup_storage_menu();
-        if (Serial) Serial.printf("after setup_storage(), free RAM is %u\n", freeRam());
+        Debug_printf("after setup_storage(), free RAM is %u\n", freeRam());
     #endif    
 
     #ifdef ENABLE_CV_INPUT
         setup_cv_input();
-        if (Serial) Serial.printf("after setup_cv_input(), free RAM is %u\n", freeRam());
+        Debug_printf("after setup_cv_input(), free RAM is %u\n", freeRam());
         setup_parameters();
-        if (Serial) Serial.printf("after setup_parameters(), free RAM is %u\n", freeRam());
+        Debug_printf("after setup_parameters(), free RAM is %u\n", freeRam());
     #endif
 
     #ifdef ENABLE_EUCLIDIAN
@@ -122,7 +122,7 @@ void setup() {
         output_processor->configure_sequencer(&sequencer);
         #ifdef ENABLE_SCREEN
             setup_sequencer_menu();
-            if (Serial) Serial.printf("after setup_sequencer_menu, free RAM is %u\n", freeRam());
+            Debug_printf("after setup_sequencer_menu, free RAM is %u\n", freeRam());
         #endif
     #endif
 
@@ -132,7 +132,7 @@ void setup() {
         parameter_manager->addParameters(params);
         params->clear();
         delete params;
-        if (Serial) Serial.printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());
+        Debug_printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());
     #endif
 
     #ifdef ENABLE_CV_INPUT
@@ -140,10 +140,10 @@ void setup() {
     #endif
 
     #if defined(ENABLE_SCREEN) && defined(ENABLE_CV_INPUT)
-        menu->add_page("Parameter Inputs");
-        if (Serial) Serial.printf("before setup_parameter_menu(), free RAM is %u\n", freeRam());
+        //menu->add_page("Parameter Inputs");
+        Debug_printf("before setup_parameter_menu(), free RAM is %u\n", freeRam());
         setup_parameter_menu();
-        if (Serial) Serial.printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
+        Debug_printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
     #endif
 
     #ifdef ENABLE_SCREEN
@@ -152,11 +152,11 @@ void setup() {
         menu->select_page(0);
     #endif
 
-    debug_free_ram();
+    //debug_free_ram();
 
     started = true;
 
-    if (Serial) Serial.printf("at end of setup(), free RAM is %u\n", freeRam());
+    Debug_printf("at end of setup(), free RAM is %u\n", freeRam());
 
     Debug_println("setup() finished!");
 }

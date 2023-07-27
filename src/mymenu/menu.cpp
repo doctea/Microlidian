@@ -337,7 +337,7 @@ void setup_menu() {
         pinMode(PIN_BUTTON_C, INPUT_PULLUP);
     #endif
 
-    if (Serial) Serial.println(F("Exiting setup_menu"));
+    Debug_printf(F("Exiting setup_menu"));
     Serial_flush();
 
     /*menu->add(&test_item_1);

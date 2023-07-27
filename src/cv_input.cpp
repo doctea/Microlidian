@@ -51,9 +51,9 @@ void setup_parameters() {
 
     // initialise the voltage source inputs
     // todo: improve this bit, maybe name the voltage sources?
-    VoltageParameterInput *vpi1 = new VoltageParameterInput((char*)"A", parameter_manager->voltage_sources->get(0));
-    VoltageParameterInput *vpi2 = new VoltageParameterInput((char*)"B", parameter_manager->voltage_sources->get(1));
-    VoltageParameterInput *vpi3 = new VoltageParameterInput((char*)"C", parameter_manager->voltage_sources->get(2));
+    VoltageParameterInput *vpi1 = new VoltageParameterInput((char*)"A", "CV Inputs", parameter_manager->voltage_sources->get(0));
+    VoltageParameterInput *vpi2 = new VoltageParameterInput((char*)"B", "CV Inputs", parameter_manager->voltage_sources->get(1));
+    VoltageParameterInput *vpi3 = new VoltageParameterInput((char*)"C", "CV Inputs", parameter_manager->voltage_sources->get(2));
 
     //vpi3->input_type = UNIPOLAR;
     // todo: set up 1v/oct inputs to map to MIDI source_ids...
@@ -63,34 +63,8 @@ void setup_parameters() {
     parameter_manager->addInput(vpi2);
     parameter_manager->addInput(vpi3);
 
-    // get the available target parameters
-    // todo: dynamically pull these from all available behaviours
-    // todo: dynamically pull them from other things that could have parameters available
-    // todo: move this to the behaviour initialising!
-    /*#ifdef ENABLE_CRAFTSYNTH_USB
-        Serial.println(F("setup_parameters() about to do get_parameters on behaviour_craftsynth..")); Serial_flush();
-        LinkedList<DoubleParameter*> *params = behaviour_craftsynth->get_parameters();
-        Serial.println(F("setup_parameters() just did get_parameters on behaviour_craftsynth.. about to addParameters()")); Serial_flush();
-        parameter_manager->addParameters(params);
-        Serial.println(F("setup_parameters() just did parameter_manager->addParameters(params)")); Serial_flush();
-
-        // setup the default mappings
-        // TODO: load this from a saved config file
-        // hmmm if this section is uncommented then it causes 'conflicting section type' problems due to FLASHMEM..?
-        //Serial.println(F("=========== SETTING DEFAULT PARAMETER MAPS.........")); Serial_flush();
-        //behaviour_craftsynth->getParameterForLabel((char*)F("Filter Cutoff"))->set_slot_0_amount(1.0); //->connect_input(vpi1, 1.0);
-        //behaviour_craftsynth->getParameterForLabel((char*)F("Filter Morph"))->set_slot_1_amount(1.0); //connect_input(vpi2, 1.0);
-        //behaviour_craftsynth->getParameterForLabel((char*)F("Distortion"))->set_slot_2_amount(1.0); //connect_input(vpi3, 1.0);
-        //Serial.println(F("=========== FINISHED SETTING DEFAULT PARAMETER MAPS")); Serial_flush();
-    #endif*/
-    /*for(unsigned int i = 0 ; i < behaviour_manager->behaviours->size() ; i++) {
-        parameter_manager->addParameters(behaviour_manager->behaviours->get(i)->get_parameters());
-    }*/
-
     //Serial.println("about to do setDefaultParameterConnections().."); Serial.flush();
-
     parameter_manager->setDefaultParameterConnections();
-
     //Serial.println("just did do setDefaultParameterConnections().."); Serial.flush();
 
     tft_print("\n");
@@ -103,18 +77,18 @@ FLASHMEM void setup_parameter_menu() {
     //Serial.println(F("Adding ParameterSelectorControls for available_inputs..."));
     // ask ParameterManager to add all the menu items for the ParameterInputs
     parameter_manager->addAllParameterInputMenuItems(menu, "CV Input ");
-    if (Serial) Serial.printf("after addAllParameterInput, free ram is %i\n", rp2040.getFreeHeap());
+    Debug_printf("after addAllParameterInput, free ram is %i\n", rp2040.getFreeHeap());
 
     //parameter_manager->addAllVoltageSourceMenuItems(menu);
     //Serial.println("About to addAllVoltageSourceCalibrationMenuItems().."); Serial.flush();
     parameter_manager->addAllVoltageSourceCalibrationMenuItems(menu);
-    if (Serial) Serial.printf("after addAllVoltageSourceCalibrationMenuItems, free ram is %i\n", rp2040.getFreeHeap());
+    Debug_printf("after addAllVoltageSourceCalibrationMenuItems, free ram is %i\n", rp2040.getFreeHeap());
 
     //Serial.println("About to addAllParameterMenuItems().."); Serial.flush();
     //#ifdef ENABLE_PARAMETER_MAPPING
         menu->add_page("Parameters");
         parameter_manager->addAllParameterMenuItems(menu);
-        if (Serial) Serial.printf("after addAllParameterMenuItems, free ram is %i\n", rp2040.getFreeHeap());
+        Debug_printf("after addAllParameterMenuItems, free ram is %i\n", rp2040.getFreeHeap());
     //#endif
 
     //DirectNumberControl<int> *mixer_profile = new DirectNumberControl<int>("Mixer profiling", &parameter_manager->profile_update_mixers, parameter_manager->profile_update_mixers, (int)0, (int)1000000, nullptr);
