@@ -2,7 +2,7 @@
 
 WIP.
 
-Project for XIAO RP2040 mcu with st7789 screen and rotary encoder.  Using components and libraries from [usb_midi_clocker](https://github.com/doctea/usb_midi_clocker) project.  
+Project for XIAO RP2040 mcu with st7789 screen and rotary encoder.  In some ways the little brother of and using components and libraries from the [usb_midi_clocker](https://github.com/doctea/usb_midi_clocker) project.  
 
 The aim here is to have a flexible and extensible MIDI generator based on the mutating Euclidian features from [drum2musocv](https://github.com/doctea/drum2musocv), but aiming to be a bit more modular and extensible.
 
@@ -103,6 +103,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - rhythm-synced LFO that sets a cycle of the waveform to the length between triggers
 - Ability to boot up as a USB flash drive, for copying files to/from the LittleFS flash?
 - Allow holding a button to go into firmware update mode before running much code at all as a failsafe against bad code that won't complete setup() or first loop()
+- Port Pitch CV->MIDI and chord quantisation stuff from usb_midi_clocker
 
 ### Known problems/gotchas
 
