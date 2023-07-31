@@ -80,6 +80,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
   - ~~maybe for clock too?~~
   - implement CV input 'reset'
   - Setting a per-parameter range for modulation
+  - Port Pitch CV->MIDI and chord quantisation stuff from usb_midi_clocker
 - MIDI inputs for controlling parameters
   - Configurable MIDI inputs for control surfaces from host USB
   - Accept baked-in CCs to configure settings (similar to how drum2musocv already does it, perhaps)
@@ -103,7 +104,6 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - rhythm-synced LFO that sets a cycle of the waveform to the length between triggers
 - Ability to boot up as a USB flash drive, for copying files to/from the LittleFS flash?
 - Allow holding a button to go into firmware update mode before running much code at all as a failsafe against bad code that won't complete setup() or first loop()
-- Port Pitch CV->MIDI and chord quantisation stuff from usb_midi_clocker
 
 ### Known problems/gotchas
 
@@ -113,6 +113,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
   - worked around this by caching the label in OutputSelectorControl, but will probably still cause crashes if displaying a list of Output names
 - Slow loading presets causing pauses and problems
 - we don't seem to get around to doing a menu update_ticks() for every tick, so the ParameterInputDisplay graph appears very noisy unless backfilling values.  even updating it from a callback for every parameter input read() didnt seem to be fast enough.  so might mean that very fast changes are being missed..
+- Sometimes crashes waiting for USB MIDI or something... suspect perhaps garbled USB MIDI is cause?
 
 ## Done
 
