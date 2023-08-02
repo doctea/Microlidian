@@ -13,3 +13,4 @@ ffs/
 hardware
 *.uf2
 disabled-lib
+lib-backup

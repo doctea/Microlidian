@@ -170,7 +170,8 @@ void setup_menu() {
             &MIDINoteTriggerCountOutput::set_scale_number, 
             &MIDINoteTriggerCountOutput::get_scale_number, 
             &MIDINoteTriggerCountOutput::set_scale_root, 
-            &MIDINoteTriggerCountOutput::get_scale_root
+            &MIDINoteTriggerCountOutput::get_scale_root,
+            true
         ));
     #endif
 

@@ -20,6 +20,7 @@ The aim here is to have a flexible and extensible MIDI generator based on the mu
 - [parameters](https://github.com/doctea/parameters)
 - [patched Encoder library](https://github.com/doctea/Encoder) 
 - [Vortigont LinkedList library](https://github.com/vortigont/LinkedList)
+- [patched bodme/TFT_eSPI library](https://github.com/doctea/TFT_eSPI)
 - vscode+platformio
 - the gfx library by Bodmer for fast DMA writes
 
