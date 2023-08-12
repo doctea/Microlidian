@@ -40,6 +40,7 @@ class BasePattern {
     virtual void unset_event_for_tick(unsigned int tick) = 0;
 
     virtual void process_step(int step) = 0;
+    virtual void process_step_end(int step) = 0;
 
     //virtual bool query_note_on_for_step(int step) = 0;
     //virtual bool query_note_off_for_step(int step) = 0;
@@ -114,16 +115,24 @@ class SimplePattern : public BasePattern {
 
     virtual void process_step(int step) {
         //Serial.printf("process_step(%i)\t");
-        if (this->query_note_off_for_step((step-1) % this->get_steps()) && this->note_held) {
+        /*if (this->query_note_off_for_step((step-1) % this->get_steps()) && this->note_held) {
             //Serial.printf("%i: note off for step!");
             this->trigger_off_for_step(step);
-        }
+        }*/
         if (this->query_note_on_for_step(step)) {
             //Serial.printf("query_note_on_for_step!,");
             this->trigger_on_for_step(step);
         }
         //Serial.println();
     };
+    virtual void process_step_end(int step) {
+        if (
+            /*this->query_note_off_for_step((step+1) % this->get_steps()) && */
+            this->note_held) {
+            //Serial.printf("%i: note off for step!");
+            this->trigger_off_for_step(step);
+        }
+    }
 
     virtual void trigger_on_for_step(int step);
     virtual void trigger_off_for_step(int step);

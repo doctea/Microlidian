@@ -11,6 +11,7 @@ void SimplePattern::trigger_on_for_step(int step) {
 void SimplePattern::trigger_off_for_step(int step) {
     if (this->output!=nullptr) {
         this->output->receive_event(0,1,0);
+        this->output->process();
         note_held = false;
     }
 };

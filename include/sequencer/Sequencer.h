@@ -41,6 +41,7 @@ class BaseSequencer {
     virtual void on_loop(int tick) = 0;
     virtual void on_tick(int tick) = 0;
     virtual void on_step(int step) = 0;
+    virtual void on_step_end(int step) = 0;
     virtual void on_beat(int beat) = 0;
     virtual void on_bar(int bar) = 0;
     virtual void on_phrase(int phrase) = 0;

@@ -43,6 +43,8 @@ std::atomic<bool> ticked = false;
 
 // serial console to host, for debug etc
 void setup_serial() {
+    //Serial.ignoreFlowControl();
+
     #ifdef WAIT_FOR_SERIAL
         Serial.begin(115200);
         Serial.setTimeout(0);

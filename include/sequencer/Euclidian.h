@@ -350,6 +350,8 @@ class EuclidianSequencer : public BaseSequencer {
         if (is_bpm_on_sixteenth(tick)) {
             //this->on_step(this->get_step_for_tick(tick));
             this->on_step(tick / (PPQN/STEPS_PER_BEAT));
+        } else if (is_bpm_on_sixteenth(tick,1)) {
+            this->on_step_end(tick / (PPQN/STEPS_PER_BEAT));
         }
     };
     virtual void on_step(int step) override {
@@ -357,6 +359,11 @@ class EuclidianSequencer : public BaseSequencer {
             this->patterns[i]->process_step(step);
         }
     };
+    virtual void on_step_end(int step) override {
+        for (int i = 0 ; i < number_patterns ; i++) {
+            this->patterns[i]->process_step_end(step);
+        }
+    }
     virtual void on_beat(int beat) override {
 
     };
