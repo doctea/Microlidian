@@ -220,6 +220,10 @@ class EuclidianPattern : public SimplePattern {
         arguments.duration = duration;
     }
 
+    virtual int get_tick_duration() {
+        return arguments.duration;
+    }
+
     virtual bool is_locked() {
         return this->locked;
     }
@@ -350,9 +354,13 @@ class EuclidianSequencer : public BaseSequencer {
         if (is_bpm_on_sixteenth(tick)) {
             //this->on_step(this->get_step_for_tick(tick));
             this->on_step(tick / (PPQN/STEPS_PER_BEAT));
-        } else if (is_bpm_on_sixteenth(tick,1)) {
+        } /*else if (is_bpm_on_sixteenth(tick,1)) {
             this->on_step_end(tick / (PPQN/STEPS_PER_BEAT));
+        }*/
+        for (int i = 0 ; i < number_patterns ; i++) {
+            this->patterns[i]->process_tick(tick);
         }
+
     };
     virtual void on_step(int step) override {
         for (int i = 0 ; i < number_patterns ; i++) {

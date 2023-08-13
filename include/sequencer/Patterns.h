@@ -41,6 +41,7 @@ class BasePattern {
 
     virtual void process_step(int step) = 0;
     virtual void process_step_end(int step) = 0;
+    virtual void process_tick(int tick) = 0;
 
     //virtual bool query_note_on_for_step(int step) = 0;
     //virtual bool query_note_off_for_step(int step) = 0;
@@ -50,6 +51,11 @@ class BasePattern {
     }
     virtual bool query_note_off_for_step(int step) {
         return this->query_note_off_for_tick(step * ticks_per_step);
+    }
+
+    // duration of the note about to be played
+    virtual int get_tick_duration() {
+        return PPQN;
     }
 
     virtual void set_steps(byte steps) {
@@ -68,6 +74,9 @@ class SimplePattern : public BasePattern {
         byte velocity = DEFAULT_VELOCITY;
         byte channel = 0;
     };
+
+    int triggered_on_step = -1;
+    int current_duration = PPQN;
 
     BaseOutput *output = nullptr;
     event *events = nullptr;
@@ -113,7 +122,7 @@ class SimplePattern : public BasePattern {
         return (this->events[step].velocity==0);
     }
 
-    virtual void process_step(int step) {
+    virtual void process_step(int step) override {
         //Serial.printf("process_step(%i)\t");
         /*if (this->query_note_off_for_step((step-1) % this->get_steps()) && this->note_held) {
             //Serial.printf("%i: note off for step!");
@@ -125,11 +134,18 @@ class SimplePattern : public BasePattern {
         }
         //Serial.println();
     };
-    virtual void process_step_end(int step) {
-        if (
-            /*this->query_note_off_for_step((step+1) % this->get_steps()) && */
-            this->note_held) {
+    virtual void process_step_end(int step) override {
+        if (this->query_note_off_for_step((step+1) % this->get_steps()) && this->note_held) {
             //Serial.printf("%i: note off for step!");
+            this->trigger_off_for_step(step);
+        }
+    }
+    virtual void process_tick(int ticks) override { 
+        // check if note is held and duration has passed...
+        int step = (ticks / ticks_per_step); // % steps;
+        //ticks = ticks % (ticks_per_step * steps);
+
+        if ((triggered_on_step * ticks_per_step) + this->current_duration <= ticks || ticks < triggered_on_step * ticks_per_step) {
             this->trigger_off_for_step(step);
         }
     }

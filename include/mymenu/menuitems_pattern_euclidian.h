@@ -49,7 +49,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
             this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Steps",    pattern, &EuclidianPattern::set_steps,      &EuclidianPattern::get_steps,    nullptr, 1, pattern->maximum_steps, true, true));
             this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Pulses",   pattern, &EuclidianPattern::set_pulses,     &EuclidianPattern::get_pulses,   nullptr, 1, STEPS_PER_BAR, true, true));
             this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Rotation", pattern, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, pattern->maximum_steps, true, true));
-            //menu->add(new ObjectNumberControl<EuclidianPattern,byte> ("Duration", p, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, 1, STEPS_PER_BAR, true, true));
+            this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Duration", pattern, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, 1, PPQN*BEATS_PER_BAR, true, true));
             //menu->debug = true;
             this->add(new ObjectActionConfirmItem<EuclidianPattern> ("Store as default", pattern, &EuclidianPattern::store_current_arguments_as_default));
         #endif
