@@ -37,14 +37,14 @@ class SingleCircleDisplay : public MenuItem {
             Debug_printf("SingleCircleDisplay() setup_coordinates, tft width is %i\n", tft->width()); Serial.flush();
             //this->set_pattern(target_pattern);
             const size_t divisions = 16;
-            const size_t degrees_per_iter = 360 / divisions;
+            const float degrees_per_iter = 360.0 / divisions;
             float size = 20.0*(tft->width()/2);
             int position = 4;
             for (int i = 0 ; i < divisions; i++) {
                 Debug_printf("generating coordinate for position %i:\trad(cos()) is %f\n", i, radians(cos(i*degrees_per_iter*PI/180)));
                 Debug_printf("generating coordinate for position %i:\trad(sin()) is %f\n", i, radians(sin(i*degrees_per_iter*PI/180)));
-                coordinates_x[position] = (int)((float)size * radians(cos((i)*degrees_per_iter*PI/180)));
-                coordinates_y[position] = (int)((float)size * radians(sin((i)*degrees_per_iter*PI/180)));
+                coordinates_x[position] = (int)((float)size * radians(cos(((float)i)*degrees_per_iter*PI/180.0)));
+                coordinates_y[position] = (int)((float)size * radians(sin(((float)i)*degrees_per_iter*PI/180.0)));
                 Debug_printf("generating coordinate for position %i:\t[%i,%i]\n---\n", i, coordinates_x[i], coordinates_y[i]); Serial.flush();
                 position++;
                 position = position % divisions;
