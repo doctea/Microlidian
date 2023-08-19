@@ -80,7 +80,7 @@ void setup_output() {
             snprintf(label, 40, "MIDINoteOutput %i: %s", index, this->label);
             menu->add_page(label);
 
-            SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 3);
+            SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 2);
             sub_menu_item_columns->add(new ObjectToggleControl("Note mode", this, &MIDINoteTriggerCountOutput::set_note_mode, &MIDINoteTriggerCountOutput::get_note_mode));
             sub_menu_item_columns->add(new DirectNumberControl<byte>("Octave", &this->octave, this->octave, (byte)0, (byte)10));
 

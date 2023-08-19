@@ -62,6 +62,9 @@ void setup_debug_menu() {
 
     menu->add_page("Debug");
 
+    ObjectNumberControl<DisplayTranslator,int> *text_size_control = new ObjectNumberControl<DisplayTranslator,int>("Text size", menu->tft, &DisplayTranslator::set_default_textsize, &DisplayTranslator::get_default_textsize, nullptr, false);
+    menu->add(text_size_control);
+
     ActionConfirmItem *reset_control = new ActionConfirmItem("RESET RP2040?", reset_rp2040);
     menu->add(reset_control);
 

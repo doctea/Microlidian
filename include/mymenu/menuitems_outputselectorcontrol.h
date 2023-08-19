@@ -184,7 +184,8 @@ class OutputSelectorControl : public SelectorControl<int> {
     virtual int renderValue(bool selected, bool opened, uint16_t max_character_width) override {
         const char *lbl = this->get_label_for_index(selected_value_index);
 
-        tft->setTextSize((strlen(lbl) < max_character_width/2) ? 2 : 1);
+        //tft->setTextSize((strlen(lbl) < max_character_width/2) ? 2 : 1);
+        tft->setTextSize(tft->get_textsize_for_width(lbl, max_character_width*tft->characterWidth()));
         tft->println(lbl);
 
         return tft->getCursorY();
