@@ -5,6 +5,8 @@
 
 #include "menu.h"
 
+#include "midi_usb/midi_usb_rp2040.h"
+
 #ifdef ENABLE_CV_INPUT
     #include "cv_input.h"
     #ifdef ENABLE_CLOCK_INPUT_CV
@@ -104,6 +106,11 @@ void setup1() {
 }
 
 void loop1() {
+    // doing this here instead of on first core means that two Microlidians powered up together won't clock drift badly
+    #ifdef USE_TINYUSB
+        USBMIDI.read();
+    #endif
+    
     static unsigned long last_pushed = 0;
     //if (last_pushed==0) delay(5000);
     while(is_locked()) {

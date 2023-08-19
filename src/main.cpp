@@ -14,7 +14,7 @@
 #include <clock.h>
 #include <bpm.h>
 
-#include "midi_usb/midi_usb_rp2040.h"
+//#include "midi_usb/midi_usb_rp2040.h"
 
 #include "sequencer/sequencing.h"
 
@@ -198,9 +198,11 @@ void loop() {
     uint32_t mics_start = micros();
     //Serial.println("loop()");
     
+    /*
+    // doing this on the second core means that two Microlidians powered up at the same time won't drift too much
     #ifdef USE_TINYUSB
         USBMIDI.read();
-    #endif
+    #endif*/
 
     ticked = update_clock_ticks();
 

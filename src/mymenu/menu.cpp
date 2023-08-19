@@ -113,6 +113,8 @@ void setup_menu() {
     tft = &displaytranslator; 
     tft->init();
 
+    //tft->set_default_textsize(1); // needs some work to make this work properly...
+
     for (int x = 0 ; x < tft->width() ; x+=3) {
         for (int y = 0 ; y < tft->height() ; y+=3) {
             tft->drawLine(0,0,x,y,random(65535));
