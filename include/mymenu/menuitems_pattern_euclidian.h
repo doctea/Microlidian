@@ -99,7 +99,8 @@ class EuclidianPatternControl : public SubMenuItemBar {
             else 
                 start_x = (tft->width()/2)  + (tft->width()/4);
 
-            const int width = this->get_max_pixel_width(item_index);
+            int width = this->get_max_pixel_width(item_index);
+            //if (item_index==0) width -= tft->characterWidth();  // adjust by 1 character if necessary
             const int temp_y = this->small_display(
                 item_index, 
                 start_x, 
