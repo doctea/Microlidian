@@ -140,9 +140,9 @@ void loop1() {
     }
     #ifdef ENABLE_CV_INPUT
         static unsigned long last_cv_update = 0;
-        if (millis() - last_cv_update > time_between_cv_input_updates && !is_locked()) {
+        if (parameter_manager->ready_for_next_update() && !is_locked()) {
             acquire_lock();
-            update_cv_input();
+            parameter_manager->throttled_update_cv_input(true, time_between_cv_input_updates, true);
             release_lock();
             last_cv_update = millis();
         }

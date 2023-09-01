@@ -27,8 +27,6 @@ FLASHMEM
 void setup_parameters();
 void setup_parameter_menu();
 
-void update_cv_input();
-
 extern ParameterManager *parameter_manager;
 
 extern bool cv_input_enabled;
