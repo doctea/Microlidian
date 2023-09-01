@@ -151,12 +151,27 @@ void load_from_slot_2() {
 void setup_storage_menu() {
     menu->add_page("Storage");
 
-    menu->add(new ActionConfirmItem("Save to slot 0",   &save_to_slot_0));
-    menu->add(new ActionConfirmItem("Load from slot 0", &load_from_slot_0));
-    menu->add(new ActionConfirmItem("Save to slot 1",   &save_to_slot_1));
-    menu->add(new ActionConfirmItem("Load from slot 1", &load_from_slot_1));
-    menu->add(new ActionConfirmItem("Save to slot 2",   &save_to_slot_2));
-    menu->add(new ActionConfirmItem("Load from slot 2", &load_from_slot_2));
+    typedef void(*function)();
+    struct functions_t {
+        function save;
+        function load;
+    };
+    functions_t functions[3] = {
+        { &save_to_slot_0, &load_from_slot_0 },
+        { &save_to_slot_1, &load_from_slot_1 },
+        { &save_to_slot_2, &load_from_slot_2 }
+    };
+
+    for (int i = 0 ; i < 3 ; i++) {
+        char label[MENU_C_MAX];
+        snprintf(label, MENU_C_MAX, "Preset slot %i", i);
+        DualMenuItem *submenuitem = new DualMenuItem(label);
+
+        submenuitem->add(new ActionConfirmItem("Load", functions[i].load, false));
+        submenuitem->add(new ActionConfirmItem("Save", functions[i].save, false));
+
+        menu->add(submenuitem);
+    }
 }
 
 #endif
