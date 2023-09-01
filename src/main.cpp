@@ -43,8 +43,6 @@ std::atomic<bool> ticked = false;
 
 // serial console to host, for debug etc
 void setup_serial() {
-    //Serial.ignoreFlowControl();
-
     #ifdef WAIT_FOR_SERIAL
         Serial.begin(115200);
         Serial.setTimeout(0);
@@ -198,11 +196,13 @@ void loop() {
     uint32_t mics_start = micros();
     //Serial.println("loop()");
     
-    /*
     // doing this on the second core means that two Microlidians powered up at the same time won't drift too much
-    #ifdef USE_TINYUSB
-        USBMIDI.read();
-    #endif*/
+    // however, it causes a deadlock...
+    #ifndef PROCESS_USB_ON_SECOND_CORE
+        #ifdef USE_TINYUSB
+            USBMIDI.read();
+        #endif
+    #endif
 
     ticked = update_clock_ticks();
 

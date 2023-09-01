@@ -85,6 +85,13 @@ void draw_screen() {
     //if (locked || menu==nullptr) 
     //    return;
     while (is_locked() || ticked || frame_ready) {
+        #ifdef PROCESS_USB_ON_SECOND_CORE
+            // doing this here instead of on first core means that two Microlidians powered up together won't clock drift badly
+            // however, think it causes a deadlock if we don't process MIDI while waiting for a lock..?
+            #ifdef USE_TINYUSB
+                USBMIDI.read();
+            #endif
+        #endif
         delay(MENU_MS_BETWEEN_REDRAW/8);
     };
     //menu_locked = true;
@@ -105,16 +112,27 @@ void setup1() {
     };
 }
 
-void loop1() {
-    // doing this here instead of on first core means that two Microlidians powered up together won't clock drift badly
-    #ifdef USE_TINYUSB
-        USBMIDI.read();
+void loop1() {  
+
+    #ifdef PROCESS_USB_ON_SECOND_CORE
+        // doing this here instead of on first core means that two Microlidians powered up together won't clock drift badly
+        #ifdef USE_TINYUSB
+            USBMIDI.read();
+        #endif
     #endif
-    
+
     static unsigned long last_pushed = 0;
     //if (last_pushed==0) delay(5000);
     while(is_locked()) {
         delay(MENU_MS_BETWEEN_REDRAW/8);
+
+        #ifdef PROCESS_USB_ON_SECOND_CORE
+            // doing this here instead of on first core means that two Microlidians powered up together won't clock drift badly
+            // however, think it causes a deadlock if we don't process MIDI while waiting for a lock..?
+            #ifdef USE_TINYUSB
+                USBMIDI.read();
+            #endif
+        #endif
     }
     if (menu!=nullptr && millis() - last_pushed > MENU_MS_BETWEEN_REDRAW) {
         draw_screen();
