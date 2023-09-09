@@ -21,11 +21,14 @@
 
 #include "midi_usb/midi_usb_rp2040.h"
 
+#include "ParameterManager.h"
+#include "parameters/MIDICCParameter.h"
+
 byte get_muso_note_for_drum(byte drum_note);
 
 // todo: port usb_midi_clocker's OutputWrapper to work here?
 // wrapper class to wrap different MIDI output types
-class MIDIOutputWrapper {
+class MIDIOutputWrapper : public IMIDICCTarget {
     public:
     #ifdef USE_TINYUSB
         midi::MidiInterface<midi::SerialMIDI<Adafruit_USBD_MIDI>> *usbmidi = &USBMIDI;
@@ -96,6 +99,74 @@ class MIDIOutputWrapper {
             dinmidi->sendStop();
         #endif
     }
+
+    MIDICCParameter<> midi_cc_parameters[6] = {
+        MIDICCParameter<> ("A",     this, 1, 1, true),
+        MIDICCParameter<> ("B",     this, 2, 1, true),
+        MIDICCParameter<> ("C",     this, 3, 1, true),
+        MIDICCParameter<> ("Mix1",  this, 4, 1, true),
+        MIDICCParameter<> ("Mix2",  this, 5, 1, true),
+        MIDICCParameter<> ("Mix3",  this, 6, 1, true),
+    };
+
+    void setup_parameters() {
+        for (int i = 0 ; i < 6 ; i++) {
+            parameter_manager->addParameter(&midi_cc_parameters[i]);
+        }
+        midi_cc_parameters[0].connect_input(0/*parameter_manager->getInputForName("A")*/, 1.0f);
+        midi_cc_parameters[0].connect_input(1/*parameter_manager->getInputForName("A")*/, 0.f);
+        midi_cc_parameters[0].connect_input(2/*parameter_manager->getInputForName("A")*/, 0.f);
+
+        midi_cc_parameters[1].connect_input(0/*parameter_manager->getInputForName("B")*/, 0.f);
+        midi_cc_parameters[1].connect_input(1/*parameter_manager->getInputForName("B")*/, 1.0f);
+        midi_cc_parameters[1].connect_input(2/*parameter_manager->getInputForName("B")*/, 0.f);
+
+        midi_cc_parameters[2].connect_input(0/*parameter_manager->getInputForName("C")*/, 0.f);
+        midi_cc_parameters[2].connect_input(1/*parameter_manager->getInputForName("C")*/, 0.f);
+        midi_cc_parameters[2].connect_input(2/*parameter_manager->getInputForName("C")*/, 1.0f);
+
+        midi_cc_parameters[3].connect_input(0, 1.0f);
+        midi_cc_parameters[3].connect_input(1, 1.0f);
+        midi_cc_parameters[3].connect_input(2, .0f);
+
+        midi_cc_parameters[4].connect_input(0, .0f);
+        midi_cc_parameters[4].connect_input(1, 1.0f);
+        midi_cc_parameters[4].connect_input(2, 1.0f);
+
+        midi_cc_parameters[5].connect_input(0, 1.0f);
+        midi_cc_parameters[5].connect_input(1, .0f);
+        midi_cc_parameters[5].connect_input(2, 1.0f);
+    }
+
+    /*LinkedList<String> *add_all_save_lines(LinkedList<String> *lines) {
+        for (int i = 0 ; i < 6 ; i++) {
+            MIDICCParameter<> p = midi_cc_parameters[i];
+            lines->add(String("midi_cc_parameter_") + String(p.label) + String("_channel=") + String(p.channel));
+            lines->add(String("midi_cc_parameter_") + String(p.label) + String("_cc=") + String(p.cc_number));
+        }
+        return lines;
+    }
+
+    bool load_parse_key_value(String key, String value) {
+        String prefix = "midi_cc_parameter_";
+        if (!key.startsWith(prefix))
+            return false;
+
+        key.replace(prefix, "");
+        for (int i = 0 ; i < 6 ; i++) {
+            String label = key.substring(0,key.indexOf("_"));
+            if (label.equals(midi_cc_parameters[i].label)) {
+                if (key.substring(key.indexOf("_"), key.length()).equals("channel"))
+                    midi_cc_parameters[i].channel = value.toInt();
+                else if (key.substring(key.indexOf("_"), key.length()).equals("cc"))
+                    midi_cc_parameters[i].cc_number = value.toInt();
+            }
+        }        
+    }*/
+
+    #ifdef ENABLE_SCREEN
+        void create_menu_items();
+    #endif
 };
 
 
@@ -333,5 +404,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
 #ifdef ENABLE_SCREEN
     void setup_output_menu();
 #endif
+
+void setup_output_parameters();
 
 #endif

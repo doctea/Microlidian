@@ -5,8 +5,11 @@
 
 #include "debug.h"
 #include "ParameterManager.h"
+#include "outputs/output.h"
 
 #include <string>
+
+extern MIDIOutputWrapper *output_wrapper;
 
 void setup_storage() {
     Debug_println("setup_storage()...");
@@ -80,7 +83,11 @@ bool load_from_slot(int slot) {
             //value.replace("\r","");
 
             //if (continue_before_parse_2) continue;
-            if (!parameter_manager->fast_load_parse_key_value(key,value)) {
+            if (parameter_manager->fast_load_parse_key_value(key,value)) {
+                // succeeded loading via parameter_manager ..
+            /*} else if (output_wrapper->load_parse_key_value(key,value)) {
+                // */
+            } else {
                 messages_log_add(String("Failed to parse line '") + key + "=" + value);
             }
             lines_parsed_count++;
@@ -109,6 +116,8 @@ bool save_to_slot(int slot) {
         for (unsigned int i = 0 ; i < size ; i++) {
             f.println(lines->get(i));
         }
+
+        //output_wrapper->add_all_save_lines(lines);
 
         f.close();
         lines->clear();

@@ -114,6 +114,7 @@ void setup() {
         Debug_printf("after setup_cv_input(), free RAM is %u\n", freeRam());
         setup_parameters();
         Debug_printf("after setup_parameters(), free RAM is %u\n", freeRam());
+        setup_output_parameters();
     #endif
 
     #ifdef ENABLE_EUCLIDIAN

@@ -39,11 +39,16 @@ void setup_output() {
     output_processor = new MIDIOutputProcessor(output_wrapper);     // todo: set this up dynamically, probably reading from a config file
 }
 
+void setup_output_parameters() {
+    output_wrapper->setup_parameters();
+}
+
 #ifdef ENABLE_SCREEN
     #include "mymenu.h"
     #include "menuitems_object_multitoggle.h"
 
     void setup_output_menu() {
+        output_wrapper->create_menu_items();
         output_processor->create_menu_items();
     }
 
@@ -86,6 +91,36 @@ void setup_output() {
 
             menu->add(sub_menu_item_columns);
         //#endif
+    }
+
+    void MIDIOutputWrapper::create_menu_items() {
+        // controls for cv-to-midi outputs..
+        menu->add_page("CV-to-MIDI");
+        char label[40];
+        for (int i = 0 ; i < 6 ; i++) {
+            snprintf(label, 40, "CC Output %s", midi_cc_parameters[i].label);
+            SubMenuItem *bar = new SubMenuItemBar(label);
+
+            snprintf(label, 40, "Output %s CC", midi_cc_parameters[i].label);            
+            bar->add(new DirectNumberControl<byte>(
+                label, 
+                &midi_cc_parameters[i].cc_number,
+                midi_cc_parameters[i].cc_number,
+                0,
+                127
+            ));
+
+            snprintf(label, 40, "Output %s Channel", midi_cc_parameters[i].label);            
+            bar->add(new DirectNumberControl<byte>(
+                label, 
+                &midi_cc_parameters[i].channel,
+                midi_cc_parameters[i].channel,
+                1,
+                16
+            ));
+
+            menu->add(bar);
+        }
     }
 
 #endif
