@@ -45,10 +45,10 @@ class EnvelopeOutput : public MIDIDrumOutput, public EnvelopeBase {
     }
 
     virtual void loop() override {
-        this->process_envelope();
+        this->process_envelope(millis()/100);
     }
 
-    virtual void send_envelope_level(byte level) override {
+    virtual void send_envelope_level(uint8_t level) override {
         output_wrapper->sendControlChange(midi_cc, level, channel);
     }
 
