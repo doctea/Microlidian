@@ -76,7 +76,7 @@ FLASHMEM void setup_parameter_menu() {
 
     //Serial.println(F("Adding ParameterSelectorControls for available_inputs..."));
     // ask ParameterManager to add all the menu items for the ParameterInputs
-    parameter_manager->addAllParameterInputMenuItems(menu, "CV Input ");
+    parameter_manager->addAllParameterInputMenuItems(menu, true);
     Debug_printf("after addAllParameterInput, free ram is %i\n", rp2040.getFreeHeap());
 
     //parameter_manager->addAllVoltageSourceMenuItems(menu);
