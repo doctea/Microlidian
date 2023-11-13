@@ -81,7 +81,7 @@ FLASHMEM void setup_parameter_menu() {
 
     //parameter_manager->addAllVoltageSourceMenuItems(menu);
     //Serial.println("About to addAllVoltageSourceCalibrationMenuItems().."); Serial.flush();
-    parameter_manager->addAllVoltageSourceCalibrationMenuItems(menu);
+    parameter_manager->addAllVoltageSourceCalibrationMenuItems(menu, true);
     Debug_printf("after addAllVoltageSourceCalibrationMenuItems, free ram is %i\n", rp2040.getFreeHeap());
 
     //Serial.println("About to addAllParameterMenuItems().."); Serial.flush();
