@@ -110,9 +110,13 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
 
     // configure target sequencer to use the output nodes held by this OutputProcessor
     virtual void configure_sequencer(BaseSequencer *sequencer) {
-        for (int i = 0 ; i < this->nodes->size() ; i++) {
-            sequencer->configure_pattern_output(i, this->nodes->get(i));
-        }
+        #ifdef DEBUG_ENVELOPES
+            sequencer->configure_pattern_output(11, this->nodes->get(11));
+        #else
+            for (int i = 0 ; i < this->nodes->size() ; i++) {
+                sequencer->configure_pattern_output(i, this->nodes->get(i));
+            }
+        #endif
     }
 
     #ifdef ENABLE_SCREEN

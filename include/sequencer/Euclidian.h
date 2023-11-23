@@ -31,7 +31,7 @@ struct arguments_t {
     int pulses = steps/2;
     int rotation = 1;
     int duration = 1;
-    float effective_euclidian_density = 0.75;
+    float effective_euclidian_density = 0.6666;
     int tie_on = -1;
 };
 
@@ -119,9 +119,8 @@ class EuclidianPattern : public SimplePattern {
         }
 
         int original_pulses = this->arguments.pulses;
-        //int temp_pulses = arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
-        int temp_pulses = arguments.pulses * (1.5f*(MINIMUM_DENSITY+*global_density));
-        //this->arguments.pulses * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
+        int temp_pulses = arguments.pulses * round(1.5f*(MINIMUM_DENSITY+*global_density));
+        //int temp_pulses = original_pulses;
 
         if (arguments.steps > maximum_steps) {
             //messages_log_add(String("arguments.steps (") + String(arguments.steps) + String(") is more than maximum steps (") + String(maximum_steps) + String(")"));
@@ -255,7 +254,7 @@ class EuclidianSequencer : public BaseSequencer {
             fills_enabled = true, 
             add_phrase_to_seed = true;
 
-    float global_density = 0.75f;
+    float global_density = 0.6666f;
 
     public:
     EuclidianSequencer() : BaseSequencer() {

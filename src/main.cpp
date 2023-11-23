@@ -157,6 +157,10 @@ void setup() {
 
     started = true;
 
+    #ifdef DEBUG_ENVELOPES
+        set_bpm(10);
+    #endif
+
     Debug_printf("at end of setup(), free RAM is %u\n", freeRam());
 
     Debug_println("setup() finished!");

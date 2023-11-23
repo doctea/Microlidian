@@ -33,10 +33,10 @@ class EnvelopeOutput : public MIDIDrumOutput, public EnvelopeBase {
         bool x_should_go_on  = should_go_on();
 
         if (x_should_go_off) {
-            this->update_state(0, false);
+            this->update_state(0, false, ticks);
         }
         if (x_should_go_on) {
-            this->update_state(127, true);
+            this->update_state(127, true, ticks);
         }
 
         //this->process_envelope(millis());
@@ -45,7 +45,7 @@ class EnvelopeOutput : public MIDIDrumOutput, public EnvelopeBase {
     }
 
     virtual void loop() override {
-        this->process_envelope(millis()/100);
+        this->process_envelope(ticks);
     }
 
     virtual void send_envelope_level(uint8_t level) override {
