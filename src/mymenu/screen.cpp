@@ -142,7 +142,7 @@ void loop1() {
         static unsigned long last_cv_update = 0;
         if (parameter_manager->ready_for_next_update() && !is_locked()) {
             acquire_lock();
-            parameter_manager->throttled_update_cv_input(false, time_between_cv_input_updates, false);
+            parameter_manager->throttled_update_cv_input__all(time_between_cv_input_updates, false, false);
             release_lock();
             last_cv_update = millis();
         }
