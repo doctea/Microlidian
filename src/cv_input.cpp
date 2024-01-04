@@ -17,6 +17,8 @@
 
 #include "sequencer/sequencing.h"
 
+#include "Wire.h"
+
 //#include "behaviours/behaviour_base.h"
 //#include "behaviours/behaviour_craftsynth.h"
 
@@ -32,8 +34,10 @@ void setup_cv_input() {
 
     parameter_manager->init();
 
+    Wire.begin();
+
     #ifdef ENABLE_CV_INPUT
-        parameter_manager->addADCDevice(new ADCPimoroni24v(ENABLE_CV_INPUT, 5.0)); //, 5.0)); //, 2, MAX_INPUT_VOLTAGE_24V));
+        parameter_manager->addADCDevice(new ADCPimoroni24v(ENABLE_CV_INPUT, &Wire, 5.0)); //, 5.0)); //, 2, MAX_INPUT_VOLTAGE_24V));
     #endif
 
     parameter_manager->auto_init_devices();
