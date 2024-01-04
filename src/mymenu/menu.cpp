@@ -125,7 +125,7 @@ void setup_menu() {
     //Serial.println(F("Finished  constructor"));
     Serial_flush();
     Debug_println(F("Creating Menu object..")); Serial_flush();
-    menu = new Menu(tft);
+    menu = new Menu(tft, true);
     Debug_println(F("Created Menu object")); Serial_flush();
 
     menu->set_screen_height_cutoff(0.5f);
