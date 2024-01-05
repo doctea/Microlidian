@@ -16,8 +16,9 @@ class PatternDisplay : public MenuItem {
     public:
         //DeviceBehaviour_Beatstep *behaviour_beatstep = nullptr;
         SimplePattern *target_pattern = nullptr;
-        PatternDisplay(const char *label, SimplePattern *target_pattern) : MenuItem(label) {
+        PatternDisplay(const char *label, SimplePattern *target_pattern, bool selectable = true, bool show_header = true) : MenuItem(label, selectable) {
             this->set_pattern(target_pattern);
+            this->show_header = show_header;
         }
 
         void set_pattern(SimplePattern *pattern) {
