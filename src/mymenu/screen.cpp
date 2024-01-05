@@ -30,6 +30,8 @@ std::atomic<bool> frame_ready = false;
 //extern DisplayTranslator_Configured *tft;
 //extern DisplayTranslator_Configured displaytranslator;
 
+void setup_menu(bool pressed_state = HIGH);
+
 void setup_screen() {
     #ifdef ENABLE_SCREEN
         pinMode(ENCODER_KNOB_L, INPUT_PULLUP);
@@ -43,7 +45,7 @@ void setup_screen() {
         tft_print((char*)"Ready!");
         tft_clear();
 
-        setup_menu();
+        setup_menu(HIGH);
 
         Debug_println("About to init menu.."); Serial_flush();
         menu->start();

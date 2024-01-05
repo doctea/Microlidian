@@ -16,39 +16,18 @@
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 #include <SPI.h>*/
 
+#include "Bounce2.h"
+
 #include "mymenu.h"
 
 #include "submenuitem_bar.h"
 
-/*#include "mymenu/menu_looper.h"
-#include "mymenu/menu_sequencer.h"*/
 #include "mymenu/menu_bpm.h"
 #include "mymenu/menu_clock_source.h"
 
 #include "mymenu/menuitems_scale.h"
-/*#include "mymenu/menu_midi_matrix.h"
 
-#include "menuitems_object_multitoggle.h"
-
-#include "mymenu/menu_usb.h"
-#include "mymenu/menu_behaviours.h"
-
-#include "behaviours/behaviour_beatstep.h"
-#include "behaviours/behaviour_keystep.h"
-#include "behaviours/behaviour_mpk49.h"
-#include "behaviours/behaviour_subclocker.h"
-#include "behaviours/behaviour_craftsynth.h"
-#include "behaviours/behaviour_neutron.h"
-
-#include "midi/midi_out_wrapper.h"
-#include "midi/midi_outs.h"
-#include "midi/midi_pc_usb.h"
-
-#include "behaviours/behaviour_subclocker.h"
-
-#include "clock.h"
-
-#include "profiler.h"*/
+using Button = Bounce2::Button;
 
 //DisplayTranslator *tft;
 DisplayTranslator_Configured *tft = nullptr;
@@ -59,15 +38,15 @@ Menu *menu = nullptr; // = Menu();
     Encoder *knob = nullptr; // earlephilhower core trashes interrupts after static initialisation, so set up Encoder in setup() instead now
 #endif
 #ifdef PIN_BUTTON_A
-    Bounce pushButtonA = Bounce(PIN_BUTTON_A, 10); // 10ms debounce
+    Button pushButtonA = Button(); // 10ms debounce
     //extern Bounce pushButtonA;
 #endif
 #ifdef PIN_BUTTON_B
-    Bounce pushButtonB = Bounce(PIN_BUTTON_B, 10); // 10ms debounce
+    Button pushButtonB = Button(); // 10ms debounce
     //extern Bounce pushButtonB; 
 #endif
 #ifdef PIN_BUTTON_C
-    Bounce pushButtonC = Bounce(PIN_BUTTON_C, 10); // 10ms debounce
+    Button pushButtonC = Button(); // 10ms debounce
     //extern Bounce pushButtonC;
 #endif
 
@@ -103,11 +82,27 @@ uint32_t external_cv_ticks_per_pulse_values[] = { 1, 2, 3, 4, 6, 8, 12, 16, 24 }
     }
 #endif
 
-void setup_menu() {
+void setup_menu(bool button_high_state = HIGH) {
     Debug_println(F("Starting setup_menu()..")); Serial_flush();
 
     #ifdef ENCODER_KNOB_L
         knob = new Encoder(ENCODER_KNOB_L, ENCODER_KNOB_R);
+    #endif
+
+    #ifdef PIN_BUTTON_A
+        pushButtonA.attach(PIN_BUTTON_A, INPUT);
+        pushButtonA.interval(10);
+        pushButtonA.setPressedState(button_high_state);
+    #endif
+    #ifdef PIN_BUTTON_B
+        pushButtonB.attach(PIN_BUTTON_B, INPUT);
+        pushButtonB.interval(10);
+        pushButtonB.setPressedState(button_high_state);
+    #endif
+    #ifdef PIN_BUTTON_C
+        pushButtonB.attach(PIN_BUTTON_C, INPUT);
+        pushButtonB.interval(10);
+        pushButtonB.setPressedState(button_high_state);
     #endif
 
     tft = &displaytranslator; 

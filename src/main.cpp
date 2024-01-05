@@ -272,12 +272,12 @@ void loop() {
 
     // if the back button is held down for 4 seconds, do a soft reboot
     #ifdef ENABLE_SCREEN
-    if (!pushButtonA.read() && pushButtonB.read() && pushButtonB.currentDuration() >= 4000) {
+    if (!pushButtonA.isPressed() && pushButtonB.isPressed() && pushButtonB.currentDuration() >= 4000) {
         //#define AIRCR_Register (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C)))
         //AIRCR_Register = 0x5FA0004;
         reset_rp2040();
     } else if (
-        pushButtonA.read() && pushButtonB.read() && pushButtonA.currentDuration() >= 3000 && pushButtonA.currentDuration() >= 4000
+        pushButtonA.isPressed() && pushButtonB.isPressed() && pushButtonA.currentDuration() >= 3000 && pushButtonA.currentDuration() >= 4000
     ) {
         reset_upload_firmware();
     }
