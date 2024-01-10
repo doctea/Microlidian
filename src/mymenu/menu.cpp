@@ -16,7 +16,7 @@
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 #include <SPI.h>*/
 
-#include "Bounce2.h"
+#include "menu_io.h"
 
 #include "mymenu.h"
 
@@ -26,8 +26,6 @@
 #include "mymenu/menu_clock_source.h"
 
 #include "mymenu/menuitems_scale.h"
-
-using Button = Bounce2::Button;
 
 //DisplayTranslator *tft;
 DisplayTranslator_Configured *tft = nullptr;
