@@ -25,7 +25,8 @@ class EnvelopeOutput : public MIDIDrumOutput, public EnvelopeBase {
     using EnvelopeBase::make_menu_items;
 
     EnvelopeOutput(const char *label, byte note_number, byte cc_number, byte channel, MIDIOutputWrapper *output_wrapper) : 
-        MIDIDrumOutput(label, note_number, channel, output_wrapper), EnvelopeBase(label), midi_cc(cc_number)
+        MIDIDrumOutput(label, note_number, channel, output_wrapper), 
+        EnvelopeBase(label), midi_cc(cc_number)
         {}
 
     virtual void process() override {
