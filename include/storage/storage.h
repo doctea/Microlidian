@@ -15,13 +15,13 @@ void setup_storage() {
     Debug_println("setup_storage()...");
     if (!LittleFS.begin()) {
         Debug_print("Filesystem not formatted - formatting now..");
-        messages_log_add("Filesystem not formatted - formatting now..");
+        messages_log_add("LittleFS: Filesystem not formatted - formatting now..");
         LittleFS.format();
         Debug_println("Formatted!");
-        messages_log_add("Formatted!");
+        messages_log_add("LittleFS: Formatted!");
     } else {
         //Debug_println("Initialised OK so must be formatted!");
-        messages_log_add("Initialised OK so must be formatted!");
+        messages_log_add("LittleFS: Initialised OK so must be formatted!");
     }
 }
 
