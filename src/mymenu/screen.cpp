@@ -19,6 +19,7 @@
 
 #include "core_safe.h"
 
+#include "SimplyAtomic.h"
 #include <atomic>
 extern std::atomic<bool> started;
 //extern std::atomic<bool> menu_locked;
@@ -100,8 +101,10 @@ void draw_screen() {
     acquire_lock();
     //uint32_t interrupts = save_and_disable_interrupts();
     frame_ready = false;
-    menu->display();
-    frame_ready = true;
+    ATOMIC() {
+        menu->display();
+        frame_ready = true;
+    }
     //restore_interrupts(interrupts);
     release_lock();
 
@@ -136,15 +139,19 @@ void loop1() {
             #endif
         #endif
     }
-    if (menu!=nullptr && millis() - last_pushed > MENU_MS_BETWEEN_REDRAW) {
-        draw_screen();
-        last_pushed = millis();
+    ATOMIC() {
+        if (menu!=nullptr && millis() - last_pushed > MENU_MS_BETWEEN_REDRAW) {
+            draw_screen();
+            last_pushed = millis();
+        }
     }
     #ifdef ENABLE_CV_INPUT
         static unsigned long last_cv_update = 0;
         if (parameter_manager->ready_for_next_update() && !is_locked()) {
             acquire_lock();
-            parameter_manager->throttled_update_cv_input__all(time_between_cv_input_updates, false, false);
+            ATOMIC() {
+                parameter_manager->throttled_update_cv_input__all(time_between_cv_input_updates, false, false);
+            }
             release_lock();
             last_cv_update = millis();
         }

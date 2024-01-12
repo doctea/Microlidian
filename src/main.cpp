@@ -13,7 +13,6 @@
 // midihelpers library clock handling
 #include <clock.h>
 #include <bpm.h>
-
 //#include "midi_usb/midi_usb_rp2040.h"
 
 #include "sequencer/sequencing.h"
@@ -38,6 +37,8 @@
 #include "core_safe.h"
 
 #include <atomic>
+#include <SimplyAtomic.h>
+
 std::atomic<bool> started = false;
 std::atomic<bool> ticked = false;
 
@@ -64,6 +65,13 @@ void global_on_restart() {
   //Serial.println(F("<==on_restart()"));
 }
 
+void auto_handle_start();
+
+void auto_handle_start_wrapper() {
+    messages_log_add("auto_handle_start_wrapper()!");
+    auto_handle_start();
+}
+
 void setup() {
     // overclock the CPU so that we can afford all those CPU cycles drawing the UI!
     //set_sys_clock_khz(225000, true);
@@ -86,6 +94,7 @@ void setup() {
 
     setup_midi();
     setup_usb();
+    USBMIDI.setHandleStart(auto_handle_start_wrapper);
     setup_output();
 
     #ifdef ENABLE_SCREEN
@@ -205,28 +214,34 @@ void loop() {
     // however, it causes a deadlock...
     #ifndef PROCESS_USB_ON_SECOND_CORE
         #ifdef USE_TINYUSB
-            USBMIDI.read();
+            ATOMIC() {
+                USBMIDI.read();
+            }
         #endif
     #endif
 
-    ticked = update_clock_ticks();
+    ATOMIC() {
+        ticked = update_clock_ticks();
+    }
 
     if (ticked) {
-        if (is_restart_on_next_bar() && is_bpm_on_bar(ticks)) {
-            //if (debug) Serial.println(F("do_tick(): about to global_on_restart"));
-            global_on_restart();
+        ATOMIC() {
+            if (is_restart_on_next_bar() && is_bpm_on_bar(ticks)) {
+                //if (debug) Serial.println(F("do_tick(): about to global_on_restart"));
+                global_on_restart();
 
-            set_restart_on_next_bar(false);
-        }
-
-        output_wrapper->sendClock();
-
-        #ifdef ENABLE_EUCLIDIAN
-            sequencer.on_tick(ticks);
-            if (is_bpm_on_sixteenth(ticks)) {
-                output_processor->process();
+                set_restart_on_next_bar(false);
             }
-        #endif
+
+            output_wrapper->sendClock();
+
+            #ifdef ENABLE_EUCLIDIAN
+                sequencer.on_tick(ticks);
+                if (is_bpm_on_sixteenth(ticks)) {
+                    output_processor->process();
+                }
+            #endif
+        }
     }
 
     #ifdef ENABLE_SCREEN
@@ -237,21 +252,26 @@ void loop() {
             menu->update_ticks(ticks);
             last_tick = ticks;
         }*/
-        if ((ticked || menu_tick_pending) && !is_locked()) {     // don't block, assume that we can make up for the missed tick next loop; much less jitter when at very very high BPMs
-            //acquire_lock();
-            menu->update_ticks(ticks);
-            //release_lock();
-            last_tick = ticks;
-            menu_tick_pending = false;
-        } else if (ticked && is_locked()) {
-            menu_tick_pending = true;
-            //menu->update_ticks(ticks);
-            //last_tick = ticks;
+        ATOMIC() {
+            if ((ticked || menu_tick_pending) && !is_locked()) {     // don't block, assume that we can make up for the missed tick next loop; much less jitter when at very very high BPMs
+                //acquire_lock();
+                menu->update_ticks(ticks);
+                //release_lock();
+                last_tick = ticks;
+                menu_tick_pending = false;
+            } else if (ticked && is_locked()) {
+                menu_tick_pending = true;
+                //menu->update_ticks(ticks);
+                //last_tick = ticks;
+            }
         }
     #endif
 
-    output_processor->loop();
+    ATOMIC() {
+        output_processor->loop();
+    }
 
+    ATOMIC() {
     if (playing && clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0 && micros() + loop_average >= last_ticked_at_micros + micros_per_tick) {
         // don't process anything else this loop, since we probably don't have time before the next tick arrives
         //Serial.printf("early return because %i + %i >= %i + %i\n", micros(), loop_average, last_ticked_at_micros, micros_per_tick);
@@ -269,7 +289,9 @@ void loop() {
 
         add_loop_length(micros()-mics_start);
     }
+    }
 
+    ATOMIC() {
     // if the back button is held down for 4 seconds, do a soft reboot
     #ifdef ENABLE_SCREEN
     if (!pushButtonA.isPressed() && pushButtonB.isPressed() && pushButtonB.currentDuration() >= 4000) {
@@ -282,5 +304,6 @@ void loop() {
         reset_upload_firmware();
     }
     #endif
+    }
 }
 
