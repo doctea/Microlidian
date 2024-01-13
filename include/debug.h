@@ -31,13 +31,9 @@ void reset_upload_firmware();
     #endif
 #endif
 
-#include "LinkedList.h"
-#define MAX_MESSAGES_LOG 20
-extern LinkedList<String> *messages_log;
-void messages_log_add(String msg);
+#include "menu_messages.h"
 
 extern bool debug_flag;
-
 
 volatile extern int menu_time;
 volatile extern int tft_time;
