@@ -159,6 +159,8 @@ void setup() {
     #ifdef ENABLE_SCREEN
         setup_output_menu();
         setup_debug_menu();
+        menu->setup_quickjump();
+
         menu->select_page(0);
     #endif
 
