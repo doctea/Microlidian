@@ -25,7 +25,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
     EuclidianPatternControl(const char *label, EuclidianPattern *pattern) : SubMenuItemBar(label), pattern(pattern) {
         #ifdef ENABLE_STEP_DISPLAYS
             this->circle_display = new SingleCircleDisplay(label, pattern);     // circle display first - don't add this as a submenu item, because it isn't selectable
-            this->step_display = new PatternDisplay(label, pattern, false);    // step sequence view next
+            this->step_display = new PatternDisplay(label, pattern, false, false);    // step sequence view next - not selectable, don't draw header
         #endif
 
         #ifdef ENABLE_OUTPUT_SELECTOR
