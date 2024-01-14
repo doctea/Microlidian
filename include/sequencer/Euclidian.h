@@ -241,6 +241,10 @@ class EuclidianPattern : public SimplePattern {
     #ifdef ENABLE_SCREEN
         void create_menu_items(Menu *menu, int index);
     #endif
+    
+    #if defined(ENABLE_CV_INPUT)
+        virtual LinkedList<FloatParameter*> *getParameters(int i);
+    #endif
 };
 
 class EuclidianSequencer : public BaseSequencer {
@@ -253,7 +257,6 @@ class EuclidianSequencer : public BaseSequencer {
             mutate_enabled = true, 
             fills_enabled = true, 
             add_phrase_to_seed = true;
-
     float global_density = 0.6666f;
 
     public:

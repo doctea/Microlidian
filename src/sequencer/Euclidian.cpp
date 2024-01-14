@@ -45,42 +45,12 @@ arguments_t initial_arguments[] = {
 
         for (int i = 0 ; i < this->number_patterns ; i++) {
             EuclidianPattern *pattern = (EuclidianPattern *)this->get_pattern(i);
-            char label[MENU_C_MAX];
-            snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
-            parameters->add(
-                new DataParameter<EuclidianPattern,byte>(
-                    label, 
-                    pattern, 
-                    &EuclidianPattern::set_steps, 
-                    &EuclidianPattern::get_steps, 
-                    1, 
-                    pattern->maximum_steps
-                ));
-
-            snprintf(label, MENU_C_MAX, "Pattern %i pulses", i);
-            parameters->add(
-                new DataParameter<EuclidianPattern,byte>(
-                    label,
-                    pattern,
-                    &EuclidianPattern::set_pulses,
-                    &EuclidianPattern::get_pulses,
-                    0,
-                    pattern->maximum_steps
-                )
-            );
-
-            snprintf(label, MENU_C_MAX, "Pattern %i rotation", i);
-            parameters->add(
-                new DataParameter<EuclidianPattern,byte>(
-                    label,
-                    pattern,
-                    &EuclidianPattern::set_rotation,
-                    &EuclidianPattern::get_rotation,
-                    0,
-                    pattern->maximum_steps
-                )
-            );
+            LinkedList<FloatParameter*> *pattern_parameters = pattern->getParameters(i);
+            for (int i = 0 ; i < pattern_parameters->size() ; i++) {
+                parameters->add(pattern_parameters->get(i));
+            }
         }
+
         return parameters;
     }
 #endif
@@ -89,6 +59,51 @@ arguments_t initial_arguments[] = {
     #include "mymenu.h"
     #include "mymenu/menuitems_pattern_euclidian.h"
 
+    LinkedList<FloatParameter*> *EuclidianPattern::getParameters(int i) {
+        if (this->parameters!=nullptr)
+            return this->parameters;
+
+        parameters = new LinkedList<FloatParameter*>();
+
+        char label[MENU_C_MAX];
+        snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
+        parameters->add(
+            new DataParameter<EuclidianPattern,byte>(
+                label, 
+                this, 
+                &EuclidianPattern::set_steps, 
+                &EuclidianPattern::get_steps, 
+                1, 
+                this->maximum_steps
+            ));
+
+        snprintf(label, MENU_C_MAX, "Pattern %i pulses", i);
+        parameters->add(
+            new DataParameter<EuclidianPattern,byte>(
+                label,
+                this,
+                &EuclidianPattern::set_pulses,
+                &EuclidianPattern::get_pulses,
+                0,
+                this->maximum_steps
+            )
+        );
+
+        snprintf(label, MENU_C_MAX, "Pattern %i rotation", i);
+        parameters->add(
+            new DataParameter<EuclidianPattern,byte>(
+                label,
+                this,
+                &EuclidianPattern::set_rotation,
+                &EuclidianPattern::get_rotation,
+                0,
+                this->maximum_steps
+            )
+        );
+
+        return parameters;
+    }
+
     void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index) {
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
@@ -96,6 +111,14 @@ arguments_t initial_arguments[] = {
 
         EuclidianPatternControl *epc = new EuclidianPatternControl(label, this);
         menu->add(epc);
+
+        snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
+        menu->add_page(label);
+
+        //snprintf(label, MENU_C_MAX, "Pattern %i")
+        for (int i = 0 ; i < this->parameters->size() ; i++) {
+            menu->add(parameter_manager->makeMenuItemsForParameter(this->parameters->get(i)));
+        }
         
         #ifdef SIMPLE_SELECTOR
         OutputSelectorControl<EuclidianPattern> *selector = new OutputSelectorControl<EuclidianPattern>(

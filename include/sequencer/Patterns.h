@@ -10,8 +10,11 @@
     #include "menu.h"
 #endif
 
-#define DEFAULT_VELOCITY 127
+#ifdef ENABLE_CV_INPUT
+    #include "parameters/Parameter.h"
+#endif
 
+#define DEFAULT_VELOCITY    MIDI_MAX_VELOCITY
 
 class BaseOutput;
 
@@ -64,6 +67,14 @@ class BasePattern {
     virtual byte get_steps() {
         return this->steps;
     }
+
+    #ifdef ENABLE_SCREEN
+        #ifdef ENABLE_CV_INPUT
+            LinkedList<FloatParameter*> *parameters = nullptr;
+            LinkedList<FloatParameter*> *getParameters(int i);
+        #endif
+        void create_menu_items(Menu *menu, int index);
+    #endif
 };
 
 class SimplePattern : public BasePattern {
@@ -156,6 +167,9 @@ class SimplePattern : public BasePattern {
     virtual void restore_default_arguments() {}
     virtual void store_current_arguments_as_default() {}
 
+    #ifdef ENABLE_SCREEN
+        void create_menu_items(Menu *menu, int index);
+    #endif
 };
 
 

@@ -137,8 +137,9 @@ void setup() {
     #endif
 
     #if defined(ENABLE_CV_INPUT) && defined(ENABLE_EUCLIDIAN)
-        //Serial.println("..calling getParameters()..");
+        Serial.println("..calling sequencer.getParameters()..");
         LinkedList<FloatParameter*> *params = sequencer.getParameters();
+        Serial.println("calling parameter_manager->addParameters.."); Serial.flush();
         parameter_manager->addParameters(params);
         params->clear();
         delete params;

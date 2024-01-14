@@ -42,7 +42,7 @@
 
             for (int i = 0 ; i < sequencer.number_patterns ; i++) {
                 //Serial.printf("adding controls for pattern %i..\n", i);
-                EuclidianPattern *p = (EuclidianPattern *)sequencer.get_pattern(i);
+                BasePattern *p = (BasePattern *)sequencer.get_pattern(i);
 
                 p->create_menu_items(menu, i);
             }
