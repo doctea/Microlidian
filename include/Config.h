@@ -38,6 +38,12 @@
     #endif
 #endif
 
+// default for using MidiMUSO CV12 mappings on the DIN output
+#define DEFAULT_OUTPUT_TYPE     OUTPUT_TYPE::DRUMS_MIDIMUSO
+
+// default to using straight MIDI output on the DIN output, eg for connecting directly to a drum machine
+//#define DEFAULT_OUTPUT_TYPE     OUTPUT_TYPE::NORMAL
+
 //#define DEFAULT_CLOCK_MODE  CLOCK_EXTERNAL_USB_HOST      
 
 /*#define SCREEN_WIDTH 135

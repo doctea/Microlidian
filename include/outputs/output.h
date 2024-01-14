@@ -24,7 +24,30 @@
 #include "ParameterManager.h"
 #include "parameters/MIDICCParameter.h"
 
-byte get_muso_note_for_drum(byte drum_note);
+int8_t get_muso_note_for_drum(int8_t drum_note);
+
+struct note_message_t {
+    int8_t pitch;
+    int8_t velocity;
+    int8_t channel;
+};
+note_message_t convert_note_for_muso_drum(int8_t pitch, int8_t velocity, int8_t channel);
+
+enum OUTPUT_TYPE {
+    DRUMS,
+    DRUMS_MIDIMUSO,
+    PITCHED
+};
+struct output_type_t {
+    OUTPUT_TYPE type_id;
+    const char *label = "n/a";
+    note_message_t(*converter_func)(int8_t,int8_t,int8_t) = nullptr;
+};
+const output_type_t available_output_types[] = {
+    { OUTPUT_TYPE::DRUMS,           "Normal",           nullptr },
+    { OUTPUT_TYPE::DRUMS_MIDIMUSO,  "Drums->MidiMuso",  &convert_note_for_muso_drum },
+    { OUTPUT_TYPE::PITCHED,         "Pitched",          nullptr }
+};
 
 // todo: port usb_midi_clocker's OutputWrapper to work here?
 // wrapper class to wrap different MIDI output types
@@ -37,6 +60,15 @@ class MIDIOutputWrapper : public IMIDICCTarget {
         midi::MidiInterface<midi::SerialMIDI<SerialPIO>> *dinmidi = &DINMIDI;
     #endif
 
+    OUTPUT_TYPE output_mode = OUTPUT_TYPE::DRUMS_MIDIMUSO;
+    void set_output_mode(int m) {
+        this->output_mode = (OUTPUT_TYPE)m;
+        // todo: if changed then we need to kill all the playing notes to avoid them getting stuck
+    }
+    OUTPUT_TYPE get_output_mode() {
+        return this->output_mode;
+    }
+
     void sendNoteOn(byte pitch, byte velocity, byte channel) {
         //Serial.printf("MIDIOutputWrapper#sendNoteOn(%i, %i, %i)\n", pitch, velocity, channel);
         if (!is_valid_note(pitch)) 
@@ -46,8 +78,24 @@ class MIDIOutputWrapper : public IMIDICCTarget {
             usbmidi->sendNoteOn(pitch, velocity, channel);
         #endif
         #ifdef USE_DINMIDI
-            if (channel==GM_CHANNEL_DRUMS)
-                dinmidi->sendNoteOn(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
+            int8_t pitch_to_send = pitch;
+            int8_t velocity_to_send = velocity;
+            int8_t channel_to_send = channel;
+
+            if (available_output_types[output_mode].converter_func!=nullptr) {
+                note_message_t r = available_output_types[output_mode].converter_func(pitch_to_send, velocity_to_send, channel_to_send);
+                pitch_to_send = r.pitch;
+                velocity_to_send = r.velocity;
+                channel_to_send = r.channel;
+            }
+
+            if (is_valid_note(pitch_to_send)) {
+                dinmidi->sendNoteOn(
+                    pitch_to_send,
+                    velocity_to_send, 
+                    channel_to_send
+                );
+            }
         #endif
     }
     void sendNoteOff(byte pitch, byte velocity, byte channel) {
@@ -58,8 +106,24 @@ class MIDIOutputWrapper : public IMIDICCTarget {
             usbmidi->sendNoteOff(pitch, velocity, channel);
         #endif
         #ifdef USE_DINMIDI
-            if (channel==GM_CHANNEL_DRUMS)
-                dinmidi->sendNoteOff(get_muso_note_for_drum(pitch), velocity, MUSO_TRIGGER_CHANNEL);
+            int8_t pitch_to_send = pitch;
+            int8_t velocity_to_send = velocity;
+            int8_t channel_to_send = channel;
+
+            if (available_output_types[output_mode].converter_func!=nullptr) {
+                note_message_t r = available_output_types[output_mode].converter_func(pitch_to_send, velocity_to_send, channel_to_send);
+                pitch_to_send = r.pitch;
+                velocity_to_send = r.velocity;
+                channel_to_send = r.channel;
+            }
+
+            if (is_valid_note(pitch_to_send)) {
+                dinmidi->sendNoteOff(
+                    pitch_to_send,
+                    velocity_to_send, 
+                    channel_to_send
+                );
+            }
         #endif
     }
 
@@ -138,34 +202,25 @@ class MIDIOutputWrapper : public IMIDICCTarget {
         midi_cc_parameters[5].connect_input(2, 1.0f);
     }
 
-    /*LinkedList<String> *add_all_save_lines(LinkedList<String> *lines) {
-        for (int i = 0 ; i < 6 ; i++) {
-            MIDICCParameter<> p = midi_cc_parameters[i];
-            lines->add(String("midi_cc_parameter_") + String(p.label) + String("_channel=") + String(p.channel));
-            lines->add(String("midi_cc_parameter_") + String(p.label) + String("_cc=") + String(p.cc_number));
-        }
-        return lines;
-    }
-
-    bool load_parse_key_value(String key, String value) {
-        String prefix = "midi_cc_parameter_";
-        if (!key.startsWith(prefix))
-            return false;
-
-        key.replace(prefix, "");
-        for (int i = 0 ; i < 6 ; i++) {
-            String label = key.substring(0,key.indexOf("_"));
-            if (label.equals(midi_cc_parameters[i].label)) {
-                if (key.substring(key.indexOf("_"), key.length()).equals("channel"))
-                    midi_cc_parameters[i].channel = value.toInt();
-                else if (key.substring(key.indexOf("_"), key.length()).equals("cc"))
-                    midi_cc_parameters[i].cc_number = value.toInt();
-            }
-        }        
-    }*/
-
     #ifdef ENABLE_SCREEN
         void create_menu_items();
+    #endif
+
+    #ifdef ENABLE_STORAGE
+        LinkedList<String> *add_all_save_lines(LinkedList<String> *lines) {
+            //if (Serial) Serial.println("MIDIOutputWrapper#add_all_save_lines()!");
+            lines->add(String("dinmidi_output_type=") + String(this->get_output_mode()));
+
+            return lines;
+        }
+        bool load_parse_key_value(String key, String value) {
+            //if (Serial) Serial.printf("MIDIOutputWrapper#load_parse_key_value('%s','%s')\n", key.c_str(), value.c_str());
+            if (key.equals("dinmidi_output_type")) {                
+                this->set_output_mode((OUTPUT_TYPE)(uint8_t)value.toInt());
+                return true;
+            }
+            return false;
+        }
     #endif
 };
 

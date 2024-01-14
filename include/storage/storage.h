@@ -83,10 +83,10 @@ bool load_from_slot(int slot) {
             //value.replace("\r","");
 
             //if (continue_before_parse_2) continue;
-            if (parameter_manager->fast_load_parse_key_value(key,value)) {
+            if (output_wrapper->load_parse_key_value(key,value)) {
+                // succeeded loading via output_wrapper MIDIOutputWrapper
+            } else if (parameter_manager->fast_load_parse_key_value(key,value)) {
                 // succeeded loading via parameter_manager ..
-            /*} else if (output_wrapper->load_parse_key_value(key,value)) {
-                // */
             } else {
                 messages_log_add(String("Failed to parse line '") + key + "=" + value);
             }
@@ -110,14 +110,17 @@ bool save_to_slot(int slot) {
         messages_log_add(String("save_to_slot opened ") + String(filename));
         LinkedList<String> *lines = new LinkedList<String> ();
 
-        // get all the parameter mapping values and save them to file
+        // get all the parameter mapping values
         parameter_manager->add_all_save_lines(lines);
+
+        // get MIDIOutputWrapper lines
+        output_wrapper->add_all_save_lines(lines);
+
+        // save them to file
         const unsigned int size = lines->size();
         for (unsigned int i = 0 ; i < size ; i++) {
             f.println(lines->get(i));
         }
-
-        //output_wrapper->add_all_save_lines(lines);
 
         f.close();
         lines->clear();
@@ -165,13 +168,13 @@ void setup_storage_menu() {
         function save;
         function load;
     };
-    functions_t functions[3] = {
+    functions_t functions[] = {
         { &save_to_slot_0, &load_from_slot_0 },
         { &save_to_slot_1, &load_from_slot_1 },
         { &save_to_slot_2, &load_from_slot_2 }
     };
 
-    for (int i = 0 ; i < 3 ; i++) {
+    for (int i = 0 ; i < sizeof(functions)/sizeof(functions_t) ; i++) {
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "Preset slot %i", i);
         DualMenuItem *submenuitem = new DualMenuItem(label);

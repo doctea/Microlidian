@@ -2,8 +2,9 @@
 #include "outputs/output.h"
 #include "outputs/output_processor.h"
 
-byte get_muso_note_for_drum(byte drum_note) {
-    byte retval = 60;
+// todo: different modes to correlate with the midimuso mode + output availability..
+int8_t get_muso_note_for_drum(int8_t drum_note) {
+    int8_t retval = 60;
     switch (drum_note) {
         case GM_NOTE_ACOUSTIC_BASS_DRUM:
         case GM_NOTE_ELECTRIC_BASS_DRUM:
@@ -29,6 +30,14 @@ byte get_muso_note_for_drum(byte drum_note) {
             retval += TRIGGER_CLOSEDHAT; break;
     }     
     return retval;
+}
+
+note_message_t convert_note_for_muso_drum(int8_t pitch, int8_t velocity, int8_t channel) {
+    return {
+        get_muso_note_for_drum(pitch),
+        velocity,
+        channel==(int8_t)GM_CHANNEL_DRUMS ? (int8_t)MUSO_TRIGGER_CHANNEL : channel
+    };
 }
 
 MIDIOutputWrapper *output_wrapper = nullptr;
@@ -78,6 +87,7 @@ void setup_output_parameters() {
 
     #include "submenuitem_bar.h"
     #include "menuitems_object.h"
+    #include "menuitems_lambda.h"
     #include "menuitems.h"
     void MIDINoteTriggerCountOutput::make_menu_items(Menu *menu, int index) {
         //#ifdef ENABLE_ENVELOPE_MENUS
@@ -121,6 +131,21 @@ void setup_output_parameters() {
 
             menu->add(bar);
         }
+
+        menu->add_page("MIDI Output");
+        LambdaSelectorControl<OUTPUT_TYPE> *output_mode_selector = new LambdaSelectorControl<OUTPUT_TYPE>(
+            "DIN output mode", 
+            [=](OUTPUT_TYPE a) -> void { this->set_output_mode(a); },
+            [=]() -> OUTPUT_TYPE { return this->get_output_mode(); },
+            nullptr, 
+            true
+        );
+        
+        for (int i = 0 ; i < sizeof(available_output_types)/sizeof(output_type_t) ; i++) {
+            output_mode_selector->add_available_value(available_output_types[i].type_id, available_output_types[i].label);
+        }
+
+        menu->add(output_mode_selector);
     }
 
 #endif
