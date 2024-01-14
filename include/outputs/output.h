@@ -1,6 +1,8 @@
 #ifndef MIDI_OUTPUT__INCLUDED
 #define MIDI_OUTPUT__INCLUDED
 
+#include "Config.h"
+
 #include <Arduino.h>
 #include <LinkedList.h>
 
@@ -60,7 +62,7 @@ class MIDIOutputWrapper : public IMIDICCTarget {
         midi::MidiInterface<midi::SerialMIDI<SerialPIO>> *dinmidi = &DINMIDI;
     #endif
 
-    OUTPUT_TYPE output_mode = OUTPUT_TYPE::DRUMS_MIDIMUSO;
+    OUTPUT_TYPE output_mode = DEFAULT_OUTPUT_TYPE;
     void set_output_mode(int m) {
         this->output_mode = (OUTPUT_TYPE)m;
         // todo: if changed then we need to kill all the playing notes to avoid them getting stuck

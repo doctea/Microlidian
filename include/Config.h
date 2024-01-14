@@ -71,9 +71,11 @@
 
 //#define Serial_println(X) { if (Serial) Serial.println(x); }
 
+// choose what type of rp2040 serial driver to use on the DIN MIDI output
+// this is specified in the platformio.ini because it needs to be picked up by the midihelpers midi_usb_rp2040.cpp file
 //#define MIDI_SERIAL_SOFTWARE    // this disnae work at all?  
 //#define MIDI_SERIAL_HARDWARE    // THIS FUCKIN WORKS LADS!!!
-//#define MIDI_SERIAL_SPIO          // this fuckin works too!  
+//#define MIDI_SERIAL_SPIO        // this fuckin works too!  
 
 #define ENABLE_ENVELOPES
 
