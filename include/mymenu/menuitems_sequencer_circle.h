@@ -1,5 +1,4 @@
-#ifndef MENUITEMS_SEQUENCER_CIRCLE__H
-#define MENUITEMS_SEQUENCER_CIRCLE__H
+#pragma once
 
 #ifdef ENABLE_SCREEN
 
@@ -142,7 +141,5 @@ class CircleDisplay : public MenuItem {
             return tft->height();
         }
 };
-
-#endif
 
 #endif

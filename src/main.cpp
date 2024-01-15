@@ -146,15 +146,16 @@ void setup() {
         Debug_printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());
     #endif
 
-    #ifdef ENABLE_CV_INPUT
-        parameter_manager->setDefaultParameterConnections();
-    #endif
 
     #if defined(ENABLE_SCREEN) && defined(ENABLE_CV_INPUT)
         //menu->add_page("Parameter Inputs");
         Debug_printf("before setup_parameter_menu(), free RAM is %u\n", freeRam());
         setup_parameter_menu();
         Debug_printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
+    #endif
+
+    #ifdef ENABLE_CV_INPUT
+        parameter_manager->setDefaultParameterConnections();
     #endif
 
     #ifdef ENABLE_SCREEN

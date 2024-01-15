@@ -247,6 +247,8 @@ class EuclidianPattern : public SimplePattern {
     #endif
 };
 
+
+
 class EuclidianSequencer : public BaseSequencer {
     // todo: list of EuclidianPatterns...
     EuclidianPattern **patterns = nullptr;
@@ -419,6 +421,10 @@ class EuclidianSequencer : public BaseSequencer {
     
     #if defined(ENABLE_CV_INPUT)
         virtual LinkedList<FloatParameter*> *getParameters() override;
+    #endif
+
+    #if defined(ENABLE_SCREEN)
+        virtual void make_menu_items(Menu *menu) override;
     #endif
 
 };

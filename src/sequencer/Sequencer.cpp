@@ -15,3 +15,7 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     if (p!=nullptr)
         p->set_output(output);
 }
+
+void BaseSequencer::make_menu_items(Menu *menu) {
+
+}
