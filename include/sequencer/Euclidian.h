@@ -239,11 +239,11 @@ class EuclidianPattern : public SimplePattern {
     }*/
 
     #ifdef ENABLE_SCREEN
-        void create_menu_items(Menu *menu, int index);
+        virtual void create_menu_items(Menu *menu, int index) override;
     #endif
     
     #if defined(ENABLE_CV_INPUT)
-        virtual LinkedList<FloatParameter*> *getParameters(int i);
+        virtual LinkedList<FloatParameter*> *getParameters(int i) override;
     #endif
 };
 

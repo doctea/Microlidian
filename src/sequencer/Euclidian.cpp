@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#include "Config.h"
+
 #include <LinkedList.h>
 
 #include "sequencer/Euclidian.h"
@@ -60,10 +62,10 @@ arguments_t initial_arguments[] = {
     #include "mymenu/menuitems_pattern_euclidian.h"
 
     LinkedList<FloatParameter*> *EuclidianPattern::getParameters(int i) {
-        if (this->parameters!=nullptr)
-            return this->parameters;
+        if (parameters!=nullptr)
+            return parameters;
 
-        parameters = new LinkedList<FloatParameter*>();
+        BasePattern::getParameters(i);
 
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
@@ -116,8 +118,10 @@ arguments_t initial_arguments[] = {
         menu->add_page(label);
 
         //snprintf(label, MENU_C_MAX, "Pattern %i")
-        for (int i = 0 ; i < this->parameters->size() ; i++) {
-            menu->add(parameter_manager->makeMenuItemsForParameter(this->parameters->get(i)));
+        LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
+        for (int i = 0 ; i < parameters->size() ; i++) {
+            // TODO: crashes (black screen on startup) if this is enabled... runs ok if not
+            menu->add(parameter_manager->makeMenuItemsForParameter(parameters->get(i)));
         }
         
         #ifdef SIMPLE_SELECTOR

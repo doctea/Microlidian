@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+#include "Config.h"
+
 #include "clock.h"
 #include "midi_helpers.h"
 
@@ -71,9 +73,9 @@ class BasePattern {
     #ifdef ENABLE_SCREEN
         #ifdef ENABLE_CV_INPUT
             LinkedList<FloatParameter*> *parameters = nullptr;
-            LinkedList<FloatParameter*> *getParameters(int i);
+            virtual LinkedList<FloatParameter*> *getParameters(int i);
         #endif
-        void create_menu_items(Menu *menu, int index);
+        virtual void create_menu_items(Menu *menu, int index);
     #endif
 };
 
@@ -167,9 +169,10 @@ class SimplePattern : public BasePattern {
     virtual void restore_default_arguments() {}
     virtual void store_current_arguments_as_default() {}
 
-    #ifdef ENABLE_SCREEN
-        void create_menu_items(Menu *menu, int index);
-    #endif
+    /*#ifdef ENABLE_SCREEN
+        virtual void create_menu_items(Menu *menu, int index) override;
+    #endif*/
+
 };
 
 

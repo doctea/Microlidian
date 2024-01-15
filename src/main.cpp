@@ -121,8 +121,8 @@ void setup() {
     #ifdef ENABLE_CV_INPUT
         setup_cv_input();
         Debug_printf("after setup_cv_input(), free RAM is %u\n", freeRam());
-        setup_parameters();
-        Debug_printf("after setup_parameters(), free RAM is %u\n", freeRam());
+        setup_parameter_inputs();
+        Debug_printf("after setup_parameter_inputs(), free RAM is %u\n", freeRam());
         setup_output_parameters();
     #endif
 
@@ -137,9 +137,9 @@ void setup() {
     #endif
 
     #if defined(ENABLE_CV_INPUT) && defined(ENABLE_EUCLIDIAN)
-        Serial.println("..calling sequencer.getParameters()..");
+        //Serial.println("..calling sequencer.getParameters()..");
         LinkedList<FloatParameter*> *params = sequencer.getParameters();
-        Serial.println("calling parameter_manager->addParameters.."); Serial.flush();
+        //Serial.println("calling parameter_manager->addParameters.."); Serial.flush();
         parameter_manager->addParameters(params);
         params->clear();
         delete params;
@@ -172,6 +172,8 @@ void setup() {
     #ifdef DEBUG_ENVELOPES
         set_bpm(10);
     #endif
+
+    menu->set_last_message((String("Started up, free RAM is ") + String(freeRam())).c_str());
 
     Debug_printf("at end of setup(), free RAM is %u\n", freeRam());
 
