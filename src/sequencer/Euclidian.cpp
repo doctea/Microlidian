@@ -135,10 +135,9 @@ arguments_t initial_arguments[] = {
         LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
         //parameter_manager->addParameters(parameters);
         for (int i = 0 ; i < parameters->size() ; i++) {
-            // TODO: crashes (black screen on startup) if this is enabled... runs ok if not
-            menu->add(parameter_manager->makeMenuItemsForParameter(parameters->get(i)));
+            menu->add(parameter_manager->makeMenuItemsForParameter(parameters->get(i), label));
         }
-        
+      
         #ifdef SIMPLE_SELECTOR
         OutputSelectorControl<EuclidianPattern> *selector = new OutputSelectorControl<EuclidianPattern>(
             "Output",
