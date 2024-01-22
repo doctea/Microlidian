@@ -166,7 +166,8 @@ class MIDIOutputWrapper : public IMIDICCTarget {
         #endif
     }
 
-    MIDICCParameter<> midi_cc_parameters[6] = {
+    #define NUM_MIDI_CC_PARAMETERS 6
+    MIDICCParameter<> midi_cc_parameters[NUM_MIDI_CC_PARAMETERS] = {
         MIDICCParameter<> ("A",     this, 1, 1, true),
         MIDICCParameter<> ("B",     this, 2, 1, true),
         MIDICCParameter<> ("C",     this, 3, 1, true),

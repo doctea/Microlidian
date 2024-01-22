@@ -106,12 +106,12 @@ void setup_output_parameters() {
     void MIDIOutputWrapper::create_menu_items() {
         // controls for cv-to-midi outputs..
         menu->add_page("CV-to-MIDI");
-        char label[40];
+        char label[MENU_C_MAX];
         for (int i = 0 ; i < 6 ; i++) {
-            snprintf(label, 40, "CC Output %s", midi_cc_parameters[i].label);
+            snprintf(label, MENU_C_MAX, "CC Output %s", midi_cc_parameters[i].label);
             SubMenuItem *bar = new SubMenuItemBar(label);
 
-            snprintf(label, 40, "Output %s CC", midi_cc_parameters[i].label);            
+            snprintf(label, MENU_C_MAX, "Output %s CC", midi_cc_parameters[i].label);            
             bar->add(new DirectNumberControl<byte>(
                 label, 
                 &midi_cc_parameters[i].cc_number,
@@ -120,7 +120,7 @@ void setup_output_parameters() {
                 127
             ));
 
-            snprintf(label, 40, "Output %s Channel", midi_cc_parameters[i].label);            
+            snprintf(label, MENU_C_MAX, "Output %s Channel", midi_cc_parameters[i].label);            
             bar->add(new DirectNumberControl<byte>(
                 label, 
                 &midi_cc_parameters[i].channel,
@@ -132,6 +132,12 @@ void setup_output_parameters() {
             menu->add(bar);
         }
 
+        menu->add_page("CV-to-MIDI mod");
+        for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
+            menu->add(midi_cc_parameters[i].makeControls());
+        }
+
+        // todo: probably move this to another more generic 'settings' page
         menu->add_page("MIDI Output");
         LambdaSelectorControl<OUTPUT_TYPE> *output_mode_selector = new LambdaSelectorControl<OUTPUT_TYPE>(
             "DIN output mode", 
@@ -140,11 +146,9 @@ void setup_output_parameters() {
             nullptr, 
             true
         );
-        
         for (int i = 0 ; i < sizeof(available_output_types)/sizeof(output_type_t) ; i++) {
             output_mode_selector->add_available_value(available_output_types[i].type_id, available_output_types[i].label);
         }
-
         menu->add(output_mode_selector);
     }
 
