@@ -63,6 +63,8 @@ arguments_t initial_arguments[] = {
             }*/
         }
 
+        parameter_manager->addParameters(parameters);
+
         return parameters;
     }
 #endif
@@ -113,6 +115,8 @@ arguments_t initial_arguments[] = {
             )
         );
 
+        parameter_manager->addParameters(parameters);
+
         return parameters;
     }
 
@@ -129,7 +133,7 @@ arguments_t initial_arguments[] = {
 
         //snprintf(label, MENU_C_MAX, "Pattern %i")
         LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
-        parameter_manager->addParameters(parameters);
+        //parameter_manager->addParameters(parameters);
         for (int i = 0 ; i < parameters->size() ; i++) {
             // TODO: crashes (black screen on startup) if this is enabled... runs ok if not
             menu->add(parameter_manager->makeMenuItemsForParameter(parameters->get(i)));
@@ -167,13 +171,14 @@ arguments_t initial_arguments[] = {
         menu->add_page("Circle");
         menu->add(new CircleDisplay("Circle", this));
 
+        /*
+        // create a dedicated page for the sequencer modulations
         menu->add_page("Sequencer mods");
         LinkedList<FloatParameter*> *parameters = getParameters();
-        parameter_manager->addParameters(parameters);
-
+        //parameter_manager->addParameters(parameters);
         for (int i = 0 ; i < parameters->size() ; i++) {
             menu->add(parameters->get(i)->makeControls());
-        }
+        }*/
 
         //using option=ObjectSelectorControl<EuclidianPattern,BaseOutput*>::option;
         /*LinkedList<BaseOutput*> *nodes = new LinkedList<BaseOutput*>();

@@ -140,9 +140,9 @@ void setup() {
         //Serial.println("..calling sequencer.getParameters()..");
         LinkedList<FloatParameter*> *params = sequencer.getParameters();
         //Serial.println("calling parameter_manager->addParameters.."); Serial.flush();
-        parameter_manager->addParameters(params);
-        params->clear();
-        delete params;
+        //parameter_manager->addParameters(params);
+        //params->clear();
+        //delete params;
         Debug_printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());
     #endif
 

@@ -27,6 +27,9 @@
 
 #include "mymenu/menuitems_scale.h"
 
+#include "LinkedList.h"
+#include "parameters/Parameter.h"
+
 //DisplayTranslator *tft;
 DisplayTranslator_Configured *tft = nullptr;
 Menu *menu = nullptr; // = Menu();
@@ -130,7 +133,7 @@ void setup_menu(bool button_high_state = HIGH) {
     menu->add(&clock_source_selector);         // midi clock source (internal or from PC USB)
 
     // add start/stop/continue bar
-    SubMenuItemBar *project_startstop = new SubMenuItemBar("Transport");
+    SubMenuItemBar *project_startstop = new SubMenuItemBar("Transport", false);
     project_startstop->add(new ActionItem("Start",    clock_start));
     project_startstop->add(new ActionItem("Stop",     clock_stop));
     project_startstop->add(new ActionItem("Continue", clock_continue));
@@ -182,6 +185,12 @@ void setup_menu(bool button_high_state = HIGH) {
         submenu->add(new ObjectToggleControl<EuclidianSequencer>("Fills", &sequencer,  &EuclidianSequencer::set_fills_enabled,         &EuclidianSequencer::is_fills_enabled));
         submenu->add(new ObjectNumberControl<EuclidianSequencer,int>("Seed", &sequencer, &EuclidianSequencer::set_euclidian_seed,      &EuclidianSequencer::get_euclidian_seed));
         menu->add(submenu);
+
+        // add the sequencer modulation controls to this page
+        LinkedList<FloatParameter*> *sequencer_parameters = sequencer.getParameters();
+        for (int i = 0 ; i < sequencer_parameters->size() ; i++) {
+            menu->add(sequencer_parameters->get(i)->makeControls());
+        }
     #endif
     
     #ifdef DISABLED_STUFF
