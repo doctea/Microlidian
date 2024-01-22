@@ -47,11 +47,11 @@ void setup_cv_input() {
 
 // initialise the input voltage ParameterInputs that can be mapped to Parameters
 FLASHMEM 
-void setup_parameters() {
+void setup_parameter_inputs() {
     //parameter_manager = new ParameterManager();
     // add the available parameters to a list used globally and later passed to each selector menuitem
-    //Serial.println(F("==== begin setup_parameters ====")); Serial_flush();
-    tft_print("..setup_parameters...");
+    //Serial.println(F("==== begin setup_parameter_inputs ====")); Serial_flush();
+    tft_print("..setup_parameter_inputs...");
 
     // initialise the voltage source inputs
     // todo: improve this bit, maybe name the voltage sources?
@@ -91,9 +91,12 @@ FLASHMEM void setup_parameter_menu() {
     //Serial.println("About to addAllParameterMenuItems().."); Serial.flush();
     //#ifdef ENABLE_PARAMETER_MAPPING
         menu->add_page("Parameters");
-        parameter_manager->addAllParameterMenuItems(menu);
+        // TODO: add the 'global' parameters, eg Density
+        //parameter_manager->addAllParameterMenuItems(menu);
         Debug_printf("after addAllParameterMenuItems, free ram is %i\n", rp2040.getFreeHeap());
     //#endif
+
+    parameter_manager->setDefaultParameterConnections();
 
     //DirectNumberControl<int> *mixer_profile = new DirectNumberControl<int>("Mixer profiling", &parameter_manager->profile_update_mixers, parameter_manager->profile_update_mixers, (int)0, (int)1000000, nullptr);
     //menu->add(mixer_profile);

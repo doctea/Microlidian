@@ -19,3 +19,19 @@ void SimplePattern::trigger_off_for_step(int step) {
         note_held = false;
     }
 };
+
+LinkedList<FloatParameter*> *BasePattern::getParameters(int i) {
+    if (this->parameters==nullptr)
+        this->parameters = new LinkedList<FloatParameter*>();
+    return this->parameters;
+}
+
+void BasePattern::create_menu_items(Menu *menu, int pattern_index) {
+    // nothing to be done for base pattern case
+    //pattern_index += 1;
+}
+
+/*void SimplePattern::create_menu_items(Menu *menu, int pattern_index) {
+    // nothing to be done for simple pattern case
+}
+*/

@@ -42,8 +42,6 @@ class EuclidianPatternControl : public SubMenuItemBar {
         #endif
 
         #ifdef ENABLE_OTHER_CONTROLS
-            this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
-
             //SubMenuItemBar *bar = new SubMenuItemBar("Arguments");
             //Menu *bar = menu;
             this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Steps",    pattern, &EuclidianPattern::set_steps,      &EuclidianPattern::get_steps,    nullptr, 1, pattern->maximum_steps, true, true));
@@ -51,7 +49,8 @@ class EuclidianPatternControl : public SubMenuItemBar {
             this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Rotation", pattern, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, pattern->maximum_steps, true, true));
             this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Duration", pattern, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, 1, PPQN*BEATS_PER_BAR, true, true));
             //menu->debug = true;
-            this->add(new ObjectActionConfirmItem<EuclidianPattern> ("Store as default", pattern, &EuclidianPattern::store_current_arguments_as_default));
+            this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
+            this->add(new ObjectActionConfirmItem<EuclidianPattern> ("Store" /*"Store as default"*/, pattern, &EuclidianPattern::store_current_arguments_as_default));
         #endif
     }
 
@@ -91,7 +90,9 @@ class EuclidianPatternControl : public SubMenuItemBar {
         for (unsigned int item_index = 0 ; item_index < items_size ; item_index++) {
 
             int column = (item_index-1)%2==1;   // first menu item ('output' should span both columns, s
-            if (item_index==0 || item_index==items_size-1)
+            if (item_index==0   // first item forced to first column
+                //|| item_index==items_size-1    // last item forced to first column?
+            )
                 column = 0;
 
             if (column==0)
@@ -99,7 +100,15 @@ class EuclidianPatternControl : public SubMenuItemBar {
             else 
                 start_x = (tft->width()/2)  + (tft->width()/4);
 
-            int width = this->get_max_pixel_width(item_index);
+            bool wrap = item_index==0   // first item moves cursor to next row
+                        || column==1    // second column moves cursor to next row
+                        //|| item_index==items_size-2
+                    ;    // last item moves cursor to next row
+
+            //int width = this->get_max_pixel_width(item_index);
+            int width = ((wrap && column==0) ? this->tft->width()/2 : this->tft->width()/4); ///this->tft->characterWidth();
+            //if (item_index==items_size-1) width = width/2;
+
             //if (item_index==0) width -= tft->characterWidth();  // adjust by 1 character if necessary
             const int temp_y = this->small_display(
                 item_index, 
@@ -111,7 +120,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 !opened && selected
             );
 
-            bool wrap = item_index==0 || column==1 || item_index==items_size-2;
+
             //start_x += width;
             //Serial.printf("for item %i '%s':\tgot column=\t%i, wrap=\t%s => start_x=%i\t, start_y=%i\t((item_index-1)%%2=%i\n", item_index, this->items->get(item_index)->label, column, wrap?"Y":"N", start_x, start_y, (item_index-1)%2);
             //if (item_index==0 || (item_index-1)%2==0 || item_index==this->items->size()-2)

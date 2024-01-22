@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+#include "Config.h"
+
 #include "clock.h"
 #include "midi_helpers.h"
 
@@ -10,15 +12,20 @@
     #include "menu.h"
 #endif
 
-#define DEFAULT_VELOCITY 127
+#ifdef ENABLE_CV_INPUT
+    #include "parameters/Parameter.h"
+#endif
 
+#define DEFAULT_VELOCITY    MIDI_MAX_VELOCITY
+
+#define MAX_STEPS 32
 
 class BaseOutput;
 
 class BasePattern {
     public:
 
-    byte steps = 32;
+    byte steps = MAX_STEPS;
     int steps_per_beat = STEPS_PER_BEAT;
     int ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
     bool note_held = false;
@@ -64,6 +71,14 @@ class BasePattern {
     virtual byte get_steps() {
         return this->steps;
     }
+
+    #ifdef ENABLE_SCREEN
+        #ifdef ENABLE_CV_INPUT
+            LinkedList<FloatParameter*> *parameters = nullptr;
+            virtual LinkedList<FloatParameter*> *getParameters(int i);
+        #endif
+        virtual void create_menu_items(Menu *menu, int index);
+    #endif
 };
 
 class SimplePattern : public BasePattern {
@@ -155,6 +170,10 @@ class SimplePattern : public BasePattern {
 
     virtual void restore_default_arguments() {}
     virtual void store_current_arguments_as_default() {}
+
+    /*#ifdef ENABLE_SCREEN
+        virtual void create_menu_items(Menu *menu, int index) override;
+    #endif*/
 
 };
 

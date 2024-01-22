@@ -4,6 +4,7 @@
 class SimplePattern;
 class BaseOutput;
 class FloatParameter;
+class Menu;
 
 class BaseSequencer {
     public:
@@ -50,6 +51,10 @@ class BaseSequencer {
     
     #if defined(ENABLE_CV_INPUT)
         virtual LinkedList<FloatParameter*> *getParameters();
+    #endif
+
+    #if defined(ENABLE_SCREEN)
+        virtual void make_menu_items(Menu *menu);
     #endif
 
 };

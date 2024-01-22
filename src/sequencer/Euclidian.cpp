@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#include "Config.h"
+
 #include <LinkedList.h>
 
 #include "sequencer/Euclidian.h"
@@ -30,9 +32,17 @@ arguments_t initial_arguments[] = {
     { LEN,    4, 5,   4 } //,   PATTERN_PAD_PITCH); // root pad
 };
 
+
 #if defined(ENABLE_CV_INPUT)
     LinkedList<FloatParameter*> *EuclidianSequencer::getParameters() {
-        LinkedList<FloatParameter*> *parameters = new LinkedList<FloatParameter*>();
+        static LinkedList<FloatParameter*> *parameters = nullptr;
+        
+        if (parameters!=nullptr)
+            return parameters;
+            
+        parameters = new LinkedList<FloatParameter*>();
+
+        // todo: store these in the object, create a page for the local-only ones
 
         parameters->add(new DataParameter<EuclidianSequencer,float> (
             "Density",
@@ -45,42 +55,16 @@ arguments_t initial_arguments[] = {
 
         for (int i = 0 ; i < this->number_patterns ; i++) {
             EuclidianPattern *pattern = (EuclidianPattern *)this->get_pattern(i);
-            char label[MENU_C_MAX];
-            snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
-            parameters->add(
-                new DataParameter<EuclidianPattern,byte>(
-                    label, 
-                    pattern, 
-                    &EuclidianPattern::set_steps, 
-                    &EuclidianPattern::get_steps, 
-                    1, 
-                    pattern->maximum_steps
-                ));
-
-            snprintf(label, MENU_C_MAX, "Pattern %i pulses", i);
-            parameters->add(
-                new DataParameter<EuclidianPattern,byte>(
-                    label,
-                    pattern,
-                    &EuclidianPattern::set_pulses,
-                    &EuclidianPattern::get_pulses,
-                    0,
-                    pattern->maximum_steps
-                )
-            );
-
-            snprintf(label, MENU_C_MAX, "Pattern %i rotation", i);
-            parameters->add(
-                new DataParameter<EuclidianPattern,byte>(
-                    label,
-                    pattern,
-                    &EuclidianPattern::set_rotation,
-                    &EuclidianPattern::get_rotation,
-                    0,
-                    pattern->maximum_steps
-                )
-            );
+            //LinkedList<FloatParameter*> *pattern_parameters = 
+            pattern->getParameters(i);
+            //parameter_manager->addParameters(parameters);
+            /*for (int i = 0 ; i < pattern_parameters->size() ; i++) {
+                parameters->add(pattern_parameters->get(i));
+            }*/
         }
+
+        parameter_manager->addParameters(parameters);
+
         return parameters;
     }
 #endif
@@ -89,6 +73,53 @@ arguments_t initial_arguments[] = {
     #include "mymenu.h"
     #include "mymenu/menuitems_pattern_euclidian.h"
 
+    LinkedList<FloatParameter*> *EuclidianPattern::getParameters(int i) {
+        if (parameters!=nullptr)
+            return parameters;
+
+        BasePattern::getParameters(i);
+
+        char label[MENU_C_MAX];
+        snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
+        parameters->add(
+            new DataParameter<EuclidianPattern,byte>(
+                label, 
+                this, 
+                &EuclidianPattern::set_steps, 
+                &EuclidianPattern::get_steps, 
+                1, 
+                this->maximum_steps
+            ));
+
+        snprintf(label, MENU_C_MAX, "Pattern %i pulses", i);
+        parameters->add(
+            new DataParameter<EuclidianPattern,byte>(
+                label,
+                this,
+                &EuclidianPattern::set_pulses,
+                &EuclidianPattern::get_pulses,
+                0,
+                this->maximum_steps
+            )
+        );
+
+        snprintf(label, MENU_C_MAX, "Pattern %i rotation", i);
+        parameters->add(
+            new DataParameter<EuclidianPattern,byte>(
+                label,
+                this,
+                &EuclidianPattern::set_rotation,
+                &EuclidianPattern::get_rotation,
+                0,
+                this->maximum_steps
+            )
+        );
+
+        parameter_manager->addParameters(parameters);
+
+        return parameters;
+    }
+
     void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index) {
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
@@ -96,7 +127,17 @@ arguments_t initial_arguments[] = {
 
         EuclidianPatternControl *epc = new EuclidianPatternControl(label, this);
         menu->add(epc);
-        
+
+        snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
+        menu->add_page(label);
+
+        //snprintf(label, MENU_C_MAX, "Pattern %i")
+        LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
+        //parameter_manager->addParameters(parameters);
+        for (int i = 0 ; i < parameters->size() ; i++) {
+            menu->add(parameter_manager->makeMenuItemsForParameter(parameters->get(i)));
+        }
+      
         #ifdef SIMPLE_SELECTOR
         OutputSelectorControl<EuclidianPattern> *selector = new OutputSelectorControl<EuclidianPattern>(
             "Output",
@@ -110,4 +151,47 @@ arguments_t initial_arguments[] = {
         menu->add(selector);
         #endif
     }
+
+    #include "mymenu.h"
+    #include "submenuitem_bar.h"
+    #include "mymenu/menuitems_sequencer.h"
+    #include "mymenu/menuitems_sequencer_circle.h"
+    #include "mymenu/menuitems_outputselectorcontrol.h"
+
+    void EuclidianSequencer::make_menu_items(Menu *menu) {
+        menu->add_page("Euclidian", TFT_CYAN);
+        for (int i = 0 ; i < this->number_patterns ; i++) {
+            char label[MENU_C_MAX];
+            snprintf(label, MENU_C_MAX, "Pattern %i", i);
+            menu->add(new PatternDisplay(label, this->get_pattern(i)));
+            this->get_pattern(i)->colour = menu->get_next_colour();
+        }
+
+        menu->add_page("Circle");
+        menu->add(new CircleDisplay("Circle", this));
+
+        /*
+        // create a dedicated page for the sequencer modulations
+        menu->add_page("Sequencer mods");
+        LinkedList<FloatParameter*> *parameters = getParameters();
+        //parameter_manager->addParameters(parameters);
+        for (int i = 0 ; i < parameters->size() ; i++) {
+            menu->add(parameters->get(i)->makeControls());
+        }*/
+
+        //using option=ObjectSelectorControl<EuclidianPattern,BaseOutput*>::option;
+        /*LinkedList<BaseOutput*> *nodes = new LinkedList<BaseOutput*>();
+        for (int i = 0 ; i < output_processor.nodes.size() ; i++) {
+            nodes->add(output_processor.nodes.get(i));
+        }*/
+
+        for (int i = 0 ; i < this->number_patterns ; i++) {
+            //Serial.printf("adding controls for pattern %i..\n", i);
+            BasePattern *p = (BasePattern *)this->get_pattern(i);
+
+            p->create_menu_items(menu, i);
+        }
+    }
+
+
 #endif

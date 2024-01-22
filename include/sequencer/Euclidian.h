@@ -56,7 +56,7 @@ class EuclidianPattern : public SimplePattern {
 
     //EuclidianPattern() : SimplePattern() {}
 
-    EuclidianPattern(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
+    EuclidianPattern(int steps = MAX_STEPS, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
         //: arguments.pulses(pulses), arguments.rotation(arguments.rotation), arguments.duration(arguments.duration), tie_on(tie_on)
         : SimplePattern(), default_arguments { .steps = steps, .pulses = pulses, .rotation = rotation, .duration = duration, .tie_on = tie_on }
         {
@@ -239,9 +239,15 @@ class EuclidianPattern : public SimplePattern {
     }*/
 
     #ifdef ENABLE_SCREEN
-        void create_menu_items(Menu *menu, int index);
+        virtual void create_menu_items(Menu *menu, int index) override;
+    #endif
+    
+    #if defined(ENABLE_CV_INPUT)
+        virtual LinkedList<FloatParameter*> *getParameters(int i) override;
     #endif
 };
+
+
 
 class EuclidianSequencer : public BaseSequencer {
     // todo: list of EuclidianPatterns...
@@ -253,7 +259,6 @@ class EuclidianSequencer : public BaseSequencer {
             mutate_enabled = true, 
             fills_enabled = true, 
             add_phrase_to_seed = true;
-
     float global_density = 0.6666f;
 
     public:
@@ -316,7 +321,7 @@ class EuclidianSequencer : public BaseSequencer {
 
     void initialise_patterns() {
         for (int i = 0 ; i < number_patterns ; i++) {
-            this->patterns[i]->make_euclid(initial_arguments[i]);
+            this->patterns[i]->set_default_arguments(&initial_arguments[i]);
         }
     }
     void reset_patterns() {
@@ -416,6 +421,10 @@ class EuclidianSequencer : public BaseSequencer {
     
     #if defined(ENABLE_CV_INPUT)
         virtual LinkedList<FloatParameter*> *getParameters() override;
+    #endif
+
+    #if defined(ENABLE_SCREEN)
+        virtual void make_menu_items(Menu *menu) override;
     #endif
 
 };
