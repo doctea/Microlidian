@@ -18,12 +18,14 @@
 
 #define DEFAULT_VELOCITY    MIDI_MAX_VELOCITY
 
+#define MAX_STEPS 32
+
 class BaseOutput;
 
 class BasePattern {
     public:
 
-    byte steps = 32;
+    byte steps = MAX_STEPS;
     int steps_per_beat = STEPS_PER_BEAT;
     int ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
     bool note_held = false;

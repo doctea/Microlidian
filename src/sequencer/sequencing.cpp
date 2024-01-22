@@ -14,6 +14,7 @@
     // call this after the menu has already been set up
     void setup_sequencer() {
         sequencer.initialise_patterns();
+        sequencer.reset_patterns();
     }
 
     #ifdef ENABLE_SCREEN

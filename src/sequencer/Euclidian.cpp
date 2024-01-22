@@ -135,7 +135,7 @@ arguments_t initial_arguments[] = {
         LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
         //parameter_manager->addParameters(parameters);
         for (int i = 0 ; i < parameters->size() ; i++) {
-            menu->add(parameter_manager->makeMenuItemsForParameter(parameters->get(i), label));
+            menu->add(parameter_manager->makeMenuItemsForParameter(parameters->get(i)));
         }
       
         #ifdef SIMPLE_SELECTOR

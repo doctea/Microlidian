@@ -56,7 +56,7 @@ class EuclidianPattern : public SimplePattern {
 
     //EuclidianPattern() : SimplePattern() {}
 
-    EuclidianPattern(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
+    EuclidianPattern(int steps = MAX_STEPS, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
         //: arguments.pulses(pulses), arguments.rotation(arguments.rotation), arguments.duration(arguments.duration), tie_on(tie_on)
         : SimplePattern(), default_arguments { .steps = steps, .pulses = pulses, .rotation = rotation, .duration = duration, .tie_on = tie_on }
         {
@@ -321,7 +321,7 @@ class EuclidianSequencer : public BaseSequencer {
 
     void initialise_patterns() {
         for (int i = 0 ; i < number_patterns ; i++) {
-            this->patterns[i]->make_euclid(initial_arguments[i]);
+            this->patterns[i]->set_default_arguments(&initial_arguments[i]);
         }
     }
     void reset_patterns() {
