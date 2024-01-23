@@ -6,6 +6,7 @@
 
 #include "sequencer/Euclidian.h"
 #include "parameters/Parameter.h"
+#include "parameters/ProxyParameter.h"
 
 #include "outputs/output.h"
 
@@ -82,22 +83,20 @@ arguments_t initial_arguments[] = {
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
         parameters->add(
-            new DataParameter<EuclidianPattern,byte>(
+            new ProxyParameter<int>(
                 label, 
-                this, 
-                &EuclidianPattern::set_steps, 
-                &EuclidianPattern::get_steps, 
+                &this->arguments.steps,
+                &this->used_arguments.steps,
                 1, 
                 this->maximum_steps
             ));
 
         snprintf(label, MENU_C_MAX, "Pattern %i pulses", i);
         parameters->add(
-            new DataParameter<EuclidianPattern,byte>(
+            new ProxyParameter<int>(
                 label,
-                this,
-                &EuclidianPattern::set_pulses,
-                &EuclidianPattern::get_pulses,
+                &this->arguments.pulses,
+                &this->used_arguments.pulses,
                 0,
                 this->maximum_steps
             )
@@ -105,11 +104,10 @@ arguments_t initial_arguments[] = {
 
         snprintf(label, MENU_C_MAX, "Pattern %i rotation", i);
         parameters->add(
-            new DataParameter<EuclidianPattern,byte>(
+            new ProxyParameter<int>(
                 label,
-                this,
-                &EuclidianPattern::set_rotation,
-                &EuclidianPattern::get_rotation,
+                &this->arguments.rotation,
+                &this->used_arguments.rotation,
                 0,
                 this->maximum_steps
             )

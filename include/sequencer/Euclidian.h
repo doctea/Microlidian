@@ -49,6 +49,7 @@ class EuclidianPattern : public SimplePattern {
     arguments_t arguments;
     arguments_t last_arguments;
     arguments_t default_arguments;
+    arguments_t used_arguments;
     int maximum_steps = steps;
     //int tie_on = 0;
 
@@ -64,8 +65,8 @@ class EuclidianPattern : public SimplePattern {
             arguments.pulses = pulses;
             arguments.rotation = rotation;*/
             this->maximum_steps = steps > 0 ? steps : default_arguments.steps;
-            if (steps>0)
-                make_euclid(default_arguments.steps, default_arguments.pulses, default_arguments.rotation, default_arguments.duration, tie_on);
+            //if (steps>0)
+                //make_euclid(default_arguments.steps, default_arguments.pulses, default_arguments.rotation, default_arguments.duration, tie_on);
             //make_euclid();
         }
 
@@ -94,7 +95,7 @@ class EuclidianPattern : public SimplePattern {
         return summary;
     }
 
-    void make_euclid(arguments_t arguments) {
+    /*void make_euclid(arguments_t arguments) {
         this->make_euclid(
             arguments.steps,
             arguments.pulses,
@@ -102,36 +103,31 @@ class EuclidianPattern : public SimplePattern {
             arguments.duration,
             arguments.tie_on
         );
-    }
+    }*/
 
-    void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, /*, int trigger = -1,*/ int tie_on = -1) { //}, float effective_euclidian_density = 0.75f) {
-        if (steps > 0)      this->arguments.steps = steps;
-        if (pulses > 0)     this->arguments.pulses = pulses;
-        if (rotation >= 0)  this->arguments.rotation = rotation;
-        if (duration >= 0)  this->arguments.duration = duration;
-        if (tie_on >= 0)    this->arguments.tie_on = tie_on;
+    //void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, /*, int trigger = -1,*/ int tie_on = -1) { //}, float effective_euclidian_density = 0.75f) {
+    void make_euclid() {
+        this->used_arguments.effective_euclidian_density = *this->global_density;
 
-        this->arguments.effective_euclidian_density = *this->global_density;
-
-        if (initialised && 0==memcmp(&this->arguments, &this->last_arguments, sizeof(arguments_t))) {
+        if (initialised && 0==memcmp(&this->used_arguments, &this->last_arguments, sizeof(arguments_t))) {
             // nothing changed, dont do anything
             return;
         }
 
-        int original_pulses = this->arguments.pulses;
-        int temp_pulses = arguments.pulses * round(1.5f*(MINIMUM_DENSITY+*global_density));
+        int original_pulses = this->used_arguments.pulses;
+        int temp_pulses = used_arguments.pulses * round(1.5f*(MINIMUM_DENSITY+*global_density));
         //int temp_pulses = original_pulses;
 
-        if (arguments.steps > maximum_steps) {
+        if (used_arguments.steps > maximum_steps) {
             //messages_log_add(String("arguments.steps (") + String(arguments.steps) + String(") is more than maximum steps (") + String(maximum_steps) + String(")"));
-            maximum_steps = arguments.steps;
+            maximum_steps = used_arguments.steps;
         }
 
         int bucket = 0;
-        for (int i = 0 ; i < this->arguments.steps ; i++) {
+        for (int i = 0 ; i < this->used_arguments.steps ; i++) {
             bucket += temp_pulses;
-            if (bucket >= this->arguments.steps) {
-                bucket -= this->arguments.steps;
+            if (bucket >= this->used_arguments.steps) {
+                bucket -= this->used_arguments.steps;
                 this->set_event_for_tick(i * ticks_per_step);
             } else {
                 this->unset_event_for_tick(i * ticks_per_step);
@@ -139,16 +135,16 @@ class EuclidianPattern : public SimplePattern {
         }
         //this->maximum_steps = this->arguments.steps;
         
-        if (this->arguments.rotation > 0) {
-            this->rotate_pattern(this->arguments.rotation);
+        if (this->used_arguments.rotation > 0) {
+            this->rotate_pattern(this->used_arguments.rotation);
         }
 
         if (!initialised) {
-            this->set_default_arguments(&this->arguments);
+            this->set_default_arguments(&this->used_arguments);
             initialised = true;
         }
 
-        memcpy(&this->last_arguments, &this->arguments, sizeof(arguments_t));
+        memcpy(&this->last_arguments, &this->used_arguments, sizeof(arguments_t));
     }
 
     // rotate the pattern around specifed number of steps -- TODO: could actually not change the pattern and just use the rotation in addition to offset in the query_patterns
@@ -217,6 +213,7 @@ class EuclidianPattern : public SimplePattern {
     }
     virtual void set_duration(byte duration) {
         arguments.duration = duration;
+        used_arguments.duration = duration;
     }
 
     virtual int get_tick_duration() {
