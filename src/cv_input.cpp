@@ -90,7 +90,7 @@ FLASHMEM void setup_parameter_menu() {
 
     //Serial.println("About to addAllParameterMenuItems().."); Serial.flush();
     //#ifdef ENABLE_PARAMETER_MAPPING
-        menu->add_page("Parameters");
+        //menu->add_page("Parameters");
         // TODO: add the 'global' parameters, eg Density
         //parameter_manager->addAllParameterMenuItems(menu);
         Debug_printf("after addAllParameterMenuItems, free ram is %i\n", rp2040.getFreeHeap());
