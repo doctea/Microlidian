@@ -57,7 +57,7 @@ class PatternDisplay : public MenuItem {
 
             int actual_current_step = target_pattern->get_step_for_tick(ticks);
 
-            for (int step = 0 ; step < target_pattern->get_steps() ; step++) {
+            for (int step = 0 ; step < target_pattern->get_effective_steps() ; step++) {
                 // for every step of sequence
 
                 // first calculate the row, column and on-screen coordinates
@@ -83,7 +83,7 @@ class PatternDisplay : public MenuItem {
             //base_row += (1+(target_pattern->get_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP);
             base_row += max(
                 STEP_HEIGHT+STEP_GAP,
-                ((target_pattern->get_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP)
+                ((target_pattern->get_effective_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP)
             );
             tft->setCursor(0, base_row);
             return base_row;

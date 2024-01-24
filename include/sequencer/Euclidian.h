@@ -82,8 +82,8 @@ class EuclidianPattern : public SimplePattern {
     }
     virtual void set_arguments(arguments_t *arguments_to_use) {
         memcpy(&this->arguments, arguments_to_use, sizeof(arguments_t));
+        memcpy(&this->used_arguments, arguments_to_use, sizeof(arguments_t));
     }
-
 
     virtual const char *get_summary() override {
         static char summary[32];
@@ -190,34 +190,41 @@ class EuclidianPattern : public SimplePattern {
         this->make_euclid();
     }
 
+    virtual byte get_effective_steps() override {
+        return this->used_arguments.steps;
+    }
+
     virtual byte get_steps() override {
-        return arguments.steps;
+        return this->arguments.steps;
     }
     virtual void set_steps(byte steps) override {
-        arguments.steps = steps;
+        this->arguments.steps = steps;
+        this->used_arguments.steps = steps;
     }
     virtual byte get_pulses() {
-        return arguments.pulses;
+        return this->arguments.pulses;
     }
     virtual void set_pulses(byte pulses) {
-        arguments.pulses = pulses;
+        this->arguments.pulses = pulses;
+        this->used_arguments.pulses = pulses;
     }
     virtual byte get_rotation() {
-        return arguments.rotation;
+        return this->arguments.rotation;
     }
     virtual void set_rotation(byte rotation) {
-        arguments.rotation = rotation;
+        this->arguments.rotation = rotation;
+        this->used_arguments.rotation = rotation;
     }
     virtual byte get_duration() {
-        return arguments.duration;
+        return this->arguments.duration;
     }
     virtual void set_duration(byte duration) {
-        arguments.duration = duration;
+        this->arguments.duration = duration;
         used_arguments.duration = duration;
     }
 
     virtual int get_tick_duration() {
-        return arguments.duration;
+        return this->arguments.duration;
     }
 
     virtual bool is_locked() {

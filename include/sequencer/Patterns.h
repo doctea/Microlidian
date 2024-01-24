@@ -71,6 +71,9 @@ class BasePattern {
     virtual byte get_steps() {
         return this->steps;
     }
+    virtual byte get_effective_steps() {
+        return this->get_steps();
+    }
 
     #ifdef ENABLE_SCREEN
         #ifdef ENABLE_CV_INPUT
@@ -112,7 +115,7 @@ class SimplePattern : public BasePattern {
     }
 
     virtual unsigned int get_step_for_tick(unsigned int tick) {
-        return (tick / this->ticks_per_step) % this->get_steps();
+        return (tick / this->ticks_per_step) % this->get_effective_steps();
     }
 
     virtual void set_event_for_tick(unsigned int tick, short note = 0, short velocity = DEFAULT_VELOCITY, short channel = 0) override {
@@ -139,7 +142,7 @@ class SimplePattern : public BasePattern {
 
     virtual void process_step(int step) override {
         //Serial.printf("process_step(%i)\t");
-        /*if (this->query_note_off_for_step((step-1) % this->get_steps()) && this->note_held) {
+        /*if (this->query_note_off_for_step((step-1) % this->get_effective_steps()) && this->note_held) {
             //Serial.printf("%i: note off for step!");
             this->trigger_off_for_step(step);
         }*/
@@ -150,7 +153,7 @@ class SimplePattern : public BasePattern {
         //Serial.println();
     };
     virtual void process_step_end(int step) override {
-        if (this->query_note_off_for_step((step+1) % this->get_steps()) && this->note_held) {
+        if (this->query_note_off_for_step((step+1) % this->get_effective_steps()) && this->note_held) {
             //Serial.printf("%i: note off for step!");
             this->trigger_off_for_step(step);
         }
