@@ -42,6 +42,8 @@
 std::atomic<bool> started = false;
 std::atomic<bool> ticked = false;
 
+void do_tick(uint32_t ticks);
+
 // serial console to host, for debug etc
 void setup_serial() {
     #ifdef WAIT_FOR_SERIAL
@@ -84,7 +86,11 @@ void setup() {
     setup_serial();
     Debug_println("setup() starting");
 
-    setup_cheapclock();
+    #ifdef USE_UCLOCK
+        setup_uclock(do_tick);
+    #else
+        setup_cheapclock();
+    #endif
     set_global_restart_callback(global_on_restart);
 
     #if defined(ENABLE_CV_INPUT) && defined(ENABLE_CLOCK_INPUT_CV)
@@ -212,6 +218,24 @@ void read_serial_buffer() {
 bool menu_tick_pending = false;
 //uint32_t menu_tick_pending_tick = -1;
 
+void do_tick(uint32_t ticks) {
+    if (is_restart_on_next_bar() && is_bpm_on_bar(ticks)) {
+        //if (debug) Serial.println(F("do_tick(): about to global_on_restart"));
+        global_on_restart();
+
+        set_restart_on_next_bar(false);
+    }
+
+    output_wrapper->sendClock();
+
+    #ifdef ENABLE_EUCLIDIAN
+        sequencer.on_tick(ticks);
+        if (is_bpm_on_sixteenth(ticks)) {
+            output_processor->process();
+        }
+    #endif
+}
+
 void loop() {
     uint32_t mics_start = micros();
     //Serial.println("loop()");
@@ -230,25 +254,15 @@ void loop() {
         ticked = update_clock_ticks();
     }
 
-    if (ticked) {
-        ATOMIC() {
-            if (is_restart_on_next_bar() && is_bpm_on_bar(ticks)) {
-                //if (debug) Serial.println(F("do_tick(): about to global_on_restart"));
-                global_on_restart();
+    #ifdef USE_UCLOCK
 
-                set_restart_on_next_bar(false);
+    #else
+        if (ticked) {
+            ATOMIC() {
+                do_tick(ticks);
             }
-
-            output_wrapper->sendClock();
-
-            #ifdef ENABLE_EUCLIDIAN
-                sequencer.on_tick(ticks);
-                if (is_bpm_on_sixteenth(ticks)) {
-                    output_processor->process();
-                }
-            #endif
         }
-    }
+    #endif
 
     #ifdef ENABLE_SCREEN
         static uint32_t last_tick = -1;
