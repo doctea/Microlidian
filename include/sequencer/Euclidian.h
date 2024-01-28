@@ -68,6 +68,8 @@ class EuclidianPattern : public SimplePattern {
             //if (steps>0)
                 //make_euclid(default_arguments.steps, default_arguments.pulses, default_arguments.rotation, default_arguments.duration, tie_on);
             //make_euclid();
+            set_arguments(&default_arguments);
+            make_euclid();
         }
 
     virtual void restore_default_arguments() override {
@@ -79,6 +81,7 @@ class EuclidianPattern : public SimplePattern {
 
     virtual void set_default_arguments(arguments_t *default_arguments_to_use) {
         memcpy(&this->default_arguments, default_arguments_to_use, sizeof(arguments_t));
+        set_arguments(&this->default_arguments);
     }
     virtual void set_arguments(arguments_t *arguments_to_use) {
         memcpy(&this->arguments, arguments_to_use, sizeof(arguments_t));
@@ -108,11 +111,18 @@ class EuclidianPattern : public SimplePattern {
     //void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, /*, int trigger = -1,*/ int tie_on = -1) { //}, float effective_euclidian_density = 0.75f) {
     void make_euclid() {
         this->used_arguments.effective_euclidian_density = *this->global_density;
+        //if (Serial) Serial.println("make_euclid..");
 
         if (initialised && 0==memcmp(&this->used_arguments, &this->last_arguments, sizeof(arguments_t))) {
+            //if (Serial) Serial.println("nothing changed, don't do anything");
             // nothing changed, dont do anything
             return;
         }
+
+        /*if (!initialised) {
+            this->set_default_arguments(&this->used_arguments);
+            initialised = true;
+        */
 
         int original_pulses = this->used_arguments.pulses;
         int temp_pulses = used_arguments.pulses * round(1.5f*(MINIMUM_DENSITY+*global_density));
@@ -139,11 +149,6 @@ class EuclidianPattern : public SimplePattern {
             this->rotate_pattern(this->used_arguments.rotation);
         }
 
-        if (!initialised) {
-            this->set_default_arguments(&this->used_arguments);
-            initialised = true;
-        }
-
         memcpy(&this->last_arguments, &this->used_arguments, sizeof(arguments_t));
     }
 
@@ -167,23 +172,23 @@ class EuclidianPattern : public SimplePattern {
     }  
 
     void mutate() {
-        //Serial.println("todo: mutate the pattern");
+        if (Serial) Serial.println("mutate the pattern!");
         int r = random(0, 100);
         if (r > 50) {
             if (r > 75) {
-                this->arguments.pulses += 1;
+                this->set_pulses(this->get_pulses() + 1);
             } else {
-                this->arguments.pulses -= 1;
+                this->set_pulses(this->get_pulses() - 1);
             }
         } else if (r < 25) {
-            this->arguments.rotation += 1;
+            this->set_rotation(this->get_rotation() + 1);
         } else if (r > 25) {
-            this->arguments.pulses *= 2;
+            this->set_pulses(this->get_pulses() * 2);
         } else {
-            this->arguments.pulses /= 2;
+            this->set_pulses(this->get_pulses() / 2);
         }
-        if (this->arguments.pulses >= this->arguments.steps || this->arguments.pulses <= 0) {
-            this->arguments.pulses = 1;
+        if (this->get_pulses() >= this->get_steps() || this->get_pulses() <= 0) {
+            this->set_pulses(1);
         }
         //r = random(this->steps/2, this->maximum_steps);
         //this->arguments.steps = r;
@@ -329,6 +334,7 @@ class EuclidianSequencer : public BaseSequencer {
         }
     }
     void reset_patterns() {
+        if (Serial) Serial.println("reset_patterns!");
         for (int i = 0 ; i < number_patterns ; i++) {
             EuclidianPattern *p = (EuclidianPattern*)this->get_pattern(i);
             if (!p->is_locked()) {
@@ -345,6 +351,7 @@ class EuclidianSequencer : public BaseSequencer {
             if (tick_of_step==(PPQN/STEPS_PER_BEAT)-1) {
                 for (int i = 0 ; i < number_patterns ; i++) {
                     if (!patterns[i]->is_locked()) {
+                        //if (Serial) Serial.println("mutate every tick!");
                         this->patterns[i]->make_euclid();
                     }
                 }
@@ -383,22 +390,26 @@ class EuclidianSequencer : public BaseSequencer {
     virtual void on_beat(int beat) override {
 
     };
-    virtual void on_bar (int bar) override {
+    virtual void on_bar(int bar) override {
+        Serial.println("on_bar!");
         if (fills_enabled && bar == BARS_PER_PHRASE - 1) {
+            if (Serial) Serial.println("on_bar doing fill!");
             // do fill
             for (int i = 0 ; i < 3 ; i++) {
                 int ran = random(0/*euclidian_mutate_minimum_pattern % NUM_PATTERNS*/, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 if (!patterns[ran]->is_locked()) {
-                    this->patterns[ran]->arguments.rotation += 2;
+                    //this->patterns[ran]->arguments.rotation += 2;
+                    this->patterns[ran]->set_rotation(this->patterns[ran]->get_rotation() + 2);
                     this->patterns[ran]->make_euclid();
                 }
             }
             for (int i = 0 ; i < 3 ; i++) {
                 int ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 if (!patterns[ran]->is_locked()) {
-                    this->patterns[ran]->arguments.pulses *= 2;
-                    if (this->patterns[ran]->arguments.pulses > this->patterns[ran]->arguments.steps) 
-                        this->patterns[ran]->arguments.pulses /= 8;
+                    this->patterns[ran]->set_rotation(this->patterns[ran]->get_rotation() *2);
+                    //this->patterns[ran]->arguments.pulses *= 2;
+                    if (this->patterns[ran]->get_pulses() > this->patterns[ran]->get_steps()) 
+                        this->patterns[ran]->set_pulses(this->patterns[ran]->get_pulses() / 8);
                     this->patterns[ran]->make_euclid();
                 }
             }
