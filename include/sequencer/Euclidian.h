@@ -172,7 +172,7 @@ class EuclidianPattern : public SimplePattern {
     }  
 
     void mutate() {
-        if (Serial) Serial.println("mutate the pattern!");
+        //if (Serial) Serial.println("mutate the pattern!");
         int r = random(0, 100);
         if (r > 50) {
             if (r > 75) {
@@ -391,12 +391,12 @@ class EuclidianSequencer : public BaseSequencer {
 
     };
     virtual void on_bar(int bar) override {
-        Serial.println("on_bar!");
+        //if (Serial) Serial.println("on_bar!");
         if (fills_enabled && bar == BARS_PER_PHRASE - 1) {
-            if (Serial) Serial.println("on_bar doing fill!");
+            //if (Serial) Serial.println("on_bar doing fill!");
             // do fill
             for (int i = 0 ; i < 3 ; i++) {
-                int ran = random(0/*euclidian_mutate_minimum_pattern % NUM_PATTERNS*/, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
+                int ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 if (!patterns[ran]->is_locked()) {
                     //this->patterns[ran]->arguments.rotation += 2;
                     this->patterns[ran]->set_rotation(this->patterns[ran]->get_rotation() + 2);
@@ -406,7 +406,7 @@ class EuclidianSequencer : public BaseSequencer {
             for (int i = 0 ; i < 3 ; i++) {
                 int ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 if (!patterns[ran]->is_locked()) {
-                    this->patterns[ran]->set_rotation(this->patterns[ran]->get_rotation() *2);
+                    this->patterns[ran]->set_rotation(this->patterns[ran]->get_rotation() * 2);
                     //this->patterns[ran]->arguments.pulses *= 2;
                     if (this->patterns[ran]->get_pulses() > this->patterns[ran]->get_steps()) 
                         this->patterns[ran]->set_pulses(this->patterns[ran]->get_pulses() / 8);
