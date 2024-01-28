@@ -48,6 +48,9 @@ void setup_screen() {
 
         setup_menu(HIGH);
 
+        tft_print("HUP!");
+        menu->updateDisplay();
+
         Debug_println("About to init menu.."); Serial_flush();
         menu->start();
         Debug_printf("after menu->start(), free RAM is %u\n", freeRam());

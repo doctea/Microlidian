@@ -161,7 +161,9 @@ void load_from_slot_2() {
 #include "mymenu.h"
 
 void setup_storage_menu() {
-    menu->add_page("Storage");
+    menu->remember_opened_page(
+        menu->add_page("Storage")
+    );
 
     typedef void(*function)();
     struct functions_t {
