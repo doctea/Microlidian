@@ -185,6 +185,15 @@ void setup() {
     Debug_printf("at end of setup(), free RAM is %u\n", freeRam());
 
     Debug_println("setup() finished!");
+
+    #ifdef USE_UCLOCK
+        //if (Serial) Serial.println("Starting uClock...");
+        //Serial_flush();
+        clock_reset();
+        clock_start();
+        //if (Serial) Serial.println("Started uClock!");
+        //Serial_flush();
+    #endif
 }
 
 //volatile bool ticked = false;
@@ -218,7 +227,11 @@ void read_serial_buffer() {
 bool menu_tick_pending = false;
 //uint32_t menu_tick_pending_tick = -1;
 
-void do_tick(uint32_t ticks) {
+void do_tick(uint32_t in_ticks) {
+    #ifdef USE_UCLOCK
+        ::ticks = in_ticks;
+    #endif
+    //if (Serial) Serial.printf("ticked %u\n", ticks);
     if (is_restart_on_next_bar() && is_bpm_on_bar(ticks)) {
         //if (debug) Serial.println(F("do_tick(): about to global_on_restart"));
         global_on_restart();
@@ -292,38 +305,38 @@ void loop() {
     }
 
     ATOMIC() {
-    if (playing && clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0 && micros() + loop_average >= last_ticked_at_micros + micros_per_tick) {
-        // don't process anything else this loop, since we probably don't have time before the next tick arrives
-        //Serial.printf("early return because %i + %i >= %i + %i\n", micros(), loop_average, last_ticked_at_micros, micros_per_tick);
-        //Serial.flush();
-    } else {
-        //read_serial_buffer();
+        if (playing && clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0 && micros() + loop_average >= last_ticked_at_micros + micros_per_tick) {
+            // don't process anything else this loop, since we probably don't have time before the next tick arrives
+            //Serial.printf("early return because %i + %i >= %i + %i\n", micros(), loop_average, last_ticked_at_micros, micros_per_tick);
+            //Serial.flush();
+        } else {
+            //read_serial_buffer();
 
-        #ifdef ENABLE_SCREEN
-        if (!is_locked()) {
-            //acquire_lock();
-            menu->update_inputs();
-            //release_lock();
+            #ifdef ENABLE_SCREEN
+            if (!is_locked()) {
+                //acquire_lock();
+                menu->update_inputs();
+                //release_lock();
+            }
+            #endif
+
+            add_loop_length(micros()-mics_start);
         }
-        #endif
-
-        add_loop_length(micros()-mics_start);
-    }
     }
 
     ATOMIC() {
-    // if the back button is held down for 4 seconds, do a soft reboot
-    #ifdef ENABLE_SCREEN
-    if (!pushButtonA.isPressed() && pushButtonB.isPressed() && pushButtonB.currentDuration() >= 4000) {
-        //#define AIRCR_Register (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C)))
-        //AIRCR_Register = 0x5FA0004;
-        reset_rp2040();
-    } else if (
-        pushButtonA.isPressed() && pushButtonB.isPressed() && pushButtonA.currentDuration() >= 3000 && pushButtonA.currentDuration() >= 4000
-    ) {
-        reset_upload_firmware();
-    }
-    #endif
+        // if the back button is held down for 4 seconds, do a soft reboot
+        #ifdef ENABLE_SCREEN
+        if (!pushButtonA.isPressed() && pushButtonB.isPressed() && pushButtonB.currentDuration() >= 4000) {
+            //#define AIRCR_Register (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C)))
+            //AIRCR_Register = 0x5FA0004;
+            reset_rp2040();
+        } else if (
+            pushButtonA.isPressed() && pushButtonB.isPressed() && pushButtonA.currentDuration() >= 3000 && pushButtonA.currentDuration() >= 4000
+        ) {
+            reset_upload_firmware();
+        }
+        #endif
     }
 }
 
