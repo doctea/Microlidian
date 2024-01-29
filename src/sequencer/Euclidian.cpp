@@ -108,7 +108,7 @@ arguments_t initial_arguments[] = {
                 label,
                 &this->arguments.rotation,
                 &this->used_arguments.rotation,
-                0,
+                1,
                 this->maximum_steps
             )
         );

@@ -134,25 +134,30 @@ class EuclidianPattern : public SimplePattern {
         }
 
         int bucket = 0;
+        //if (this->used_arguments.rotation!=0)
         for (int i = 0 ; i < this->used_arguments.steps ; i++) {
+            int rotation = this->used_arguments.rotation;
+            //int new_i = ((used_arguments.steps - rotation) + i) % used_arguments.steps;
+            int new_i = (rotation + i) % used_arguments.steps;
             bucket += temp_pulses;
             if (bucket >= this->used_arguments.steps) {
                 bucket -= this->used_arguments.steps;
-                this->set_event_for_tick(i * ticks_per_step);
+                this->set_event_for_tick(new_i * ticks_per_step);
             } else {
-                this->unset_event_for_tick(i * ticks_per_step);
+                this->unset_event_for_tick(new_i * ticks_per_step);
             }
         }
         //this->maximum_steps = this->arguments.steps;
         
-        if (this->used_arguments.rotation > 0) {
+        /*if (this->used_arguments.rotation > 0) {
             this->rotate_pattern(this->used_arguments.rotation);
-        }
+        }*/
 
         memcpy(&this->last_arguments, &this->used_arguments, sizeof(arguments_t));
     }
 
-    // rotate the pattern around specifed number of steps -- TODO: could actually not change the pattern and just use the rotation in addition to offset in the query_patterns
+    // rotate the pattern around specifed number of steps -- 
+    // TODO: could actually not change the pattern and just use the rotation in addition to offset in the query_patterns
     void rotate_pattern(int rotate) {
         unsigned long rotate_time = millis();
         bool temp_pattern[steps];
