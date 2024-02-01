@@ -39,19 +39,25 @@
   #include "pico/stdlib.h"  // not sure if we need this?
   #include "pico/bootrom.h" // needed for reset_usb_boot
 
-  void reset_rp2040 () {
-    // https://forums.raspberrypi.com/viewtopic.php?t=318747
-    //#define AIRCR_Register (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C)))
-    //AIRCR_Register = 0x5FA0004;
-    watchdog_reboot(0,0,0);
-  }
+  #ifdef USE_UCLOCK
+    #include "uClock.h"
+  #endif
 
   #include "mymenu.h"
   #include "mymenu/screen.h"
-
   #include "core_safe.h"
 
+  void reset_rp2040 () {
+    #ifdef USE_UCLOCK
+      uClock.stop();
+    #endif
+    watchdog_reboot(0,0,0);
+  }
+
   void reset_upload_firmware() {
+    #ifdef USE_UCLOCK
+      uClock.stop();
+    #endif
     acquire_lock();// lock so that other core won't trash what we're about to draw to the screen
     if (menu!=nullptr && menu->tft) {
       menu->tft->clear();

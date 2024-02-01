@@ -75,11 +75,12 @@ class BasePattern {
         return this->get_steps();
     }
 
-    #ifdef ENABLE_SCREEN
         #ifdef ENABLE_CV_INPUT
             LinkedList<FloatParameter*> *parameters = nullptr;
             virtual LinkedList<FloatParameter*> *getParameters(int i);
         #endif
+
+    #ifdef ENABLE_SCREEN
         virtual void create_menu_items(Menu *menu, int index);
     #endif
 };

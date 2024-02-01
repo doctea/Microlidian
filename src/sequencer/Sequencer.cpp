@@ -16,6 +16,8 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
         p->set_output(output);
 }
 
+#ifdef ENABLE_SCREEN
 void BaseSequencer::make_menu_items(Menu *menu) {
 
 }
+#endif

@@ -1,12 +1,8 @@
 #include <Arduino.h>
-
 #include "Config.h"
 
 #include <LinkedList.h>
-
 #include "sequencer/Euclidian.h"
-#include "parameters/Parameter.h"
-#include "parameters/ProxyParameter.h"
 
 #include "outputs/output.h"
 
@@ -35,6 +31,9 @@ arguments_t initial_arguments[] = {
 
 
 #if defined(ENABLE_CV_INPUT)
+    #include "parameters/Parameter.h"
+    #include "parameters/ProxyParameter.h"
+
     LinkedList<FloatParameter*> *EuclidianSequencer::getParameters() {
         static LinkedList<FloatParameter*> *parameters = nullptr;
         
@@ -70,7 +69,7 @@ arguments_t initial_arguments[] = {
     }
 #endif
 
-#ifdef ENABLE_SCREEN
+#if defined(ENABLE_SCREEN) && defined(ENABLE_CV_INPUT)
     #include "mymenu.h"
     #include "mymenu/menuitems_pattern_euclidian.h"
 

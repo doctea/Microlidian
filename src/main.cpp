@@ -59,7 +59,7 @@ void global_on_restart() {
   set_restart_on_next_bar(false);
 
   //Serial.println(F("on_restart()==>"));
-  ticks = 0;
+  clock_reset();
   last_processed_tick = -1;
   
   //send_midi_serial_stop_start();
@@ -180,7 +180,9 @@ void setup() {
         set_bpm(10);
     #endif
 
+    #ifdef ENABLE_SCREEN
     menu->set_last_message((String("Started up, free RAM is ") + String(freeRam())).c_str());
+    #endif
 
     Debug_printf("at end of setup(), free RAM is %u\n", freeRam());
 
@@ -194,6 +196,7 @@ void setup() {
         //if (Serial) Serial.println("Started uClock!");
         //Serial_flush();
     #endif
+    started = true;
 }
 
 //volatile bool ticked = false;
@@ -268,7 +271,7 @@ void loop() {
     }
 
     #ifdef USE_UCLOCK
-
+        // do_tick is called from interrupt via uClock, so we don't need to do it manually here
     #else
         if (ticked) {
             ATOMIC() {

@@ -1,5 +1,6 @@
-#include "sequencer/Patterns.h"
+#include "Config.h"
 
+#include "sequencer/Patterns.h"
 #include "outputs/output.h"
 
 void SimplePattern::trigger_on_for_step(int step) {
@@ -20,16 +21,20 @@ void SimplePattern::trigger_off_for_step(int step) {
     }
 };
 
-LinkedList<FloatParameter*> *BasePattern::getParameters(int i) {
-    if (this->parameters==nullptr)
-        this->parameters = new LinkedList<FloatParameter*>();
-    return this->parameters;
-}
+#ifdef ENABLE_CV_INPUT
+    LinkedList<FloatParameter*> *BasePattern::getParameters(int i) {
+        if (this->parameters==nullptr)
+            this->parameters = new LinkedList<FloatParameter*>();
+        return this->parameters;
+    }
+#endif
 
-void BasePattern::create_menu_items(Menu *menu, int pattern_index) {
-    // nothing to be done for base pattern case
-    //pattern_index += 1;
-}
+#ifdef ENABLE_SCREEN
+    void BasePattern::create_menu_items(Menu *menu, int pattern_index) {
+        // nothing to be done for base pattern case
+        //pattern_index += 1;
+    }
+#endif
 
 /*void SimplePattern::create_menu_items(Menu *menu, int pattern_index) {
     // nothing to be done for simple pattern case

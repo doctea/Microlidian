@@ -74,6 +74,7 @@ void setup_parameter_inputs() {
     tft_print("\n");
 }
 
+#ifdef ENABLE_SCREEN
 // set up the menus to provide control over the Parameters and ParameterInputs
 FLASHMEM void setup_parameter_menu() {
     //Serial.println(F("==== setup_parameter_menu starting ===="));
@@ -103,5 +104,6 @@ FLASHMEM void setup_parameter_menu() {
 
     //Serial.println(F("setup_parameter_menu done =================="));
 }
+#endif
 
 #endif

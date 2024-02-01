@@ -160,6 +160,7 @@ void load_from_slot_2() {
 
 #include "mymenu.h"
 
+#ifdef ENABLE_SCREEN
 void setup_storage_menu() {
     menu->remember_opened_page(
         menu->add_page("Storage")
@@ -187,5 +188,6 @@ void setup_storage_menu() {
         menu->add(submenuitem);
     }
 }
+#endif
 
 #endif

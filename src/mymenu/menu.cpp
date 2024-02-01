@@ -186,11 +186,13 @@ void setup_menu(bool button_high_state = HIGH) {
         submenu->add(new ObjectNumberControl<EuclidianSequencer,int>("Seed", &sequencer, &EuclidianSequencer::set_euclidian_seed,      &EuclidianSequencer::get_euclidian_seed));
         menu->add(submenu);
 
+        #ifdef ENABLE_CV_INPUT
         // add the sequencer modulation controls to this page
         LinkedList<FloatParameter*> *sequencer_parameters = sequencer.getParameters();
         for (int i = 0 ; i < sequencer_parameters->size() ; i++) {
             menu->add(sequencer_parameters->get(i)->makeControls());
         }
+        #endif
     #endif
     
     #ifdef DISABLED_STUFF

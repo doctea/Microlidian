@@ -22,7 +22,9 @@ class EnvelopeOutput : public MIDIDrumOutput, public EnvelopeBase {
 
     byte midi_cc = -1;
 
-    using EnvelopeBase::make_menu_items;
+    #ifdef ENABLE_SCREEN
+        using EnvelopeBase::make_menu_items;
+    #endif
 
     EnvelopeOutput(const char *label, byte note_number, byte cc_number, byte channel, MIDIOutputWrapper *output_wrapper) : 
         MIDIDrumOutput(label, note_number, channel, output_wrapper), 

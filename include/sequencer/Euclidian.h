@@ -1,5 +1,4 @@
-#ifndef EUCLIDIAN__INCLUDED
-#define EUCLIDIAN__INCLUDED
+#pragma once
 
 #include "Config.h"
 
@@ -449,4 +448,3 @@ class EuclidianSequencer : public BaseSequencer {
 
 };
 
-#endif
