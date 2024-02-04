@@ -35,7 +35,7 @@ The aim here is to have a flexible and extensible MIDI generator based on the mu
 
 ### Images
 
-![Prototype Eurorack modules](main/media/Microlidians.jpg?raw=true)
+![Prototype Eurorack modules](media/Microlidians.jpg?raw=true)
 
 
 ### Breadboard wiring
