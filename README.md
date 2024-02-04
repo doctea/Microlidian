@@ -33,6 +33,11 @@ The aim here is to have a flexible and extensible MIDI generator based on the mu
 - And [These encoders](https://www.aliexpress.com/item/33022441687.html)
 - [These +/-24v ADC breakout boards](https://thepihut.com/products/ads1015-24v-adc-breakout)
 
+### Images
+
+![Prototype Eurorack modules](main/media/Microlidians.jpg?raw=true)
+
+
 ### Breadboard wiring
 
 - Use env:pcb with -DBUILD_BREADBOARD
@@ -55,7 +60,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - D1       -> Encoder button
 - D0       -> ST7789 DC (swapped with D9 on PCB version)
 
-## TODO
+## TODO/future ideas
 
 - ~~Implement a basic sequencer~~
   - ~~with Euclidian stuff on top of that~~
@@ -105,7 +110,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
   - 'euclidian within euclidian'?  so eg we fill in triggers in between other triggers?
 - rhythm-synced LFO that sets a cycle of the waveform to the length between triggers
 - Ability to boot up as a USB flash drive, for copying files to/from the LittleFS flash?
-- Allow holding a button to go into firmware update mode before running much code at all as a failsafe against bad code that won't complete setup() or first loop()
+- ~~Allow holding a button to go into firmware update mode before running much code at all as a failsafe against bad code that won't complete setup() or first loop()~~ DONE, hold both buttons while booting up to go straight into firmware update/uf2 mode
 
 ### Known problems/gotchas
 
@@ -116,6 +121,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - Slow loading presets causing pauses and problems
 - we don't seem to get around to doing a menu update_ticks() for every tick, so the ParameterInputDisplay graph appears very noisy unless backfilling values.  even updating it from a callback for every parameter input read() didnt seem to be fast enough.  so might mean that very fast changes are being missed..
 - Sometimes crashes waiting for USB MIDI or something... suspect perhaps garbled USB MIDI is cause?
+- Soft reboot when using uClock crashes/does not start up properly - works fine from cold boot/first power on though
 
 ## Done
 
