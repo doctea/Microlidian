@@ -121,7 +121,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
 - Slow loading presets causing pauses and problems
 - we don't seem to get around to doing a menu update_ticks() for every tick, so the ParameterInputDisplay graph appears very noisy unless backfilling values.  even updating it from a callback for every parameter input read() didnt seem to be fast enough.  so might mean that very fast changes are being missed..
 - Sometimes crashes waiting for USB MIDI or something... suspect perhaps garbled USB MIDI is cause?
-  - Actually, think this is the bug in the TinyUSB library that is fixed/worked around by my simple patch mentioned in this ticket https://github.com/adafruit/Adafruit_TinyUSB_Arduino/issues/238
+  - Actually, think this is the bug in the TinyUSB library that is fixed/worked around by my simple patch mentioned in [https://github.com/adafruit/Adafruit_TinyUSB_Arduino/issues/238](https://github.com/adafruit/Adafruit_TinyUSB_Arduino/issues/293#issuecomment-1666959735)
 - Soft reboot when using uClock crashes/does not start up properly - works fine from cold boot/first power on though
 
 ## Done
