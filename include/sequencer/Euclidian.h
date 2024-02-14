@@ -338,7 +338,7 @@ class EuclidianSequencer : public BaseSequencer {
         }
     }
     void reset_patterns() {
-        if (Serial) Serial.println("reset_patterns!");
+        //if (Serial) Serial.println("reset_patterns!");
         for (int i = 0 ; i < number_patterns ; i++) {
             EuclidianPattern *p = (EuclidianPattern*)this->get_pattern(i);
             if (!p->is_locked()) {
