@@ -409,7 +409,8 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 // count all the triggering notes and add that value ot the root note
                 // then quantise according to selected scale to get final note number
                 int count = 0;
-                for (int i = 0 ; i < this->nodes->size() ; i++) {
+                uint_fast16_t size = this->nodes->size();
+                for (uint_fast16_t i = 0 ; i < size ; i++) {
                     BaseOutput *o = this->nodes->get(i);
                     if (o==this) continue;
                     count += o->should_go_on() ? (i%12) : 0;

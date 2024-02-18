@@ -117,8 +117,8 @@ bool save_to_slot(int slot) {
         output_wrapper->add_all_save_lines(lines);
 
         // save them to file
-        const unsigned int size = lines->size();
-        for (unsigned int i = 0 ; i < size ; i++) {
+        const uint_fast16_t size = lines->size();
+        for (uint_fast16_t i = 0 ; i < size ; i++) {
             f.println(lines->get(i));
         }
 

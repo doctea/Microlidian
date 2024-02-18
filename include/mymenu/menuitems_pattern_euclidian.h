@@ -79,17 +79,17 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 pos.y = this->step_display->display(pos, selected, opened); // display the step sequencer across the top
         #endif
 
-        int start_y = pos.y;        // y to start drawing at (just under header)
-        int finish_y = pos.y;       // highest y that we finished drawing at
+        uint_fast16_t start_y = pos.y;        // y to start drawing at (just under header)
+        uint_fast16_t finish_y = pos.y;       // highest y that we finished drawing at
 
         // draw all the sub-widgets
         //int width_per_item = this->tft->width() / (this->items->size() /*+1*/);
         int start_x = tft->width()/2;
         Debug_printf(F("display in SubMenuItemBar got width_per_item=%i\tfrom tftwidth\t%i / itemsize\t%i\n"), width_per_item, this->tft->width(), this->items->size());
-        const unsigned int items_size = this->items->size();
-        for (unsigned int item_index = 0 ; item_index < items_size ; item_index++) {
+        const uint_fast16_t items_size = this->items->size();
+        for (uint_fast16_t item_index = 0 ; item_index < items_size ; item_index++) {
 
-            int column = (item_index-1)%2==1;   // first menu item ('output' should span both columns, s
+            uint_fast16_t column = (item_index-1)%2==1;   // first menu item ('output' should span both columns, s
             if (item_index==0   // first item forced to first column
                 //|| item_index==items_size-1    // last item forced to first column?
             )
@@ -106,7 +106,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
                     ;    // last item moves cursor to next row
 
             //int width = this->get_max_pixel_width(item_index);
-            int width = ((wrap && column==0) ? this->tft->width()/2 : this->tft->width()/4); ///this->tft->characterWidth();
+            uint_fast16_t width = ((wrap && column==0) ? this->tft->width()/2 : this->tft->width()/4); ///this->tft->characterWidth();
             //if (item_index==items_size-1) width = width/2;
 
             //if (item_index==0) width -= tft->characterWidth();  // adjust by 1 character if necessary
@@ -138,7 +138,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
         return finish_y;
     }
 
-    virtual inline int get_max_pixel_width(int item_number) {
+    virtual inline int get_max_pixel_width(uint_fast16_t item_number) {
         if (item_number==0 || item_number==this->items->size()-1)
             return this->tft->width() / 2;
         else

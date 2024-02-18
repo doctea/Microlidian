@@ -79,8 +79,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
             n->stop();
         }*/
         //count = 0;
-        const unsigned int size = this->nodes->size();
-        for (unsigned int i = 0 ; i < size ; i++) {
+        const uint_fast16_t size = this->nodes->size();
+        for (uint_fast16_t i = 0 ; i < size ; i++) {
             BaseOutput *o = this->nodes->get(i);
             Debug_printf("\tnode %i\n", i);
             o->process();
@@ -92,7 +92,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
             //count = 35;
         }*/
 
-        for (int i = 0 ; i < this->nodes->size() ; i++) {
+        for (uint_fast16_t i = 0 ; i < size ; i++) {
             this->nodes->get(i)->reset();
         }
 
@@ -100,7 +100,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
     }
 
     virtual void loop() {
-        for (int i = 0 ; i < this->nodes->size() ; i++) {
+        const uint_fast16_t size = this->nodes->size();
+        for (uint_fast16_t i = 0 ; i < size ; i++) {
             BaseOutput *o = this->nodes->get(i);
             Debug_printf("\tnode %i\n", i);
             o->loop();
@@ -113,7 +114,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         #ifdef DEBUG_ENVELOPES
             sequencer->configure_pattern_output(11, this->nodes->get(11));
         #else
-            for (int i = 0 ; i < this->nodes->size() ; i++) {
+            const uint_fast16_t size = this->nodes->size();
+            for (uint_fast16_t i = 0 ; i < size ; i++) {
                 sequencer->configure_pattern_output(i, this->nodes->get(i));
             }
         #endif
