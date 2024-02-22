@@ -5,7 +5,7 @@
 .vscode/ipch
 lib/
 .vscode
-Microlidian.code-workspace
+*.code-workspace
 ffs/
 *.orig
 *.rej
