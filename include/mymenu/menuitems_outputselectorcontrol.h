@@ -9,7 +9,7 @@
 
 //class BaseOutput;
 
-// Selector to choose a ParameterInput from the available list to use a Source; used by objects/parameters that can only feed from one ParameterInput at a time, eg CVInput
+// Selector to choose an OutputNode from the available list to use as target 
 template<class TargetClass> //,class BaseOutput>
 class OutputSelectorControl : public SelectorControl<int> {
     BaseOutput *initial_selected_object = nullptr;
