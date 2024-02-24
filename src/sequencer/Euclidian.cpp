@@ -194,14 +194,14 @@ arguments_t initial_arguments[] = {
         source_selector_3->go_back_on_select = true;
 
         // tell the parameter's connection mappings which screen controls they need to update
-        parameter_selector->actual_controls->parameter->link_parameter_input_controls_to_connections(
+        /*parameter_selector->actual_controls->parameter->link_parameter_input_controls_to_connections(
             parameter_selector->actual_controls->items->get(1),
             parameter_selector->actual_controls->items->get(2),
             parameter_selector->actual_controls->items->get(3),
             source_selector_1,
             source_selector_2,
             source_selector_3
-        );
+        );*/
 
         input_selectors_bar->add(source_selector_1);
         input_selectors_bar->add(source_selector_2);
