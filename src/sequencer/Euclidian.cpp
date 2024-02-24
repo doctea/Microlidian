@@ -167,6 +167,7 @@ arguments_t initial_arguments[] = {
             "Input 1", 
             &parameter_selector->actual_controls->parameter,
             &FloatParameter::set_slot_0_input,
+            &FloatParameter::get_slot_0_input,
             parameter_manager->available_inputs,
             parameter_selector->actual_controls->parameter->connections[0].parameter_input
         );
@@ -176,6 +177,7 @@ arguments_t initial_arguments[] = {
             "Input 2", 
             &parameter_selector->actual_controls->parameter,
             &FloatParameter::set_slot_1_input,
+            &FloatParameter::get_slot_1_input,
             parameter_manager->available_inputs,
             parameter_selector->actual_controls->parameter->connections[1].parameter_input
         );
@@ -185,6 +187,7 @@ arguments_t initial_arguments[] = {
             "Input 3", 
             &parameter_selector->actual_controls->parameter,
             &FloatParameter::set_slot_2_input,
+            &FloatParameter::get_slot_2_input,
             parameter_manager->available_inputs,
             parameter_selector->actual_controls->parameter->connections[2].parameter_input
         );
