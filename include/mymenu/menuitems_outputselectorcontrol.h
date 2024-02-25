@@ -11,7 +11,7 @@
 
 // Selector to choose an OutputNode from the available list to use as target 
 template<class TargetClass> //,class BaseOutput>
-class OutputSelectorControl : public SelectorControl<int> {
+class OutputSelectorControl : public SelectorControl<int_least16_t> {
     BaseOutput *initial_selected_object = nullptr;
     LinkedList<BaseOutput*> *available_objects = nullptr;
 
@@ -92,7 +92,7 @@ class OutputSelectorControl : public SelectorControl<int> {
     BaseOutput *last_object = nullptr;
     int last_index = -1;
     char last_label[MAX_LABEL];
-    virtual const char *get_label_for_index(int index) {
+    virtual const char *get_label_for_index(int_least16_t index) {
         if (index<0 || index >= this->available_objects->size())
             return "None";
 
@@ -113,14 +113,14 @@ class OutputSelectorControl : public SelectorControl<int> {
         this->update_actual_index(index);
     }
 
-    virtual void setter(int new_value) override {
+    virtual void setter(int_least16_t new_value) override {
         //if (this->debug) Serial.printf(F("ParameterSelectorControl changing from %i to %i\n"), this->actual_value_index, new_value);
         selected_value_index = actual_value_index = new_value;
         if(new_value>=0 && new_value<this->available_objects->size() && this->target_object!=nullptr && this->setter_func!=nullptr) {
             (this->target_object->*this->setter_func)(this->available_objects->get(new_value));
         }
     }
-    virtual int getter() override {
+    virtual int_least16_t getter() override {
         return selected_value_index;
     }
 
