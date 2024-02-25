@@ -142,12 +142,15 @@ arguments_t initial_arguments[] = {
         ParameterMenuItemSelector *parameter_selector = new ParameterMenuItemSelector(label, parameters);
         menu->add(parameter_selector);
 
+        ParameterMenuItem *parameter_amount_controls = new ParameterMenuItem("Amounts", &parameter_selector->parameter);
+        menu->add(parameter_amount_controls);
+
         SubMenuItemBar *polarity_submenu = new SubMenuItemBar("Polarities", false);
         polarity_submenu->show_header = false;
         polarity_submenu->add(new MenuItem("Polarity"));
-        polarity_submenu->add(new ParameterConnectionPolarityTypeSelectorControl("Slot 1", &parameter_selector->actual_controls->parameter, 0));
-        polarity_submenu->add(new ParameterConnectionPolarityTypeSelectorControl("Slot 2", &parameter_selector->actual_controls->parameter, 1));
-        polarity_submenu->add(new ParameterConnectionPolarityTypeSelectorControl("Slot 3", &parameter_selector->actual_controls->parameter, 2));
+        polarity_submenu->add(new ParameterConnectionPolarityTypeSelectorControl("Slot 1", &parameter_selector->parameter, 0));
+        polarity_submenu->add(new ParameterConnectionPolarityTypeSelectorControl("Slot 2", &parameter_selector->parameter, 1));
+        polarity_submenu->add(new ParameterConnectionPolarityTypeSelectorControl("Slot 3", &parameter_selector->parameter, 2));
         polarity_submenu->add(new MenuItem(""));
         menu->add(polarity_submenu);
 
@@ -165,43 +168,30 @@ arguments_t initial_arguments[] = {
         // make the three source selector controls
         ParameterInputSelectorControl<FloatParameter> *source_selector_1 = new ParameterInputSelectorControl<FloatParameter>(
             "Input 1", 
-            &parameter_selector->actual_controls->parameter,
+            &parameter_selector->parameter,
             &FloatParameter::set_slot_0_input,
             &FloatParameter::get_slot_0_input,
-            parameter_manager->available_inputs,
-            parameter_selector->actual_controls->parameter->connections[0].parameter_input
+            parameter_manager->available_inputs
         );
         source_selector_1->go_back_on_select = true;
 
         ParameterInputSelectorControl<FloatParameter> *source_selector_2 = new ParameterInputSelectorControl<FloatParameter>(
             "Input 2", 
-            &parameter_selector->actual_controls->parameter,
+            &parameter_selector->parameter,
             &FloatParameter::set_slot_1_input,
             &FloatParameter::get_slot_1_input,
-            parameter_manager->available_inputs,
-            parameter_selector->actual_controls->parameter->connections[1].parameter_input
+            parameter_manager->available_inputs
         );
         source_selector_2->go_back_on_select = true;
 
         ParameterInputSelectorControl<FloatParameter> *source_selector_3 = new ParameterInputSelectorControl<FloatParameter>(
             "Input 3", 
-            &parameter_selector->actual_controls->parameter,
+            &parameter_selector->parameter,
             &FloatParameter::set_slot_2_input,
             &FloatParameter::get_slot_2_input,
-            parameter_manager->available_inputs,
-            parameter_selector->actual_controls->parameter->connections[2].parameter_input
+            parameter_manager->available_inputs
         );
         source_selector_3->go_back_on_select = true;
-
-        // tell the parameter's connection mappings which screen controls they need to update
-        /*parameter_selector->actual_controls->parameter->link_parameter_input_controls_to_connections(
-            parameter_selector->actual_controls->items->get(1),
-            parameter_selector->actual_controls->items->get(2),
-            parameter_selector->actual_controls->items->get(3),
-            source_selector_1,
-            source_selector_2,
-            source_selector_3
-        );*/
 
         input_selectors_bar->add(source_selector_1);
         input_selectors_bar->add(source_selector_2);
