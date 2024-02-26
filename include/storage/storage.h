@@ -54,47 +54,50 @@ class LineReader {
 bool load_from_slot(int slot) {
     char filename[MAXFILEPATH];
     snprintf(filename, MAXFILEPATH, PRESET_SLOT_FILEPATH_FORMAT, slot);
-
     //bool return_before_open = false, return_before_read = false, continue_before_parse_1 = false, continue_before_parse_2 = false;
     //if (return_before_open) return false;
 
     uint32_t millis_at_start_of_load = millis();
     File f = LittleFS.open(filename, FILE_READ_MODE);
     if (f) {
-        //messages_log_add("Slot file is " + String(f.size()) + " bytes big.");
-        messages_log_add(String("load_from_slot opened ") + String(filename));
-        int lines_parsed_count = 0;
-        String line;
-        /*if (return_before_read) {
-            messages_log_add(String("load_from_slot early return took ") + String(millis()-millis_at_start_of_load) + "ms to open file.");
-            f.close();
-            return false;
-        }*/
-        String data = f.readString();   // read entire file into memory - much faster than reading a byte at a time like readStringUntil()!
-        //messages_log_add("read file to string in " + String((millis()-millis_at_start_of_load)) + "ms, length " + String(data.length()));
-        LineReader r(&data);
-        while (r.available()) {
-            //line = f.readStringUntil('\n');
-            line = r.read_line();
-            //if (continue_before_parse_1) continue;
-            int_fast8_t p = line.indexOf('=');
-            String key = line.substring(0, p);
-            String value = line.substring(p+1);
-            //value.replace("\r","");
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+            //messages_log_add("Slot file is " + String(f.size()) + " bytes big.");
+            messages_log_add(String("load_from_slot opened ") + String(filename));
+            int lines_parsed_count = 0;
+            String line;
+            /*if (return_before_read) {
+                messages_log_add(String("load_from_slot early return took ") + String(millis()-millis_at_start_of_load) + "ms to open file.");
+                f.close();
+                return false;
+            }*/
+            String data = f.readString();   // read entire file into memory - much faster than reading a byte at a time like readStringUntil()!
+            //messages_log_add("read file to string in " + String((millis()-millis_at_start_of_load)) + "ms, length " + String(data.length()));
+            LineReader r(&data);
+            while (r.available()) {
+                //line = f.readStringUntil('\n');
+                line = r.read_line();
+                //if (continue_before_parse_1) continue;
+                int_fast8_t p = line.indexOf('=');
+                String key = line.substring(0, p);
+                String value = line.substring(p+1);
+                //value.replace("\r","");
 
-            //if (continue_before_parse_2) continue;
-            if (output_wrapper->load_parse_key_value(key,value)) {
-                // succeeded loading via output_wrapper MIDIOutputWrapper
-            } else if (parameter_manager->fast_load_parse_key_value(key,value)) {
-                // succeeded loading via parameter_manager ..
-            } else {
-                messages_log_add(String("Failed to parse line '") + key + "=" + value);
+                //if (continue_before_parse_2) continue;
+                if (output_wrapper->load_parse_key_value(key,value)) {
+                    // succeeded loading via output_wrapper MIDIOutputWrapper
+                    //Serial.printf(">>output_wrapper handled line\t%s\n", line.c_str());
+                } else if (parameter_manager->fast_load_parse_key_value(key,value)) {
+                    // succeeded loading via parameter_manager ..
+                    //Serial.printf(">>parameter_manager handled line\t%s\n", line.c_str());
+                } else {
+                    messages_log_add(String("!!Failed to parse line\t'") + key + "=" + value);
+                }
+                lines_parsed_count++;
+                //uint32_t millis_now = millis();
             }
-            lines_parsed_count++;
-            //uint32_t millis_now = millis();
+            f.close();
+            messages_log_add(String("load_from_slot took ") + String(millis()-millis_at_start_of_load) + "ms to parse " + String(lines_parsed_count) + " lines.");
         }
-        f.close();
-        messages_log_add(String("load_from_slot took ") + String(millis()-millis_at_start_of_load) + "ms to parse " + String(lines_parsed_count) + " lines.");
         return true;
     } else {
         messages_log_add(String("load_from_slot failed to open ") + String(filename));
@@ -105,26 +108,36 @@ bool load_from_slot(int slot) {
 bool save_to_slot(int slot) {
     char filename[MAXFILEPATH];
     snprintf(filename, MAXFILEPATH, PRESET_SLOT_FILEPATH_FORMAT, slot);
+    //Serial.printf("save_to_slot starting save process, freeRam is %u\n", freeRam()); Serial_flush();
     File f = LittleFS.open(filename, FILE_WRITE_MODE);
     if (f) {
-        messages_log_add(String("save_to_slot opened ") + String(filename));
-        LinkedList<String> *lines = new LinkedList<String> ();
+        //Serial.printf("save_to_slot file opened: freeRam is %u\n", freeRam()); Serial_flush();
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+            messages_log_add(String("save_to_slot opened ") + String(filename));
+            LinkedList<String> *lines = new LinkedList<String> ();
+            //Serial.printf("save_to_slot created LinkedList: freeRam is %u\n", freeRam()); Serial_flush();
 
-        // get all the parameter mapping values
-        parameter_manager->add_all_save_lines(lines);
+            // get all the parameter mapping values
+            parameter_manager->add_all_save_lines(lines);
 
-        // get MIDIOutputWrapper lines
-        output_wrapper->add_all_save_lines(lines);
+            // get MIDIOutputWrapper lines
+            output_wrapper->add_all_save_lines(lines);
 
-        // save them to file
-        const uint_fast16_t size = lines->size();
-        for (uint_fast16_t i = 0 ; i < size ; i++) {
-            f.println(lines->get(i));
+            // save them to file
+            const uint_fast16_t size = lines->size();
+            for (uint_fast16_t i = 0 ; i < size ; i++) {
+                //Serial.printf("Saving line: %s\n", lines->get(i).c_str());
+                f.println(lines->get(i));
+            }
+
+            //Serial.printf("save_to_slot file written: freeRam is %u\n", freeRam()); Serial_flush();
+            f.close();
+            //Serial.printf("save_to_slot closed file: freeRam is %u\n", freeRam()); Serial_flush();
+            lines->clear();
+            //Serial.printf("save_to_slot clear() lines: freeRam is %u\n", freeRam()); Serial_flush();
+            delete lines;
+            //Serial.printf("save_to_slot deleted lines: freeRam is %u\n", freeRam()); Serial_flush();
         }
-
-        f.close();
-        lines->clear();
-        delete lines;
         return false;
     } else {
         messages_log_add(String("save_to_slot failed to open ") + String(filename));
