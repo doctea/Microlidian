@@ -118,7 +118,6 @@ arguments_t initial_arguments[] = {
     }
 
     #include "mymenu_items/ParameterMenuItems_lowmemory.h"
-    #include "mymenu_items/ParameterInputMenuItems.h"
 
     void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index) {
         char label[MENU_C_MAX];

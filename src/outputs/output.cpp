@@ -89,6 +89,9 @@ void setup_output_parameters() {
     #include "menuitems_object.h"
     #include "menuitems_lambda.h"
     #include "menuitems.h"
+
+    #include "mymenu_items/ParameterMenuItems_lowmemory.h"
+
     void MIDINoteTriggerCountOutput::make_menu_items(Menu *menu, int index) {
         //#ifdef ENABLE_ENVELOPE_MENUS
             char label[40];
@@ -105,22 +108,30 @@ void setup_output_parameters() {
 
     void MIDIOutputWrapper::create_menu_items() {
         // controls for cv-to-midi outputs..
-        menu->add_page("CV-to-MIDI");
+
+        /*LinkedList<FloatParameter*> *parameters = new LinkedList<FloatParameter*>();
+        for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
+            parameters->add(&midi_cc_parameters[i]);
+        }*/
+        
         char label[MENU_C_MAX];
-        for (int i = 0 ; i < 6 ; i++) {
-            snprintf(label, MENU_C_MAX, "CC Output %s", midi_cc_parameters[i].label);
+        for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
+            snprintf(label, MENU_C_MAX, "CV-to-MIDI: %s", midi_cc_parameters[i].label);
+            menu->add_page(label);
+
+            snprintf(label, MENU_C_MAX, "Settings");
             SubMenuItem *bar = new SubMenuItemBar(label);
 
-            snprintf(label, MENU_C_MAX, "Output %s CC", midi_cc_parameters[i].label);            
+            snprintf(label, MENU_C_MAX, "Output CC");
             bar->add(new DirectNumberControl<byte>(
                 label, 
                 &midi_cc_parameters[i].cc_number,
                 midi_cc_parameters[i].cc_number,
                 0,
-                127
+                MIDI_MAX_VELOCITY
             ));
 
-            snprintf(label, MENU_C_MAX, "Output %s Channel", midi_cc_parameters[i].label);            
+            snprintf(label, MENU_C_MAX, "Output MIDI Channel");
             bar->add(new DirectNumberControl<byte>(
                 label, 
                 &midi_cc_parameters[i].channel,
@@ -130,12 +141,17 @@ void setup_output_parameters() {
             ));
 
             menu->add(bar);
+
+            // todo: use lowmemory controls instead of a full instance of each
+            menu->add(midi_cc_parameters[i].makeControls());
+
+            // todo: a little widget that shows the inputs/output value?
         }
 
-        menu->add_page("CV-to-MIDI mod");
+        /*menu->add_page("CV-to-MIDI mod");
         for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
             menu->add(midi_cc_parameters[i].makeControls());
-        }
+        }*/
 
         // todo: probably move this to another more generic 'settings' page
         menu->add_page("MIDI Output");
