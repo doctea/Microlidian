@@ -30,6 +30,8 @@ class BasePattern {
     int ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
     bool note_held = false;
 
+    BaseOutput *output = nullptr;
+
     #ifdef ENABLE_SCREEN
         int16_t colour = C_WHITE;
     #endif
@@ -37,6 +39,7 @@ class BasePattern {
     virtual const char *get_summary() {
         return "??";
     }
+    virtual const char *get_output_label();
 
     // todo: ability to pass in step, offset, and bar number, like we have for the current euclidian...?
     //          or, tbf, we can derive this from the 'tick'
@@ -97,16 +100,11 @@ class SimplePattern : public BasePattern {
     int triggered_on_step = -1;
     int current_duration = PPQN;
 
-    BaseOutput *output = nullptr;
     event *events = nullptr;
 
     SimplePattern() : BasePattern() {
         this->events = (event*)calloc(sizeof(event), steps);
     }
-
-    /*const char *get_label() {
-
-    }*/
 
     virtual void set_output(BaseOutput *output) {
         this->output = output;

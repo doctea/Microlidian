@@ -91,12 +91,11 @@ void draw_screen() {
     //if (locked || menu==nullptr) 
     //    return;
     while (is_locked() || ticked || frame_ready) {
-        #ifdef PROCESS_USB_ON_SECOND_CORE
+        #if defined(PROCESS_USB_ON_SECOND_CORE) && defined(USE_TINYUSB)
             // doing this here instead of on first core means that two Microlidians powered up together won't clock drift badly
-            // however, think it causes a deadlock if we don't process MIDI while waiting for a lock..?
-            #ifdef USE_TINYUSB
+            //ATOMIC() {
                 USBMIDI.read();
-            #endif
+            //}
         #endif
         delay(MENU_MS_BETWEEN_REDRAW/8);
     };

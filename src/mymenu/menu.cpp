@@ -56,33 +56,13 @@ LoopMarkerPanel top_loop_marker_panel = LoopMarkerPanel(LOOP_LENGTH_TICKS, PPQN,
 BPMPositionIndicator posbar = BPMPositionIndicator();
 ClockSourceSelectorControl clock_source_selector = ClockSourceSelectorControl("Clock source", clock_mode);
 
-/*#include "menuitems_fileviewer.h"
-extern FileViewerMenuItem *sequence_fileviewer;
-extern FileViewerMenuItem *project_fileviewer;*/
-
-//MenuItem test_item_1 = MenuItem("test 1");
-
-//DisplayTranslator_STeensy steensy = DisplayTranslator_STeensy();
-//DisplayTranslator_STeensy_Big steensy = DisplayTranslator_STeensy_Big();
 DisplayTranslator_Configured displaytranslator = DisplayTranslator_Configured();
+
+//float bpm_selector_values[] = { 60, 90, 120, 150, 180, 500, 1000, 2000, 3000 };
 
 /*#ifndef GDB_DEBUG
 FLASHMEM 
 #endif*/
-
-float bpm_selector_values[] = { 60, 90, 120, 150, 180, 500, 1000, 2000, 3000 };
-uint32_t external_cv_ticks_per_pulse_values[] = { 1, 2, 3, 4, 6, 8, 12, 16, 24 };
-#ifdef ENABLE_CLOCK_INPUT_CV
-    void set_external_cv_ticks_per_pulse_values(uint32_t new_value) {
-        external_cv_ticks_per_pulse = new_value;
-        //reset_clock();
-        ticks = 0;
-    }
-    uint32_t get_external_cv_ticks_per_pulse_values() {
-        return external_cv_ticks_per_pulse;
-    }
-#endif
-
 void setup_menu(bool button_high_state = HIGH) {
     Debug_println(F("Starting setup_menu()..")); Serial_flush();
 
@@ -139,15 +119,6 @@ void setup_menu(bool button_high_state = HIGH) {
     project_startstop->add(new ActionItem("Continue", clock_continue));
     project_startstop->add(new ActionFeedbackItem("Restart", (ActionFeedbackItem::setter_def_2)set_restart_on_next_bar_on, is_restart_on_next_bar, "Restarting..", "Restart"));
     menu->add(project_startstop);
-
-    #ifdef ENABLE_CLOCK_INPUT_CV
-        SelectorControl<uint32_t> *external_cv_ticks_per_pulse_selector = new SelectorControl<uint32_t>("External CV clock: Pulses per tick");
-        external_cv_ticks_per_pulse_selector->available_values = external_cv_ticks_per_pulse_values;
-        external_cv_ticks_per_pulse_selector->num_values = sizeof(external_cv_ticks_per_pulse_values)/sizeof(uint32_t);
-        external_cv_ticks_per_pulse_selector->f_setter = set_external_cv_ticks_per_pulse_values;
-        external_cv_ticks_per_pulse_selector->f_getter = get_external_cv_ticks_per_pulse_values;
-        menu->add(external_cv_ticks_per_pulse_selector);
-    #endif
 
     // debug bpm selector
     /*SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");

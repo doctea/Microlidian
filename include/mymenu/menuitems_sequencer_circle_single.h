@@ -75,45 +75,43 @@ class SingleCircleDisplay : public MenuItem {
             static const int_fast8_t circle_center_y = pos.y + ((tft->height() - pos.y) / 2);
 
             // draw circle
-            //for (int_fast8_t seq = 0 ; seq < target_pattern->number_patterns ; seq++ ) {
-                int_fast8_t first_x, first_y;
-                int_fast8_t last_x, last_y;
-                int_fast8_t count = 0;
-                //BasePattern *pattern = target_sequencer->get_pattern(seq);
-                //int16_t colour = color565(255 * seq, 255 - (255 * seq), seq) + (seq*8);
-                uint16_t colour = target_pattern->colour;
-                if (!target_pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_PHRASE))
-                    colour = tft->halfbright_565(colour);
-                // todo: if STEPS_PER_PHRASE is a multiple of get_steps, should be able to limit number of loops we do here?
-                for (int i = 0 ; i < STEPS_PER_PHRASE/*max(target_pattern->get_steps(),16*/ ; i++) {
-                    int_fast8_t coord_x = circle_center_x + coordinates_x[i%16];
-                    int_fast8_t coord_y = circle_center_y + coordinates_y[i%16];
-                    if (target_pattern->query_note_on_for_step(i)) {
-                        if (count>0) {
-                            tft->drawLine(
-                                last_x, last_y, coord_x, coord_y,
-                                colour
-                            );
-                        } else {
-                            first_x = coord_x;
-                            first_y = coord_y;
-                        }
-                        last_x = circle_center_x + coordinates_x[i%16];
-                        last_y = circle_center_y + coordinates_y[i%16];
-
-                        tft->fillCircle(last_x, last_y, 6, colour);  // draw a slightly larger colour circle
-                        count++;
+            int_fast8_t first_x, first_y;
+            int_fast8_t last_x, last_y;
+            int_fast8_t count = 0;
+            //BasePattern *pattern = target_sequencer->get_pattern(seq);
+            //int16_t colour = color565(255 * seq, 255 - (255 * seq), seq) + (seq*8);
+            uint_fast16_t pattern_colour = target_pattern->colour;
+            bool is_step_on = target_pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_PHRASE);
+            if (!is_step_on) pattern_colour = tft->halfbright_565(pattern_colour);
+            // todo: if STEPS_PER_PHRASE is a multiple of get_steps, should be able to limit number of loops we do here?
+            for (int i = 0 ; i < STEPS_PER_PHRASE/*max(target_pattern->get_steps(),16*/ ; i++) {
+                int_fast8_t coord_x = circle_center_x + coordinates_x[i%16];
+                int_fast8_t coord_y = circle_center_y + coordinates_y[i%16];
+                if (target_pattern->query_note_on_for_step(i)) {
+                    if (count>0) {
+                        tft->drawLine(
+                            last_x, last_y, coord_x, coord_y,
+                            pattern_colour
+                        );
+                    } else {
+                        first_x = coord_x;
+                        first_y = coord_y;
                     }
+                    last_x = circle_center_x + coordinates_x[i%16];
+                    last_y = circle_center_y + coordinates_y[i%16];
+
+                    tft->fillCircle(last_x, last_y, 6, (is_step_on ? target_pattern->colour : pattern_colour));  // draw a slightly larger colour circle
+                    count++;
                 }
-                if (count>1) {
-                    tft->drawLine(last_x, last_y, first_x, first_y, colour);
-                }
-            //}
+            }
+            if (count>1) {
+                tft->drawLine(last_x, last_y, first_x, first_y, pattern_colour);
+            }
 
             // draw step markers around circle
             const int_fast8_t radius = 2;
             for (int_fast8_t i = 0 ; i < 16 ; i++) {
-                int16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : BLUE;
+                const int_fast16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : (is_step_on ? target_pattern->colour : pattern_colour);
                 tft->fillCircle(
                     circle_center_x + coordinates_x[i], 
                     circle_center_y + coordinates_y[i], 
@@ -121,24 +119,6 @@ class SingleCircleDisplay : public MenuItem {
                     colour
                 );
             }
-
-            /*// draw flashy blocks for every patterns
-            tft->setCursor(tft->width()/2, ++initial_y);
-            colours(false, C_WHITE);
-            tft->println(" St Pu Ro   St Pu Ro");
-            tft->setCursor(tft->width()/2, pos.y);
-            for (int_fast8_t seq = 0 ; seq < target_pattern->number_patterns ; seq++) {
-                int_fast8_t column = seq / 10;
-                int_fast8_t row = 1+(seq % 10);
-                tft->setCursor((tft->width()/2) + (column*65), initial_y + (row*8)); //tft->getCursorY());
-                //tft->setCursor((tft->width()/2) + (seq/10), tft->getCursorY());
-                BasePattern *pattern = target_sequencer->get_pattern(seq);
-                colours(pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR), pattern->colour, BLACK);
-                tft->print(" ");
-                colours(false, C_WHITE);
-                //tft->printf("%i %s\n", seq, pattern->get_summary());
-                tft->print(pattern->get_summary());
-            }*/
 
             return tft->height();
         }

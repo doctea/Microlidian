@@ -122,13 +122,13 @@ arguments_t initial_arguments[] = {
     void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index) {
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
-        menu->add_page(label);
+        menu->add_page(label, this->colour);
 
         EuclidianPatternControl *epc = new EuclidianPatternControl(label, this);
         menu->add(epc);
 
         snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
-        menu->add_page(label);
+        menu->add_page(label, this->colour);
 
         //snprintf(label, MENU_C_MAX, "Pattern %i")
         LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
@@ -136,7 +136,7 @@ arguments_t initial_arguments[] = {
         /*for (int i = 0 ; i < parameters->size() ; i++) {
             menu->add(parameter_manager->makeMenuItemsForParameter(parameters->get(i)));
         }*/
-        create_low_memory_parameter_controls(label, parameters);
+        create_low_memory_parameter_controls(label, parameters, this->colour);
 
         #ifdef SIMPLE_SELECTOR
         OutputSelectorControl<EuclidianPattern> *selector = new OutputSelectorControl<EuclidianPattern>(

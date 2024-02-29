@@ -1,16 +1,10 @@
 #include "Config.h"
 #include "menu.h"
 #include "debug.h"
-//#include "mymenu/menu_usb.h"
-//#include "mymenu/menu_behaviours.h"
 #include "menuitems_numbers.h"
-//#include "submenuitem_bar.h"
 #include "menuitems_listviewer.h"
-
-//#include "menuitems_selector.h"
-
+#include "menuitems_lambda.h"
 #include "cv_input.h"
-
 #include "bpm.h"
 
 #ifdef ENABLE_CV_INPUT
@@ -69,7 +63,12 @@ void setup_debug_menu() {
 
     menu->add_page("Debug");
 
-    ObjectNumberControl<Menu,int> *text_size_control = new ObjectNumberControl<Menu,int>("Text size", menu, &Menu::set_default_textsize, &Menu::get_default_textsize, nullptr, false);
+    //ObjectNumberControl<Menu,int> *text_size_control = new ObjectNumberControl<Menu,int>("Text size", menu, &Menu::set_default_textsize, &Menu::get_default_textsize, nullptr, false);
+    LambdaNumberControl<int8_t> *text_size_control = new LambdaNumberControl<int8_t>(
+        "Text size", 
+        [=](int8_t v) -> void { menu->set_default_textsize(v); }, 
+        [=](void) -> int8_t { return menu->get_default_textsize(); } 
+    );
     menu->add(text_size_control);
 
     ActionConfirmItem *reset_control = new ActionConfirmItem("RESET RP2040?", reset_rp2040);
@@ -80,7 +79,10 @@ void setup_debug_menu() {
 
     SubMenuItemBar *bar = new SubMenuItemBar("Debug");
 
-    ObjectToggleControl<Menu> *debug_times_control = new ObjectToggleControl<Menu>("Render times", menu, &Menu::setDebugTimes, &Menu::isDebugTimes, nullptr);
+    LambdaToggleControl *debug_times_control = new LambdaToggleControl("Render times", [=](bool v) -> void { menu->setDebugTimes(v); }, [=]() -> bool { return menu->isDebugTimes(); }, nullptr);
+    bar->add(debug_times_control);
+    LambdaToggleControl *profiler_control = new LambdaToggleControl("Profiler", [=](bool v) -> void { menu->setProfileEnable(v); }, [=]() -> bool { return menu->isProfileEnable(); }, nullptr);
+    bar->add(profiler_control);
     /*bar->add(debug_times_control);
     bar->add(new NumberControl<bool>("Extra", (bool*)&debug_flag, debug_flag, false, true));
     bar->add(new NumberControl<bool>("InSaNe", (bool*)&debug_stress_sequencer_load, debug_flag, false, true));

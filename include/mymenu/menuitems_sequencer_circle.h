@@ -58,7 +58,7 @@ class CircleDisplay : public MenuItem {
             int initial_y = pos.y;
             //pos.y = header(label, pos, selected, opened);
 
-            tft->printf("ticks:%4i step:%i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
+            //tft->printf("ticks:%4i step:%2i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
             
             /*static int last_rendered_step = -1;
             if (BPM_CURRENT_STEP_OF_BAR==last_rendered_step)
@@ -121,21 +121,33 @@ class CircleDisplay : public MenuItem {
             }
 
             // draw flashy blocks for every patterns
-            tft->setCursor(tft->width()/2, ++initial_y);
+            tft->setCursor((tft->width()/2)-8, ++initial_y);
             colours(false, C_WHITE);
-            tft->println(" St Pu Ro   St Pu Ro");
-            tft->setCursor(tft->width()/2, pos.y);
+            //tft->println(" St Pu Ro   St Pu Ro");
+            tft->setCursor((tft->width()/2)-8, pos.y);
+            static const int_fast16_t middle_x = ((tft->width()/2)-8);
+            static const int_fast8_t column_width = (8*8)+1;
             for (int_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
                 int_fast8_t column = seq / 10;
                 int_fast8_t row = 1+(seq % 10);
-                tft->setCursor((tft->width()/2) + (column*65), initial_y + (row*8)); //tft->getCursorY());
+                tft->setCursor(middle_x + (column*column_width), initial_y + (row*8)); //tft->getCursorY());
                 //tft->setCursor((tft->width()/2) + (seq/10), tft->getCursorY());
                 BasePattern *pattern = target_sequencer->get_pattern(seq);
-                colours(pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR), pattern->colour, BLACK);
+                colours(
+                    pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR), 
+                    pattern->colour,
+                    //tft->dim_565(pattern->colour, min(0,(PPQN/(1+BPM_CURRENT_TICK_OF_BEAT))-1)),
+                    //tft->dim_565(pattern->colour, max(0,2-(BPM_CURRENT_TICK_OF_BEAT/8))),
+                    BLACK
+                );
                 tft->print(" ");
-                colours(false, C_WHITE);
+                //colours(false, C_WHITE);
                 //tft->printf("%i %s\n", seq, pattern->get_summary());
-                tft->print(pattern->get_summary());
+                //tft->print(pattern->get_summary());
+                char label[10];
+                snprintf(label, 10, "%9s", (char*)pattern->get_output_label());
+                tft->print(label);
+                //tft->printf("%8s", (char*)pattern->get_output_label());
             }
 
             return tft->height();

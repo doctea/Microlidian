@@ -93,7 +93,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
             if (item_index==0   // first item forced to first column
                 //|| item_index==items_size-1    // last item forced to first column?
             )
-                column = 0;
+            column = 0;
 
             if (column==0)
                 start_x = tft->width()/2;

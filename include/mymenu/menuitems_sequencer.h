@@ -23,16 +23,24 @@ class PatternDisplay : public MenuItem {
 
         void set_pattern(SimplePattern *pattern) {
             this->target_pattern = pattern;
+            this->default_fg = pattern->colour;
         }
 
         virtual int display(Coord pos, bool selected, bool opened) override {
             char label_info[MENU_C_MAX];
-            snprintf(label_info, MENU_C_MAX, "%s: Steps=%2i Pulses=%2i Rot=%2i", this->label, 
-                ((EuclidianPattern*)target_pattern)->get_steps(), 
-                ((EuclidianPattern*)target_pattern)->arguments.pulses, 
-                ((EuclidianPattern*)target_pattern)->arguments.rotation
-            );
-            pos.y = header(label_info, pos, selected, opened);
+            if(this->show_header) {
+                /*snprintf(label_info, MENU_C_MAX, "%s: Steps=%2i Pulses=%2i Rot=%2i", 
+                    this->label, 
+                    ((EuclidianPattern*)target_pattern)->get_steps(), 
+                    ((EuclidianPattern*)target_pattern)->arguments.pulses, 
+                    ((EuclidianPattern*)target_pattern)->arguments.rotation
+                );*/
+                snprintf(label_info, MENU_C_MAX, "%s: %s", 
+                    this->label, 
+                    this->target_pattern->get_output_label()
+                );
+                pos.y = header(label_info, pos, selected, opened);
+            }
 
             if (this->target_pattern==nullptr) {
                 tft->println("No pattern selected");
@@ -68,8 +76,9 @@ class PatternDisplay : public MenuItem {
 
                 const bool is_step_on = target_pattern->query_note_on_for_step(step);
                 const uint16_t colour = is_step_on ? 
-                    (actual_current_step == step ? RED : BLUE) :     // current step active
-                    (actual_current_step == step ? RED : GREY);      // current step inactive
+                    //(actual_current_step == step ? RED      : BLUE) :     // current step active
+                    (actual_current_step == step ? C_WHITE  : target_pattern->colour) :     // current step active
+                    (actual_current_step == step ? GREY     : tft->halfbright_565(target_pattern->colour));      // current step inactive
 
                 if (is_step_on) {  // yer twisting my melon, man
                     tft->fillRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);

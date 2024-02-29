@@ -3,6 +3,12 @@
 #include "sequencer/Patterns.h"
 #include "outputs/output.h"
 
+const char *BasePattern::get_output_label() {        
+    if (this->output!=nullptr)
+        return this->output->label;
+    return "None";
+}
+
 void SimplePattern::trigger_on_for_step(int step) {
     this->triggered_on_step = step; // % (ticks_per_step*steps);
     this->current_duration = this->get_tick_duration();

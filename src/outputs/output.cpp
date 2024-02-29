@@ -2,6 +2,21 @@
 #include "outputs/output.h"
 #include "outputs/output_processor.h"
 
+#include "clock.h"
+
+uint32_t external_cv_ticks_per_pulse_values[] = { 1, 2, 3, 4, 6, 8, 12, 16, 24 };
+#ifdef ENABLE_CLOCK_INPUT_CV
+    void set_external_cv_ticks_per_pulse_values(uint32_t new_value) {
+        external_cv_ticks_per_pulse = new_value;
+        //reset_clock();
+        ticks = 0;
+    }
+    uint32_t get_external_cv_ticks_per_pulse_values() {
+        return external_cv_ticks_per_pulse;
+    }
+#endif
+
+
 // todo: different modes to correlate with the midimuso mode + output availability..
 int8_t get_muso_note_for_drum(int8_t drum_note) {
     int8_t retval = 60;
@@ -166,6 +181,16 @@ void setup_output_parameters() {
             output_mode_selector->add_available_value(available_output_types[i].type_id, available_output_types[i].label);
         }
         menu->add(output_mode_selector);
+
+        #ifdef ENABLE_CLOCK_INPUT_CV
+            SelectorControl<uint32_t> *external_cv_ticks_per_pulse_selector = new SelectorControl<uint32_t>("External CV clock: Pulses per tick");
+            external_cv_ticks_per_pulse_selector->available_values = external_cv_ticks_per_pulse_values;
+            external_cv_ticks_per_pulse_selector->num_values = sizeof(external_cv_ticks_per_pulse_values)/sizeof(uint32_t);
+            external_cv_ticks_per_pulse_selector->f_setter = set_external_cv_ticks_per_pulse_values;
+            external_cv_ticks_per_pulse_selector->f_getter = get_external_cv_ticks_per_pulse_values;
+            menu->add(external_cv_ticks_per_pulse_selector);
+        #endif
+
     }
 
 #endif
