@@ -120,7 +120,9 @@ void setup() {
 
     #ifdef ENABLE_STORAGE
         setup_storage();
-        setup_storage_menu();
+        #ifdef ENABLE_SCREEN
+            setup_storage_menu();
+        #endif
         Debug_printf("after setup_storage(), free RAM is %u\n", freeRam());
     #endif    
 
@@ -202,15 +204,15 @@ void setup() {
 //volatile bool ticked = false;
 
 #define LOOP_AVG_COUNT 50
-int loop_averages[LOOP_AVG_COUNT];
-int loop_average = 0;
-int pos = 0;
+uint_fast32_t loop_averages[LOOP_AVG_COUNT];
+uint_fast32_t loop_average = 0;
+uint_fast8_t pos = 0;
 void add_loop_length(int length) {
     loop_averages[pos] = length;
     pos++;
     if (pos>=LOOP_AVG_COUNT) {
-        int c = 0;
-        for (int i = 0 ; i < LOOP_AVG_COUNT ; i++) {
+        uint_fast32_t c = 0;
+        for (uint_fast32_t i = 0 ; i < LOOP_AVG_COUNT ; i++) {
             c += loop_averages[i];
         }
         loop_average = c / LOOP_AVG_COUNT;
@@ -250,6 +252,7 @@ void do_tick(uint32_t in_ticks) {
             output_processor->process();
         }
     #endif
+
 }
 
 void loop() {
@@ -257,16 +260,18 @@ void loop() {
     //Serial.println("loop()");
     
     // doing this on the second core means that two Microlidians powered up at the same time won't drift too much
-    // however, it causes a deadlock...
+    // however, it causes crashes...
     #ifndef PROCESS_USB_ON_SECOND_CORE
         #ifdef USE_TINYUSB
-            ATOMIC() {
+            ATOMIC()
+            {
                 USBMIDI.read();
             }
         #endif
     #endif
 
-    ATOMIC() {
+    ATOMIC() 
+    {
         ticked = update_clock_ticks();
     }
 
@@ -288,7 +293,8 @@ void loop() {
             menu->update_ticks(ticks);
             last_tick = ticks;
         }*/
-        ATOMIC() {
+        ATOMIC() 
+        {
             if ((ticked || menu_tick_pending) && !is_locked()) {     // don't block, assume that we can make up for the missed tick next loop; much less jitter when at very very high BPMs
                 //acquire_lock();
                 menu->update_ticks(ticks);
@@ -303,11 +309,15 @@ void loop() {
         }
     #endif
 
-    ATOMIC() {
+    //return;
+
+    ATOMIC() 
+    {
         output_processor->loop();
     }
 
-    ATOMIC() {
+    ATOMIC() 
+    {
         if (playing && clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0 && micros() + loop_average >= last_ticked_at_micros + micros_per_tick) {
             // don't process anything else this loop, since we probably don't have time before the next tick arrives
             //Serial.printf("early return because %i + %i >= %i + %i\n", micros(), loop_average, last_ticked_at_micros, micros_per_tick);
@@ -327,7 +337,8 @@ void loop() {
         }
     }
 
-    ATOMIC() {
+    ATOMIC() 
+    {
         // if the back button is held down for 4 seconds, do a soft reboot
         #ifdef ENABLE_SCREEN
         if (!pushButtonA.isPressed() && pushButtonB.isPressed() && pushButtonB.currentDuration() >= 4000) {

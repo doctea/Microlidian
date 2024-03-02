@@ -1,5 +1,6 @@
-#ifndef SEQUENCER__INCLUDED
-#define SEQUENCER__INCLUDED
+#pragma once
+
+#include <Arduino.h>
 
 class SimplePattern;
 class BaseOutput;
@@ -10,7 +11,7 @@ class BaseSequencer {
     public:
 
     bool running = true;
-    int number_patterns = 20;
+    int_fast8_t number_patterns = 20;
     virtual SimplePattern *get_pattern(int pattern) = 0;
 
     /*virtual void process_tick(int tick) {
@@ -58,5 +59,3 @@ class BaseSequencer {
     #endif
 
 };
-
-#endif

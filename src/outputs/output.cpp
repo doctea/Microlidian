@@ -115,7 +115,7 @@ void setup_output_parameters() {
 
             SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 2);
             sub_menu_item_columns->add(new ObjectToggleControl("Note mode", this, &MIDINoteTriggerCountOutput::set_note_mode, &MIDINoteTriggerCountOutput::get_note_mode));
-            sub_menu_item_columns->add(new DirectNumberControl<byte>("Octave", &this->octave, this->octave, (byte)0, (byte)10));
+            sub_menu_item_columns->add(new DirectNumberControl<int_fast8_t>("Octave", &this->octave, this->octave, (int_fast8_t)0, (int_fast8_t)10));
 
             menu->add(sub_menu_item_columns);
         //#endif

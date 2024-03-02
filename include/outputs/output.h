@@ -245,7 +245,7 @@ class BaseOutput {
     // event_value_1 = send a note on
     // event_value_2 = send a note off
     // event_value_3 = ??
-    virtual void receive_event(byte event_value_1, byte event_value_2, byte event_value_3) = 0;
+    virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) = 0;
     virtual void reset() = 0;
     virtual bool matches_label(const char *compare) {
         return strcmp(compare, this->label)==0;
@@ -276,25 +276,25 @@ class BaseOutput {
 class MIDIBaseOutput : public BaseOutput {
     public:
     
-    byte note_number = -1, last_note_number = -1;
-    byte channel = GM_CHANNEL_DRUMS;
-    byte event_value_1, event_value_2, event_value_3;
+    int_fast8_t note_number = -1, last_note_number = -1;
+    int_fast8_t channel = GM_CHANNEL_DRUMS;
+    int_fast8_t event_value_1, event_value_2, event_value_3;
 
     MIDIOutputWrapper *output_wrapper = nullptr;
 
-    MIDIBaseOutput(const char *label, byte note_number, MIDIOutputWrapper *output_wrapper) 
+    MIDIBaseOutput(const char *label, int_fast8_t note_number, MIDIOutputWrapper *output_wrapper) 
         : BaseOutput(label), note_number(note_number), output_wrapper(output_wrapper) {}
 
-    virtual byte get_note_number() {
+    virtual int_fast8_t get_note_number() {
         return this->note_number;
     }
-    virtual byte get_last_note_number() {
+    virtual int_fast8_t get_last_note_number() {
         return this->last_note_number;
     }
-    virtual void set_last_note_number(byte note_number) {
+    virtual void set_last_note_number(int_fast8_t note_number) {
         this->last_note_number = note_number;
     }
-    virtual byte get_channel() {
+    virtual int_fast8_t get_channel() {
         return this->channel;
     }
 
@@ -348,7 +348,7 @@ class MIDIBaseOutput : public BaseOutput {
     }
 
     // receive an event from a sequencer
-    virtual void receive_event(byte event_value_1, byte event_value_2, byte event_value_3) override {
+    virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) override {
         this->event_value_1 += event_value_1;
         this->event_value_2 += event_value_2;
         this->event_value_3 += event_value_3;
@@ -363,11 +363,11 @@ class MIDIBaseOutput : public BaseOutput {
 // an output that tracks MIDI drum triggers
 class MIDIDrumOutput : public MIDIBaseOutput {
     public:
-    MIDIDrumOutput(const char *label, byte note_number, MIDIOutputWrapper *output_wrapper) 
+    MIDIDrumOutput(const char *label, int_fast8_t note_number, MIDIOutputWrapper *output_wrapper) 
         : MIDIBaseOutput(label, note_number, output_wrapper) {
         this->channel = GM_CHANNEL_DRUMS;
     }
-    MIDIDrumOutput(const char *label, byte note_number, byte channel, MIDIOutputWrapper *output_wrapper) 
+    MIDIDrumOutput(const char *label, int_fast8_t note_number, int_fast8_t channel, MIDIOutputWrapper *output_wrapper) 
         : MIDIBaseOutput(label, note_number, output_wrapper) {
         this->channel = channel;
     }
@@ -381,12 +381,12 @@ class MIDIDrumOutput : public MIDIBaseOutput {
         public:
             LinkedList<BaseOutput*> *nodes = nullptr;   // output nodes that will count towards the note calculation
 
-            byte octave = 3;
-            byte scale_root = SCALE_ROOT_A;
+            int_fast8_t octave = 3;
+            int_fast8_t scale_root = SCALE_ROOT_A;
             SCALE scale_number = SCALE::MAJOR;
             //int base_note = scale_root * octave;
 
-            MIDINoteTriggerCountOutput(const char *label, LinkedList<BaseOutput*> *nodes, MIDIOutputWrapper *output_wrapper, byte channel = 1, byte scale_root = SCALE_ROOT_A, SCALE scale_number = SCALE::MAJOR, byte octave = 3) 
+            MIDINoteTriggerCountOutput(const char *label, LinkedList<BaseOutput*> *nodes, MIDIOutputWrapper *output_wrapper, int_fast8_t channel = 1, int_fast8_t scale_root = SCALE_ROOT_A, SCALE scale_number = SCALE::MAJOR, int_fast8_t octave = 3) 
                 : MIDIBaseOutput(label, 0, output_wrapper) {
                 this->channel = channel;
                 this->nodes = nodes;
@@ -398,14 +398,14 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             }
 
             int note_mode = 0;
-            virtual byte get_note_number() override {
+            virtual int_fast8_t get_note_number() override {
                 if (!note_mode)
                     return get_note_number_count();
                 else
                     return quantise_pitch(get_base_note() + BPM_CURRENT_BEAT_OF_PHRASE, scale_root, scale_number);
             }
 
-            virtual byte get_note_number_count() {
+            virtual int_fast8_t get_note_number_count() {
                 // count all the triggering notes and add that value ot the root note
                 // then quantise according to selected scale to get final note number
                 int count = 0;
@@ -426,7 +426,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 return quantise_pitch(get_base_note() + count, scale_root, scale_number);
             }
 
-            virtual byte get_base_note() {
+            virtual int_fast8_t get_base_note() {
                 //return this->scale_root * octave;
                 return (octave * 12) + scale_root;
             }

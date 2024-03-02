@@ -1,5 +1,4 @@
-#ifndef PATTERNS__INCLUDED
-#define PATTERNS__INCLUDED
+#pragma once
 
 #include <Arduino.h>
 
@@ -178,6 +177,3 @@ class SimplePattern : public BasePattern {
     #endif*/
 
 };
-
-
-#endif

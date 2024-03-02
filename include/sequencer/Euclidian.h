@@ -26,12 +26,12 @@ class Menu;
 const int LEN = SEQUENCE_LENGTH_STEPS;
     
 struct arguments_t {
-    int steps = SEQUENCE_LENGTH_STEPS;
-    int pulses = steps/2;
-    int rotation = 1;
-    int duration = 1;
+    int_fast8_t steps = SEQUENCE_LENGTH_STEPS;
+    int_fast8_t pulses = steps/2;
+    int_fast8_t rotation = 1;
+    int_fast8_t duration = 1;
     float effective_euclidian_density = 0.6666;
-    int tie_on = -1;
+    int_fast8_t tie_on = -1;
 };
 
 extern arguments_t initial_arguments[];
@@ -124,8 +124,8 @@ class EuclidianPattern : public SimplePattern {
         */
 
         int original_pulses = this->used_arguments.pulses;
-        int temp_pulses = used_arguments.pulses * round(1.5f*(MINIMUM_DENSITY+*global_density));
-        //int temp_pulses = original_pulses;
+        //int temp_pulses = used_arguments.pulses * round(1.5f*(MINIMUM_DENSITY+*global_density));
+        int temp_pulses = original_pulses;
 
         if (used_arguments.steps > maximum_steps) {
             //messages_log_add(String("arguments.steps (") + String(arguments.steps) + String(") is more than maximum steps (") + String(maximum_steps) + String(")"));
@@ -351,9 +351,9 @@ class EuclidianSequencer : public BaseSequencer {
     virtual void on_loop(int tick) override {};
     virtual void on_tick(int tick) override {
         #ifdef MUTATE_EVERY_TICK
-            int tick_of_step = tick % (PPQN/STEPS_PER_BEAT);
-            if (tick_of_step==(PPQN/STEPS_PER_BEAT)-1) {
-                for (int i = 0 ; i < number_patterns ; i++) {
+            int_fast8_t tick_of_step = tick % TICKS_PER_STEP;
+            if (tick_of_step==TICKS_PER_STEP-1) {
+                for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
                     if (!patterns[i]->is_locked()) {
                         //if (Serial) Serial.println("mutate every tick!");
                         this->patterns[i]->make_euclid();
@@ -372,22 +372,22 @@ class EuclidianSequencer : public BaseSequencer {
         }
         if (is_bpm_on_sixteenth(tick)) {
             //this->on_step(this->get_step_for_tick(tick));
-            this->on_step(tick / (PPQN/STEPS_PER_BEAT));
+            this->on_step(tick / TICKS_PER_STEP);
         } /*else if (is_bpm_on_sixteenth(tick,1)) {
             this->on_step_end(tick / (PPQN/STEPS_PER_BEAT));
         }*/
-        for (int i = 0 ; i < number_patterns ; i++) {
+        for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
             this->patterns[i]->process_tick(tick);
         }
 
     };
     virtual void on_step(int step) override {
-        for (int i = 0 ; i < number_patterns ; i++) {
+        for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
             this->patterns[i]->process_step(step);
         }
     };
     virtual void on_step_end(int step) override {
-        for (int i = 0 ; i < number_patterns ; i++) {
+        for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
             this->patterns[i]->process_step_end(step);
         }
     }
@@ -399,16 +399,16 @@ class EuclidianSequencer : public BaseSequencer {
         if (fills_enabled && bar == BARS_PER_PHRASE - 1) {
             //if (Serial) Serial.println("on_bar doing fill!");
             // do fill
-            for (int i = 0 ; i < 3 ; i++) {
-                int ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
+            for (int_fast8_t i = 0 ; i < 3 ; i++) {
+                int_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 if (!patterns[ran]->is_locked()) {
                     //this->patterns[ran]->arguments.rotation += 2;
                     this->patterns[ran]->set_rotation(this->patterns[ran]->get_rotation() + 2);
                     this->patterns[ran]->make_euclid();
                 }
             }
-            for (int i = 0 ; i < 3 ; i++) {
-                int ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
+            for (int_fast8_t i = 0 ; i < 3 ; i++) {
+                int_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 if (!patterns[ran]->is_locked()) {
                     this->patterns[ran]->set_rotation(this->patterns[ran]->get_rotation() * 2);
                     //this->patterns[ran]->arguments.pulses *= 2;
@@ -426,9 +426,9 @@ class EuclidianSequencer : public BaseSequencer {
             if (mutate_enabled) {
               unsigned long seed = get_euclidian_seed();
               randomSeed(seed);
-              for (int i = 0 ; i < 3 ; i++) {
+              for (int_fast8_t i = 0 ; i < 3 ; i++) {
                 // choose a pattern to mutate, out of all those for whom mutate is enabled
-                int ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
+                int_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 randomSeed(seed + ran);
                 if (!patterns[ran]->is_locked()) {
                     this->patterns[ran]->mutate();

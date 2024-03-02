@@ -91,12 +91,12 @@ void draw_screen() {
     //if (locked || menu==nullptr) 
     //    return;
     while (is_locked() || ticked || frame_ready) {
-        #if defined(PROCESS_USB_ON_SECOND_CORE) && defined(USE_TINYUSB)
+        /*#if defined(PROCESS_USB_ON_SECOND_CORE) && defined(USE_TINYUSB)
             // doing this here instead of on first core means that two Microlidians powered up together won't clock drift badly
             //ATOMIC() {
                 USBMIDI.read();
             //}
-        #endif
+        #endif*/
         delay(MENU_MS_BETWEEN_REDRAW/8);
     };
     //menu_locked = true;
@@ -133,13 +133,13 @@ void loop1() {
     while(is_locked()) {
         delay(MENU_MS_BETWEEN_REDRAW/8);
 
-        #ifdef PROCESS_USB_ON_SECOND_CORE
+        /*#ifdef PROCESS_USB_ON_SECOND_CORE
             // doing this here instead of on first core means that two Microlidians powered up together won't clock drift badly
             // however, think it causes a deadlock if we don't process MIDI while waiting for a lock..?
             #ifdef USE_TINYUSB
                 USBMIDI.read();
             #endif
-        #endif
+        #endif*/
     }
     ATOMIC() {
         if (menu!=nullptr && millis() - last_pushed > MENU_MS_BETWEEN_REDRAW) {
@@ -149,13 +149,15 @@ void loop1() {
     }
     #ifdef ENABLE_CV_INPUT
         static unsigned long last_cv_update = 0;
-        if (parameter_manager->ready_for_next_update() && !is_locked()) {
-            acquire_lock();
-            ATOMIC() {
-                parameter_manager->throttled_update_cv_input__all(time_between_cv_input_updates, false, false);
+        if (cv_input_enabled) {
+            if (parameter_manager->ready_for_next_update() && !is_locked()) {
+                acquire_lock();
+                //ATOMIC() {
+                    parameter_manager->throttled_update_cv_input__all(time_between_cv_input_updates, false, false);
+                //}
+                release_lock();
+                last_cv_update = millis();
             }
-            release_lock();
-            last_cv_update = millis();
         }
     #endif
 }
