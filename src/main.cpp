@@ -309,8 +309,6 @@ void loop() {
         }
     #endif
 
-    //return;
-
     ATOMIC() 
     {
         output_processor->loop();

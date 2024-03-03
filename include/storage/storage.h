@@ -60,7 +60,10 @@ bool load_from_slot(int slot) {
     uint32_t millis_at_start_of_load = millis();
     File f = LittleFS.open(filename, FILE_READ_MODE);
     if (f) {
-        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        #ifdef USE_UCLOCK
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) 
+        #endif
+        {
             //messages_log_add("Slot file is " + String(f.size()) + " bytes big.");
             messages_log_add(String("load_from_slot opened ") + String(filename));
             int lines_parsed_count = 0;
@@ -112,7 +115,10 @@ bool save_to_slot(int slot) {
     File f = LittleFS.open(filename, FILE_WRITE_MODE);
     if (f) {
         //Serial.printf("save_to_slot file opened: freeRam is %u\n", freeRam()); Serial_flush();
-        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        #ifdef USE_UCLOCK
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) 
+        #endif
+        {
             messages_log_add(String("save_to_slot opened ") + String(filename));
             LinkedList<String> *lines = new LinkedList<String> ();
             //Serial.printf("save_to_slot created LinkedList: freeRam is %u\n", freeRam()); Serial_flush();
