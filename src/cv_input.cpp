@@ -13,6 +13,8 @@
 
 #include "devices/ADCPimoroni24v.h"
 
+#include "parameter_inputs/VirtualParameterInput.h"
+
 //#define LOOP_LENGTH_TICKS   (PPQN*BEATS_PER_BAR*BARS_PER_PHRASE)
 
 #include "sequencer/sequencing.h"
@@ -52,6 +54,11 @@ void setup_parameter_inputs() {
     // add the available parameters to a list used globally and later passed to each selector menuitem
     //Serial.println(F("==== begin setup_parameter_inputs ====")); Serial_flush();
     tft_print("..setup_parameter_inputs...");
+
+    VirtualParameterInput *virtpi1 = new VirtualParameterInput((char*)"LFO", "LFOs", LFO);
+    VirtualParameterInput *virtpi2 = new VirtualParameterInput((char*)"Random", "LFOs", RAND);
+    parameter_manager->addInput(virtpi1);
+    parameter_manager->addInput(virtpi2);
 
     // initialise the voltage source inputs
     // todo: improve this bit, maybe name the voltage sources?
