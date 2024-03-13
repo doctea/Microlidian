@@ -55,11 +55,6 @@ void setup_parameter_inputs() {
     //Serial.println(F("==== begin setup_parameter_inputs ====")); Serial_flush();
     tft_print("..setup_parameter_inputs...");
 
-    VirtualParameterInput *virtpi1 = new VirtualParameterInput((char*)"LFO", "LFOs", LFO);
-    VirtualParameterInput *virtpi2 = new VirtualParameterInput((char*)"Random", "LFOs", RAND);
-    parameter_manager->addInput(virtpi1);
-    parameter_manager->addInput(virtpi2);
-
     // initialise the voltage source inputs
     // todo: improve this bit, maybe name the voltage sources?
     VoltageParameterInput *vpi1 = new VoltageParameterInput((char*)"A", "CV Inputs", parameter_manager->voltage_sources->get(0));
@@ -74,9 +69,16 @@ void setup_parameter_inputs() {
     parameter_manager->addInput(vpi2);
     parameter_manager->addInput(vpi3);
 
+    VirtualParameterInput *virtpi1 = new VirtualParameterInput((char*)"LFO sync", "LFOs", LFO_LOCKED);
+    VirtualParameterInput *virtpi2 = new VirtualParameterInput((char*)"LFO free", "LFOs", LFO_FREE);
+    VirtualParameterInput *virtpi3 = new VirtualParameterInput((char*)"Random",   "LFOs", RAND);
+    parameter_manager->addInput(virtpi1);
+    parameter_manager->addInput(virtpi2);
+    parameter_manager->addInput(virtpi3);
+
     //Serial.println("about to do setDefaultParameterConnections().."); Serial.flush();
     parameter_manager->setDefaultParameterConnections();
-    //Serial.println("just did do setDefaultParameterConnections().."); Serial.flush();
+    //"Serial.println("just did do setDefaultParameterConnections().."); Serial.flush();
 
     tft_print("\n");
 }
