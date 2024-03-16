@@ -103,6 +103,14 @@ void setup() {
     USBMIDI.setHandleStart(auto_handle_start_wrapper);
     setup_output();
 
+    #ifdef ENABLE_CV_INPUT
+        setup_cv_input();
+        Debug_printf("after setup_cv_input(), free RAM is %u\n", freeRam());
+        setup_parameter_inputs();
+        Debug_printf("after setup_parameter_inputs(), free RAM is %u\n", freeRam());
+        setup_output_parameters();
+    #endif
+
     #ifdef ENABLE_SCREEN
         //delay(1000);    // see if giving 1 second to calm down will help reliability of screen initialisation... it does not. :(
         setup_screen();
@@ -125,14 +133,6 @@ void setup() {
         #endif
         Debug_printf("after setup_storage(), free RAM is %u\n", freeRam());
     #endif    
-
-    #ifdef ENABLE_CV_INPUT
-        setup_cv_input();
-        Debug_printf("after setup_cv_input(), free RAM is %u\n", freeRam());
-        setup_parameter_inputs();
-        Debug_printf("after setup_parameter_inputs(), free RAM is %u\n", freeRam());
-        setup_output_parameters();
-    #endif
 
     #ifdef ENABLE_EUCLIDIAN
         //Serial.println("setting up sequencer..");
