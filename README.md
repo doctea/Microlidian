@@ -74,7 +74,7 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
   - eg raga sequencer that loads .mid files
 - MIDI input (via USB, for setting options, ~~clock sync,~~ forwarding notes and drums)
   - options to enable/disable all this
-- MIDI output (~~via TRS/DIN, for sending clock, triggers, notes~~ and ~triggerable envelopes~~/LFO)
+- MIDI output (~~via TRS/DIN, for sending clock, triggers, notes~~ and ~triggerable envelopes/LFO~~)
   - ~~basic hacky approach is working~~
   - standard gm drum machine option with assignable drum numbers
   - midimuso cv trigger+cv modes
@@ -83,12 +83,11 @@ Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
   - options to enable/disable all this
 - Integrate CV inputs
   - ~~basic cv input parameter~~
-  - for controlling parameters
-  - low-memory version of the mapping tool, since providing options for all options of 20 tracks uses 100K+ and takes us over the available RAM!
-    - worked around for now by not allowing the sources for a slot to be changed
+  - ~~for controlling parameters~~
+  - ~~low-memory version of the mapping tool, since providing options for all options of 20 tracks uses 100K+ and takes us over the available RAM!~~
   - ~~maybe for clock too?~~
   - implement CV input 'reset'
-  - Setting a per-parameter range for modulation
+  - ~~Setting a per-parameter range for modulation~~
   - Port Pitch CV->MIDI and chord quantisation stuff from usb_midi_clocker
 - MIDI inputs for controlling parameters
   - Configurable MIDI inputs for control surfaces from host USB
