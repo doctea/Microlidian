@@ -267,7 +267,8 @@ class EuclidianSequencer : public BaseSequencer {
     EuclidianPattern **patterns = nullptr;
 
     int seed = 0;
-    int mutate_minimum_pattern = 0, mutate_maximum_pattern = number_patterns;
+    uint_fast8_t mutate_minimum_pattern = 0, mutate_maximum_pattern = number_patterns;
+    int_fast8_t mutation_count = 3, effective_mutation_count = 3;
     bool    reset_before_mutate = true, 
             mutate_enabled = true, 
             fills_enabled = true, 
@@ -296,6 +297,13 @@ class EuclidianSequencer : public BaseSequencer {
     }
     void set_mutated_enabled(bool v = true) {
         this->mutate_enabled = v;
+    }
+
+    int_fast8_t get_effective_mutation_count() {
+        return effective_mutation_count;
+    }
+    void set_mutation_count(int_fast8_t v) {
+        this->mutation_count = v;
     }
 
     bool should_reset_before_mutate() {
@@ -426,9 +434,9 @@ class EuclidianSequencer : public BaseSequencer {
             if (mutate_enabled) {
               unsigned long seed = get_euclidian_seed();
               randomSeed(seed);
-              for (int_fast8_t i = 0 ; i < 3 ; i++) {
+              for (uint_fast8_t i = 0 ; i < this->mutation_count ; i++) {
                 // choose a pattern to mutate, out of all those for whom mutate is enabled
-                int_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
+                uint_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 randomSeed(seed + ran);
                 if (!patterns[ran]->is_locked()) {
                     this->patterns[ran]->mutate();

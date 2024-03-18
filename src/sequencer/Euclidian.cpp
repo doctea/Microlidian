@@ -53,6 +53,14 @@ arguments_t initial_arguments[] = {
             MAXIMUM_DENSITY
         ));
 
+        parameters->add(new ProxyParameter<int_fast8_t>(
+            "Mutation amount", 
+            &this->mutation_count,
+            &this->effective_mutation_count,
+            1,
+            8
+        ));
+
         for (int i = 0 ; i < this->number_patterns ; i++) {
             EuclidianPattern *pattern = (EuclidianPattern *)this->get_pattern(i);
             //LinkedList<FloatParameter*> *pattern_parameters = 
