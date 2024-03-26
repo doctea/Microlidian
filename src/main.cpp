@@ -39,6 +39,10 @@
 #include <atomic>
 #include <SimplyAtomic.h>
 
+#ifdef USE_UCLOCK_GENERIC
+    void uClockCheckTime(uint32_t micros_time);
+#endif
+
 std::atomic<bool> started = false;
 std::atomic<bool> ticked = false;
 
@@ -87,7 +91,7 @@ void setup() {
     Debug_println("setup() starting");
 
     #ifdef USE_UCLOCK
-        setup_uclock(do_tick);
+        setup_uclock(do_tick, uClock.PPQN_24);
     #else
         setup_cheapclock();
     #endif
@@ -277,6 +281,9 @@ void loop() {
 
     #ifdef USE_UCLOCK
         // do_tick is called from interrupt via uClock, so we don't need to do it manually here
+        #ifdef USE_UCLOCK_GENERIC
+            uClockCheckTime(micros());
+        #endif
     #else
         if (ticked) {
             ATOMIC() {
