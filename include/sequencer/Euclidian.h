@@ -124,8 +124,13 @@ class EuclidianPattern : public SimplePattern {
         */
 
         int original_pulses = this->used_arguments.pulses;
-        //int temp_pulses = used_arguments.pulses * round(1.5f*(MINIMUM_DENSITY+*global_density));
-        int temp_pulses = original_pulses;
+        float multiplier = 1.5f*(MINIMUM_DENSITY+*global_density);
+        int temp_pulses = 0.5f + (((float)original_pulses) * multiplier);
+        //if (Serial) {
+            //Serial.printf("from original pulses %i, got temp_pulses %i from multiplier %3.3f (global_density=%3.3f)\n", original_pulses, temp_pulses, multiplier, *global_density);
+            //Serial_flush();
+        //}
+        //int temp_pulses = original_pulses;    // for disabling density for testing purposes
 
         if (used_arguments.steps > maximum_steps) {
             //messages_log_add(String("arguments.steps (") + String(arguments.steps) + String(") is more than maximum steps (") + String(maximum_steps) + String(")"));
