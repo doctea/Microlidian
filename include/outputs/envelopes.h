@@ -34,7 +34,10 @@ class EnvelopeOutput : public MIDIDrumOutput/*, public EnvelopeBase*/ {
         ,midi_cc(cc_number)
         {
             // todo: allow to switch to different types of envelope..?
-            this->envelope = new RegularEnvelope(label);
+            this->envelope = new RegularEnvelope(
+                label, 
+                [=](uint8_t level) -> void { output_wrapper->sendControlChange(this->midi_cc, level, this->channel);} 
+            );
         }
 
     virtual void process() override {
@@ -58,9 +61,9 @@ class EnvelopeOutput : public MIDIDrumOutput/*, public EnvelopeBase*/ {
     }
 
     // todo: make EnvelopeBase accept a lambda as callback, instead of the send_envelope_level override
-    virtual void send_envelope_level(uint8_t level) override {
+    /*virtual void send_envelope_level(uint8_t level) override {
         output_wrapper->sendControlChange(midi_cc, level, channel);
-    }
+    }*/
 
     #ifdef ENABLE_SCREEN
         virtual void make_menu_items(Menu *menu, int index) override {
