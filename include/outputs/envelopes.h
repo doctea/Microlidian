@@ -16,6 +16,7 @@
 #endif
 
 #include "envelopes/envelopes.h"
+#include "envelopes/borolope.h"
 
 class EnvelopeOutput : public MIDIDrumOutput/*, public EnvelopeBase*/ {
     public:
@@ -34,7 +35,8 @@ class EnvelopeOutput : public MIDIDrumOutput/*, public EnvelopeBase*/ {
         ,midi_cc(cc_number)
         {
             // todo: allow to switch to different types of envelope..?
-            this->envelope = new RegularEnvelope(
+            //this->envelope = new RegularEnvelope(
+            this->envelope = new Weirdolope(
                 label, 
                 [=](uint8_t level) -> void { output_wrapper->sendControlChange(this->midi_cc, level, this->channel);} 
             );
@@ -71,6 +73,11 @@ class EnvelopeOutput : public MIDIDrumOutput/*, public EnvelopeBase*/ {
             this->envelope->make_menu_items(menu, index);
         };
     #endif
+
+    virtual LinkedList<FloatParameter*> *get_parameters() override {
+        //return nullptr;
+        return this->envelope->get_parameters();
+    }
 };
 
 

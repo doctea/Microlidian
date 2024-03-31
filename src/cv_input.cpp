@@ -80,7 +80,7 @@ void setup_parameter_inputs() {
     parameter_manager->setDefaultParameterConnections();
     //"Serial.println("just did do setDefaultParameterConnections().."); Serial.flush();
 
-    tft_print("\n");
+    tft_print("Finished setup_parameter_inputs()\n");
 }
 
 #ifdef ENABLE_SCREEN

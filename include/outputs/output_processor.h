@@ -121,6 +121,15 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         #endif
     }
 
+    virtual void setup_parameters() {
+        for (int i = 0 ; i < this->nodes->size() ; i++) {
+            Serial.printf("MIDIOutputProcessor#setup_parameters processing item [%i/%i]\n", i+1, this->nodes->size());
+            Serial_flush();
+            parameter_manager->addParameters(this->nodes->get(i)->get_parameters());
+        }
+    }
+
+
     #ifdef ENABLE_SCREEN
         virtual void create_menu_items();
     #endif

@@ -65,6 +65,7 @@ void setup_output() {
 
 void setup_output_parameters() {
     output_wrapper->setup_parameters();
+    output_processor->setup_parameters();
 }
 
 #ifdef ENABLE_SCREEN
@@ -80,6 +81,7 @@ void setup_output_parameters() {
         for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
             BaseOutput *node = this->nodes->get(i);
             node->make_menu_items(menu, i);
+            node->make_parameter_menu_items(menu, i);
         }
 
         menu->add_page("Outputs");
@@ -192,5 +194,40 @@ void setup_output_parameters() {
         #endif
 
     }
+
+    #include "mymenu_items/ParameterMenuItems_lowmemory.h"
+    void BaseOutput::make_parameter_menu_items(Menu *menu, int index, uint16_t colour) {
+        // don't make a menu page if no parameters to use
+        LinkedList<FloatParameter*> *parameters = this->get_parameters();
+        if (parameters==nullptr || parameters->size()==0)
+            return;
+
+        // create page
+        char label[40];
+        snprintf(label, 40, "Modulation %i: %s", index, this->label);
+        menu->add_page(label, C_WHITE, false);
+
+        // create lowmemory parameter controls
+        create_low_memory_parameter_controls(label, parameters, colour);
+    }
+
+    LinkedList<FloatParameter*> *Weirdolope::get_parameters() {
+        if (this->parameters!=nullptr)
+            return this->parameters;
+
+        this->parameters = new LinkedList<FloatParameter*>();
+        
+        this->parameters->add(new DataParameter<Weirdolope,float>(
+            "Mix",
+            this,
+            &Weirdolope::setMix,
+            &Weirdolope::getMix,
+            0.0f,
+            1.0f
+        ));
+
+        return this->parameters;
+    }
+
 
 #endif

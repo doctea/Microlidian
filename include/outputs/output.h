@@ -268,7 +268,12 @@ class BaseOutput {
 
     #ifdef ENABLE_SCREEN
         virtual void make_menu_items(Menu *menu, int index) {}
+        virtual void make_parameter_menu_items(Menu *menu, int index, uint16_t colour = C_WHITE);
     #endif
+
+    virtual LinkedList<FloatParameter*> *get_parameters() {
+        return nullptr;
+    }
 };
 
 
