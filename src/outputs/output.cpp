@@ -211,23 +211,4 @@ void setup_output_parameters() {
         create_low_memory_parameter_controls(label, parameters, colour);
     }
 
-    LinkedList<FloatParameter*> *Weirdolope::get_parameters() {
-        if (this->parameters!=nullptr)
-            return this->parameters;
-
-        this->parameters = new LinkedList<FloatParameter*>();
-        
-        this->parameters->add(new DataParameter<Weirdolope,float>(
-            "Mix",
-            this,
-            &Weirdolope::setMix,
-            &Weirdolope::getMix,
-            0.0f,
-            1.0f
-        ));
-
-        return this->parameters;
-    }
-
-
 #endif
