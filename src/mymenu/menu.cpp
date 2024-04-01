@@ -157,6 +157,7 @@ void setup_menu(bool button_high_state = HIGH) {
         submenu->add(new ObjectToggleControl<EuclidianSequencer>("Add phrase", &sequencer, &EuclidianSequencer::set_add_phrase_enabled,&EuclidianSequencer::is_add_phrase_enabled));
         submenu->add(new ObjectToggleControl<EuclidianSequencer>("Fills", &sequencer,  &EuclidianSequencer::set_fills_enabled,         &EuclidianSequencer::is_fills_enabled));
         submenu->add(new ObjectNumberControl<EuclidianSequencer,int>("Seed", &sequencer, &EuclidianSequencer::set_euclidian_seed,      &EuclidianSequencer::get_euclidian_seed));
+        submenu->add(new ObjectNumberControl<EuclidianSequencer,int_fast8_t>("Mut.Amt", &sequencer, &EuclidianSequencer::set_mutation_count,       &EuclidianSequencer::get_mutation_count, nullptr, 1, 8));
         menu->add(submenu);
 
         #ifdef ENABLE_CV_INPUT

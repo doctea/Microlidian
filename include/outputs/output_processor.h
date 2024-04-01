@@ -123,8 +123,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
 
     virtual void setup_parameters() {
         for (int i = 0 ; i < this->nodes->size() ; i++) {
-            Serial.printf("MIDIOutputProcessor#setup_parameters processing item [%i/%i]\n", i+1, this->nodes->size());
-            Serial_flush();
+            //Serial.printf("MIDIOutputProcessor#setup_parameters processing item [%i/%i]\n", i+1, this->nodes->size());
+            //Serial_flush();
             parameter_manager->addParameters(this->nodes->get(i)->get_parameters());
         }
     }

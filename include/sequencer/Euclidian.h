@@ -17,6 +17,7 @@ class Menu;
 #define MINIMUM_DENSITY 0.0f  // 0.10f
 #define MAXIMUM_DENSITY 1.5f
 #define DEFAULT_DURATION 1
+#define DEFAULT_DURATION_ENVELOPES 8
 
 #define BARS_PER_PHRASE 4
 
@@ -309,6 +310,9 @@ class EuclidianSequencer : public BaseSequencer {
     }
     void set_mutation_count(int_fast8_t v) {
         this->mutation_count = v;
+    }
+    int_fast8_t get_mutation_count() {
+        return this->mutation_count;
     }
 
     bool should_reset_before_mutate() {
