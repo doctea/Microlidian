@@ -368,12 +368,14 @@ class EuclidianSequencer : public BaseSequencer {
     virtual void on_loop(int tick) override {};
     virtual void on_tick(int tick) override {
         #ifdef MUTATE_EVERY_TICK
-            int_fast8_t tick_of_step = tick % TICKS_PER_STEP;
-            if (tick_of_step==TICKS_PER_STEP-1) {
-                for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
-                    if (!patterns[i]->is_locked()) {
-                        //if (Serial) Serial.println("mutate every tick!");
-                        this->patterns[i]->make_euclid();
+            if (is_mutate_enabled()) {
+                int_fast8_t tick_of_step = tick % TICKS_PER_STEP;
+                if (tick_of_step==TICKS_PER_STEP-1) {
+                    for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
+                        if (!patterns[i]->is_locked()) {
+                            //if (Serial) Serial.println("mutate every tick!");
+                            this->patterns[i]->make_euclid();
+                        }
                     }
                 }
             }
@@ -437,20 +439,18 @@ class EuclidianSequencer : public BaseSequencer {
         }
     };
     virtual void on_phrase(int phrase) override {
-        if (reset_before_mutate)
-            reset_patterns();
-        if (mutate_enabled) {
-            if (mutate_enabled) {
-              unsigned long seed = get_euclidian_seed();
-              randomSeed(seed);
-              for (uint_fast8_t i = 0 ; i < this->mutation_count ; i++) {
+        if (is_mutate_enabled()) {
+            if (reset_before_mutate)
+                reset_patterns();
+            unsigned long seed = get_euclidian_seed();
+            randomSeed(seed);
+            for (uint_fast8_t i = 0 ; i < this->get_effective_mutation_count() ; i++) {
                 // choose a pattern to mutate, out of all those for whom mutate is enabled
                 uint_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 randomSeed(seed + ran);
                 if (!patterns[ran]->is_locked()) {
                     this->patterns[ran]->mutate();
                 }
-              }
             }
         }
     };
