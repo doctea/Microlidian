@@ -78,5 +78,7 @@
 //#define MIDI_SERIAL_SPIO        // this fuckin works too!  
 
 #define ENABLE_ENVELOPES
+#define DEFAULT_ENVELOPE_CLASS Weirdolope
+//#define DEFAULT_ENVELOPE_CLASS RegularEnvelope
 
 //#define PROCESS_USB_ON_SECOND_CORE

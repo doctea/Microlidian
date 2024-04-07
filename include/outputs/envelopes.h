@@ -1,5 +1,11 @@
 #pragma once
 
+#include "Config.h"
+#ifndef DEFAULT_ENVELOPE_CLASS
+    #define DEFAULT_ENVELOPE_CLASS Weirdolope
+    //#define DEFAULT_ENVELOPE_CLASS RegularEnvelope
+#endif
+
 #include "bpm.h"
 #include "output.h"
 
@@ -35,8 +41,7 @@ class EnvelopeOutput : public MIDIDrumOutput/*, public EnvelopeBase*/ {
         ,midi_cc(cc_number)
         {
             // todo: allow to switch to different types of envelope..?
-            //this->envelope = new RegularEnvelope(
-            this->envelope = new Weirdolope(
+            this->envelope = new DEFAULT_ENVELOPE_CLASS(
                 label, 
                 [=](uint8_t level) -> void { output_wrapper->sendControlChange(this->midi_cc, level, this->channel);} 
             );
