@@ -259,8 +259,8 @@ void do_tick(uint32_t in_ticks) {
     output_wrapper->sendClock();
 
     #ifdef ENABLE_EUCLIDIAN
-        sequencer.on_tick(ticks);
-        if (is_bpm_on_sixteenth(ticks)) {
+        if (sequencer.is_running()) sequencer.on_tick(ticks);
+        if (is_bpm_on_sixteenth(ticks) && output_processor->is_enabled()) {
             output_processor->process();
         }
     #endif
@@ -336,6 +336,7 @@ void loop() {
 
             //ATOMIC() 
             //{
+            if (output_processor->is_enabled())
                 output_processor->loop();
             //}
 

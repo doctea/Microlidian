@@ -166,7 +166,7 @@ arguments_t initial_arguments[] = {
     #include "mymenu/menuitems_sequencer_circle.h"
     #include "mymenu/menuitems_outputselectorcontrol.h"
 
-    void EuclidianSequencer::make_menu_items(Menu *menu) {
+    void EuclidianSequencer::make_menu_items(Menu *menu) {       
         menu->add_page("Euclidian", TFT_CYAN);
         for (int i = 0 ; i < this->number_patterns ; i++) {
             char label[MENU_C_MAX];

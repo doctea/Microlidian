@@ -7,8 +7,18 @@
 
 // holds individual output nodes and processes them (eg queries them for the pitch and sends note on/offs)
 class BaseOutputProcessor {
+
+    bool enabled = true;
+
     public:
         virtual void process() = 0;
+
+        virtual bool is_enabled() {
+            return this->enabled;
+        }
+        virtual void set_enabled(bool v = true) {
+            this->enabled = v;
+        }
 };
 
 #include "envelopes.h"
@@ -58,7 +68,6 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
             //this->nodes->get(0)->is_ = false;
         #endif
     }
-
     virtual void addNode(BaseOutput* node) {
         this->nodes->add(node);
     }

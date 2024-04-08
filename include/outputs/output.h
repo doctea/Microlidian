@@ -311,7 +311,7 @@ class MIDIBaseOutput : public BaseOutput {
     }
     virtual void process() override {
         if (should_go_off()) {
-            int note_number = get_last_note_number();
+            int8_t note_number = get_last_note_number();
             Debug_printf("\t\tgoes off note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
             //Serial.printf("Sending note off for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
             if (is_enabled() && is_valid_note(note_number)) {
@@ -323,7 +323,7 @@ class MIDIBaseOutput : public BaseOutput {
         if (should_go_on()) {
             this->stop();
 
-            int note_number = get_note_number();
+            int8_t note_number = get_note_number();
             Debug_printf("\t\tgoes on note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
             //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
             if (is_enabled() && is_valid_note(note_number)) {
