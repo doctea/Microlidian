@@ -124,14 +124,10 @@ class EuclidianPattern : public SimplePattern {
             initialised = true;
         */
 
-        int original_pulses = this->used_arguments.pulses;
+        int_fast8_t original_pulses = this->used_arguments.pulses;
         float multiplier = 1.5f*(MINIMUM_DENSITY+*global_density);
-        int temp_pulses = 0.5f + (((float)original_pulses) * multiplier);
-        //if (Serial) {
-            //Serial.printf("from original pulses %i, got temp_pulses %i from multiplier %3.3f (global_density=%3.3f)\n", original_pulses, temp_pulses, multiplier, *global_density);
-            //Serial_flush();
-        //}
-        //int temp_pulses = original_pulses;    // for disabling density for testing purposes
+        int_fast8_t temp_pulses = 0.5f + (((float)original_pulses) * multiplier);
+        //int_fast8_t temp_pulses = original_pulses;    // for disabling density for testing purposes
 
         if (used_arguments.steps > maximum_steps) {
             //messages_log_add(String("arguments.steps (") + String(arguments.steps) + String(") is more than maximum steps (") + String(maximum_steps) + String(")"));
@@ -140,10 +136,10 @@ class EuclidianPattern : public SimplePattern {
 
         int bucket = 0;
         //if (this->used_arguments.rotation!=0)
-        for (int i = 0 ; i < this->used_arguments.steps ; i++) {
-            int rotation = this->used_arguments.rotation;
+        for (uint_fast8_t i = 0 ; i < this->used_arguments.steps ; i++) {
+            int_fast8_t rotation = this->used_arguments.rotation;
             //int new_i = ((used_arguments.steps - rotation) + i) % used_arguments.steps;
-            int new_i = (rotation + i) % used_arguments.steps;
+            int_fast8_t new_i = (rotation + i) % used_arguments.steps;
             bucket += temp_pulses;
             if (bucket >= this->used_arguments.steps) {
                 bucket -= this->used_arguments.steps;
