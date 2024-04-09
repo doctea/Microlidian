@@ -108,6 +108,9 @@ void setup_output_parameters() {
     #include "menuitems_lambda.h"
     #include "menuitems.h"
 
+    #include "mymenu/menuitems_scale.h"
+    #include "mymenu/menuitems_harmony.h"
+
     #include "mymenu_items/ParameterMenuItems_lowmemory.h"
 
     void MIDINoteTriggerCountOutput::make_menu_items(Menu *menu, int index) {
@@ -117,10 +120,30 @@ void setup_output_parameters() {
             menu->add_page(label);
 
             SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 2);
-            sub_menu_item_columns->add(new ObjectToggleControl("Note mode", this, &MIDINoteTriggerCountOutput::set_note_mode, &MIDINoteTriggerCountOutput::get_note_mode));
+            sub_menu_item_columns->add(new ObjectToggleControl("Quantise", this, &MIDINoteTriggerCountOutput::set_quantise, &MIDINoteTriggerCountOutput::is_quantise));
             sub_menu_item_columns->add(new DirectNumberControl<int_fast8_t>("Octave", &this->octave, this->octave, (int_fast8_t)0, (int_fast8_t)10));
 
             menu->add(sub_menu_item_columns);
+
+            menu->add(new LambdaScaleMenuItemBar(
+                "Scale / Key", 
+                [=](SCALE scale) -> void { this->set_scale_number(scale); }, 
+                [=]() -> SCALE { return this->get_scale_number(); },
+                [=](int_fast8_t scale_root) -> void { this->set_scale_root(scale_root); },
+                [=]() -> int_fast8_t { return this->get_scale_root(); },
+                true
+            ));
+
+            menu->add(new HarmonyDisplay("Output", &this->scale_number, &this->scale_root, &this->last_note_number));
+
+            menu->add(new HarmonyStatus("Output", &this->last_note_number, &this->note_number));
+
+            //bar = new SubMenuItemBar("Quantise / chords");
+            /*scale_items_bar->add(new LambdaToggleControl("Quantise",    
+                [=](bool v) -> void { this->set_quantise(v); },
+                [=]() -> bool { return this->is_quantise(); }
+            ));*/
+
         //#endif
     }
 

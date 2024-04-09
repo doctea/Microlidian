@@ -136,7 +136,7 @@ arguments_t initial_arguments[] = {
         menu->add(epc);
 
         snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
-        menu->add_page(label, this->colour);
+        menu->add_page(label, this->colour, false);
 
         //snprintf(label, MENU_C_MAX, "Pattern %i")
         LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);

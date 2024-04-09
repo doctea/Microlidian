@@ -404,7 +404,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
 
             int note_mode = 0;
             virtual int_fast8_t get_note_number() override {
-                if (!note_mode)
+                if (!this->is_quantise())
                     return get_note_number_count();
                 else
                     return quantise_pitch(get_base_note() + BPM_CURRENT_BEAT_OF_PHRASE, scale_root, scale_number);
@@ -428,7 +428,10 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 /*static int count = 0;
                 count++;
                 count %= 24;*/
-                return quantise_pitch(get_base_note() + count, scale_root, scale_number);
+                if (this->is_quantise())
+                    return quantise_pitch(get_base_note() + count, scale_root, scale_number);
+                else
+                    return get_base_note() + count;
             }
 
             virtual int_fast8_t get_base_note() {
@@ -451,12 +454,19 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 //base_note = scale_root * octave;
             }
 
-            void set_note_mode(bool mode) {
+            void set_note_mode(int8_t mode) {
                 this->note_mode = mode;
             }
-            bool get_note_mode() {
+            int get_note_mode() {
                 return this->note_mode;
             }
+            void set_quantise(bool v) {
+                this->note_mode = v ? 1 : 0;
+            }
+            bool is_quantise() {
+                return this->note_mode==1;
+            }
+            
 
             #ifdef ENABLE_SCREEN
                 virtual void make_menu_items(Menu *menu, int index) override;
