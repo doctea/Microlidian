@@ -133,10 +133,12 @@ void setup_output_parameters() {
                 [=]() -> SCALE { return this->get_scale_number(); },
                 [=](int_fast8_t scale_root) -> void { this->set_scale_root(scale_root); },
                 [=]() -> int_fast8_t { return this->get_scale_root(); },
-                true
+                true,
+                true,
+                false                
             ));
 
-            menu->add(new HarmonyStatus("Output", &this->last_note_number, &this->note_number));
+            menu->add(new HarmonyStatus("Output", &this->last_note_number, &this->note_number, false));
 
             //bar = new SubMenuItemBar("Quantise / chords");
             /*scale_items_bar->add(new LambdaToggleControl("Quantise",    
