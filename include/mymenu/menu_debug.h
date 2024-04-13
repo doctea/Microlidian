@@ -33,6 +33,10 @@ class DebugPanel : public MenuItem {
             tft->printf("Uptime: %02uh %02um %02us\n", time/60/60, (time/60)%60, (time)%60);
             tft->print("Serial: ");
             tft->print(Serial?"connected\n":"not connected\n");
+            tft->print("USB host connected: ");
+            tft->print(tud_connected()?"yes\n":"--\n");
+            tft->print("USB host mounted: ");
+            tft->print(tud_mounted()?"yes\n":"--\n");
             tft->println("Built at " __BUILD_TIME__);
             tft->println("Git info: " COMMIT_INFO);
             #ifdef ENABLE_CV_INPUT
