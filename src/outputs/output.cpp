@@ -125,6 +125,8 @@ void setup_output_parameters() {
 
             menu->add(sub_menu_item_columns);
 
+            menu->add(new HarmonyDisplay("Output", &this->scale_number, &this->scale_root, &this->last_note_number, &this->quantise));
+
             menu->add(new LambdaScaleMenuItemBar(
                 "Scale / Key", 
                 [=](SCALE scale) -> void { this->set_scale_number(scale); }, 
@@ -133,8 +135,6 @@ void setup_output_parameters() {
                 [=]() -> int_fast8_t { return this->get_scale_root(); },
                 true
             ));
-
-            menu->add(new HarmonyDisplay("Output", &this->scale_number, &this->scale_root, &this->last_note_number));
 
             menu->add(new HarmonyStatus("Output", &this->last_note_number, &this->note_number));
 

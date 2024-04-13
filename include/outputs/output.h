@@ -402,7 +402,8 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 //this->base_note = scale_root * octave;
             }
 
-            int note_mode = 0;
+            //int note_mode = 0;
+            bool quantise = false;
             virtual int_fast8_t get_note_number() override {
                 if (!this->is_quantise())
                     return get_note_number_count();
@@ -455,16 +456,20 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             }
 
             void set_note_mode(int8_t mode) {
-                this->note_mode = mode;
+                //this->note_mode = mode;
+                this->quantise = mode == 1;
             }
             int get_note_mode() {
-                return this->note_mode;
+                //return this->note_mode;
+                return this->quantise ? 1 : 0;
             }
             void set_quantise(bool v) {
-                this->note_mode = v ? 1 : 0;
+                //this->note_mode = v ? 1 : 0;
+                this->quantise = v;
             }
             bool is_quantise() {
-                return this->note_mode==1;
+                //return this->note_mode==1;
+                return this->quantise;
             }
             
 
