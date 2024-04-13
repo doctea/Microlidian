@@ -24,30 +24,27 @@
 #include "envelopes/envelopes.h"
 #include "envelopes/borolope.h"
 
-class EnvelopeOutput : public MIDIDrumOutput/*, public EnvelopeBase*/ {
+class EnvelopeOutput : public MIDIDrumOutput {
     public:
 
     byte midi_cc = -1;
 
     EnvelopeBase *envelope;
 
-    /*#ifdef ENABLE_SCREEN
-        using EnvelopeBase::make_menu_items;
-    #endif*/
-
     EnvelopeOutput(const char *label, byte note_number, byte cc_number, byte channel, MIDIOutputWrapper *output_wrapper) : 
         MIDIDrumOutput(label, note_number, channel, output_wrapper)
-        //,EnvelopeBase(label),
         ,midi_cc(cc_number)
         {
             // todo: allow to switch to different types of envelope..?
             this->envelope = new DEFAULT_ENVELOPE_CLASS(
                 label, 
-                [=](uint8_t level) -> void { output_wrapper->sendControlChange(this->midi_cc, level, this->channel);} 
+                [=](uint8_t level) -> void { output_wrapper->sendControlChange(this->midi_cc, level, this->channel); } 
             );
         }
 
     virtual void process() override {
+        if (!is_enabled()) return;
+
         bool x_should_go_off = should_go_off();
         bool x_should_go_on  = should_go_on();
 
@@ -57,24 +54,14 @@ class EnvelopeOutput : public MIDIDrumOutput/*, public EnvelopeBase*/ {
         if (x_should_go_on) {
             this->envelope->update_state(127, true, ticks);
         }
-
-        //this->process_envelope(millis());
-
-        //MIDIDrumOutput::process();    // ?
     }
 
     virtual void loop() override {
         this->envelope->process_envelope(ticks);
     }
 
-    // todo: make EnvelopeBase accept a lambda as callback, instead of the send_envelope_level override
-    /*virtual void send_envelope_level(uint8_t level) override {
-        output_wrapper->sendControlChange(midi_cc, level, channel);
-    }*/
-
     #ifdef ENABLE_SCREEN
         virtual void make_menu_items(Menu *menu, int index) override {
-            //EnvelopeBase::make_menu_items(menu, index);
             this->envelope->make_menu_items(menu, index);
         };
     #endif
