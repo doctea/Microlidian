@@ -26,6 +26,8 @@
 #include "ParameterManager.h"
 #include "parameters/MIDICCParameter.h"
 
+#include <atomic>
+
 int8_t get_muso_note_for_drum(int8_t drum_note);
 
 struct note_message_t {
@@ -77,7 +79,9 @@ class MIDIOutputWrapper : public IMIDICCTarget {
             return;
 
         #ifdef USE_TINYUSB
+            cc_locked.lock();
             usbmidi->sendNoteOn(pitch, velocity, channel);
+            cc_locked.unlock();
         #endif
         #ifdef USE_DINMIDI
             int8_t pitch_to_send = pitch;
@@ -105,7 +109,9 @@ class MIDIOutputWrapper : public IMIDICCTarget {
             return;
             
         #ifdef USE_TINYUSB
+            cc_locked.lock();
             usbmidi->sendNoteOff(pitch, velocity, channel);
+            cc_locked.unlock();
         #endif
         #ifdef USE_DINMIDI
             int8_t pitch_to_send = pitch;
@@ -129,20 +135,48 @@ class MIDIOutputWrapper : public IMIDICCTarget {
         #endif
     }
 
+    struct Mutex {
+        mutex_t mutex;
+        std::atomic<bool> locked = false;
+        Mutex() {
+            mutex_init(&mutex);
+        }
+        public:
+        void lock() {
+            mutex_enter_blocking(&mutex);
+            locked = true;
+        }
+        void unlock() {
+            mutex_exit(&mutex);
+            locked = false;
+        }
+        bool is_locked() {
+            return locked;
+        }
+    };
+    Mutex cc_locked;
+
     void sendControlChange(byte number, byte value, byte channel) {
         if (!is_valid_note(number))
             return;
         #ifdef USE_TINYUSB
+            cc_locked.lock();
+            if (number < 0 || number > 127 || value < 0 || value > 127 || channel < 1 || channel > 16) {
+                Serial.printf("MIDIOutputWrapper#sendControlChange got an CC message: cc=%i,\t value=%i,\t channel=%i\n", number, value, channel);
+            }
             usbmidi->sendControlChange(number, value, channel);
+            cc_locked.unlock();
         #endif
         #ifdef USE_DINMIDI
             dinmidi->sendControlChange(number, value, channel);
-        #endif
+        #endif        
     }
 
     void sendClock() {
         #ifdef USE_TINYUSB
+            cc_locked.lock();
             usbmidi->sendClock();
+            cc_locked.unlock();
         #endif
         #ifdef USE_DINMIDI
             if (is_bpm_on_beat(ticks))  // todo: make clock tick sends to din MIDI use custom divisor value
@@ -151,7 +185,9 @@ class MIDIOutputWrapper : public IMIDICCTarget {
     }
     void sendStart() {
         #ifdef USE_TINYUSB
+            cc_locked.lock();
             usbmidi->sendStart();
+            cc_locked.unlock();
         #endif
         #ifdef USE_DINMIDI
             dinmidi->sendStart();
@@ -159,7 +195,9 @@ class MIDIOutputWrapper : public IMIDICCTarget {
     }
     void sendStop() {
         #ifdef USE_TINYUSB
+            cc_locked.lock();
             usbmidi->sendStop();
+            cc_locked.unlock();
         #endif
         #ifdef USE_DINMIDI
             dinmidi->sendStop();
@@ -406,11 +444,12 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             bool quantise = false;
             virtual int_fast8_t get_note_number() override {
                 if (!this->is_quantise())
-                    return get_note_number_count();
+                    return get_base_note() + get_note_number_count();
                 else
-                    return quantise_pitch(get_base_note() + BPM_CURRENT_BEAT_OF_PHRASE, scale_root, scale_number);
+                    return quantise_pitch(get_base_note() + get_note_number_count()/*+ BPM_CURRENT_BEAT_OF_PHRASE*/, scale_root, scale_number);
             }
 
+            // get the number of outputs that are also triggering this step
             virtual int_fast8_t get_note_number_count() {
                 // count all the triggering notes and add that value ot the root note
                 // then quantise according to selected scale to get final note number
@@ -429,10 +468,8 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 /*static int count = 0;
                 count++;
                 count %= 24;*/
-                if (this->is_quantise())
-                    return quantise_pitch(get_base_note() + count, scale_root, scale_number);
-                else
-                    return get_base_note() + count;
+
+                return count;
             }
 
             virtual int_fast8_t get_base_note() {
