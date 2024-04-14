@@ -29,6 +29,8 @@ class BasePattern {
     int ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
     bool note_held = false;
 
+    bool locked = false;
+
     BaseOutput *output = nullptr;
 
     #ifdef ENABLE_SCREEN
@@ -75,6 +77,13 @@ class BasePattern {
     }
     virtual byte get_effective_steps() {
         return this->get_steps();
+    }
+
+    virtual void set_locked(bool v = true) {
+        this->locked = v;
+    }
+    virtual bool is_locked() {
+        return this->locked;
     }
 
     #ifdef ENABLE_CV_INPUT

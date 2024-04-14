@@ -238,12 +238,12 @@ class EuclidianPattern : public SimplePattern {
         return this->arguments.duration;
     }
 
-    virtual bool is_locked() {
+    /*virtual bool is_locked() {
         return this->locked;
     }
     virtual void set_locked(bool state) {
         this->locked = state;
-    }
+    }*/
 
     /*void trigger_on_for_step(int step) override {
         Serial.printf("trigger_on_for_step(%i)\n", step);

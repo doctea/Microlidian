@@ -54,7 +54,7 @@ const output_type_t available_output_types[] = {
 };
 
 // todo: port usb_midi_clocker's OutputWrapper to work here?
-// wrapper class to wrap different MIDI output types
+// wrapper class to wrap different MIDI output types; handles both USB MIDI and DIN MIDI outputs
 class MIDIOutputWrapper : public IMIDICCTarget {
     public:
     #ifdef USE_TINYUSB
@@ -71,6 +71,14 @@ class MIDIOutputWrapper : public IMIDICCTarget {
     }
     OUTPUT_TYPE get_output_mode() {
         return this->output_mode;
+    }
+
+    uint32_t din_midi_clock_output_divider = 24;
+    void set_din_midi_clock_output_divider(uint32_t new_value) {
+        din_midi_clock_output_divider = new_value;
+    }
+    uint32_t get_din_midi_clock_output_divider() {
+        return din_midi_clock_output_divider;
     }
 
     void sendNoteOn(byte pitch, byte velocity, byte channel) {
@@ -179,7 +187,8 @@ class MIDIOutputWrapper : public IMIDICCTarget {
             cc_locked.unlock();
         #endif
         #ifdef USE_DINMIDI
-            if (is_bpm_on_beat(ticks))  // todo: make clock tick sends to din MIDI use custom divisor value
+            //if (is_bpm_on_beat(ticks))  // todo: make clock tick sends to din MIDI use custom divisor value
+            if (ticks % this->get_din_midi_clock_output_divider() == 0)
                 dinmidi->sendClock();   // send divisions of clock to muso, to make the clock output more useful
         #endif
     }

@@ -120,6 +120,17 @@ arguments_t initial_arguments[] = {
             )
         );
 
+        snprintf(label, MENU_C_MAX, "Pattern %i duration", i);
+        parameters->add(
+            new ProxyParameter<int>(
+                label,
+                &this->arguments.duration,
+                &this->used_arguments.duration,
+                1,
+                PPQN * 4
+            )
+        );
+
         parameter_manager->addParameters(parameters);
 
         return parameters;
@@ -165,8 +176,10 @@ arguments_t initial_arguments[] = {
     #include "mymenu/menuitems_sequencer.h"
     #include "mymenu/menuitems_sequencer_circle.h"
     #include "mymenu/menuitems_outputselectorcontrol.h"
+    #include "menuitems_object_multitoggle.h"
 
-    void EuclidianSequencer::make_menu_items(Menu *menu) {       
+    void EuclidianSequencer::make_menu_items(Menu *menu) {
+        // add a page for the 'boxed' sequence display of all tracks
         menu->add_page("Euclidian", TFT_CYAN);
         for (int i = 0 ; i < this->number_patterns ; i++) {
             char label[MENU_C_MAX];
@@ -175,6 +188,7 @@ arguments_t initial_arguments[] = {
             this->get_pattern(i)->colour = menu->get_next_colour();
         }
 
+        // add a page for the circle display that shows all tracks simultaneously
         menu->add_page("Circle");
         menu->add(new CircleDisplay("Circle", this));
 
@@ -193,6 +207,23 @@ arguments_t initial_arguments[] = {
             nodes->add(output_processor.nodes.get(i));
         }*/
 
+        // single page for multitoggle to lock pattern parameters
+        menu->add_page("Pattern lock", C_WHITE, false);
+        ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Lock patterns", true);
+        for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
+            BasePattern *p = (BasePattern *)this->get_pattern(i);
+
+            MultiToggleItemClass<BasePattern> *option = new MultiToggleItemClass<BasePattern> (
+                p->get_output_label(),  // todo: make class auto-update 
+                p,
+                &BasePattern::set_locked,
+                &BasePattern::is_locked
+            );
+            toggle->addItem(option);
+        }
+        menu->add(toggle);
+
+        // ask each pattern to add their menu pages
         for (int i = 0 ; i < this->number_patterns ; i++) {
             //Serial.printf("adding controls for pattern %i..\n", i);
             BasePattern *p = (BasePattern *)this->get_pattern(i);

@@ -5,6 +5,7 @@
 #include "clock.h"
 
 uint32_t external_cv_ticks_per_pulse_values[] = { 1, 2, 3, 4, 6, 8, 12, 16, 24 };
+#define NUM_EXTERNAL_CV_TICKS_VALUES (sizeof(external_cv_ticks_per_pulse_values)/sizeof(uint32_t))
 #ifdef ENABLE_CLOCK_INPUT_CV
     void set_external_cv_ticks_per_pulse_values(uint32_t new_value) {
         external_cv_ticks_per_pulse = new_value;
@@ -15,7 +16,6 @@ uint32_t external_cv_ticks_per_pulse_values[] = { 1, 2, 3, 4, 6, 8, 12, 16, 24 }
         return external_cv_ticks_per_pulse;
     }
 #endif
-
 
 // todo: different modes to correlate with the midimuso mode + output availability..
 int8_t get_muso_note_for_drum(int8_t drum_note) {
@@ -213,12 +213,28 @@ void setup_output_parameters() {
         #ifdef ENABLE_CLOCK_INPUT_CV
             SelectorControl<uint32_t> *external_cv_ticks_per_pulse_selector = new SelectorControl<uint32_t>("External CV clock: Pulses per tick");
             external_cv_ticks_per_pulse_selector->available_values = external_cv_ticks_per_pulse_values;
-            external_cv_ticks_per_pulse_selector->num_values = sizeof(external_cv_ticks_per_pulse_values)/sizeof(uint32_t);
+            external_cv_ticks_per_pulse_selector->num_values = NUM_EXTERNAL_CV_TICKS_VALUES;
             external_cv_ticks_per_pulse_selector->f_setter = set_external_cv_ticks_per_pulse_values;
             external_cv_ticks_per_pulse_selector->f_getter = get_external_cv_ticks_per_pulse_values;
             menu->add(external_cv_ticks_per_pulse_selector);
         #endif
 
+        LambdaSelectorControl<uint32_t> *din_midi_clock_output_divider = new LambdaSelectorControl<uint32_t>(
+            "DIN MIDI: send clock every X pulses", 
+            [=](uint32_t v) -> void { set_din_midi_clock_output_divider(v); },
+            [=](void) -> uint32_t { return this->get_din_midi_clock_output_divider(); },
+            nullptr,
+            true,
+            true
+        );
+        // todo: make this a 'horizontal selector' like the SelectorControl above; maybe make a LambdaSelectorControl...
+        for (int i = 0 ; i < NUM_EXTERNAL_CV_TICKS_VALUES ; i++) {
+            din_midi_clock_output_divider->add_available_value(
+                external_cv_ticks_per_pulse_values[i], 
+                (new String(external_cv_ticks_per_pulse_values[i]))->c_str()
+            );
+        }
+        menu->add(din_midi_clock_output_divider);
     }
 
     #include "mymenu_items/ParameterMenuItems_lowmemory.h"
