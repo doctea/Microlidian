@@ -34,7 +34,10 @@ class BasePattern {
     BaseOutput *output = nullptr;
 
     #ifdef ENABLE_SCREEN
-        int16_t colour = C_WHITE;
+        uint16_t colour = C_WHITE;
+        inline uint16_t get_colour() {
+            return colour;
+        }
     #endif
 
     virtual const char *get_summary() {

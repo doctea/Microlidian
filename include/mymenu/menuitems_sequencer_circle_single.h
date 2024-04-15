@@ -80,7 +80,7 @@ class SingleCircleDisplay : public MenuItem {
             int_fast8_t count = 0;
             //BasePattern *pattern = target_sequencer->get_pattern(seq);
             //int16_t colour = color565(255 * seq, 255 - (255 * seq), seq) + (seq*8);
-            uint_fast16_t pattern_colour = target_pattern->colour;
+            uint_fast16_t pattern_colour = target_pattern->get_colour();
             bool is_step_on = target_pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_PHRASE);
             if (!is_step_on) pattern_colour = tft->halfbright_565(pattern_colour);
             // todo: if STEPS_PER_PHRASE is a multiple of get_steps, should be able to limit number of loops we do here?
@@ -100,7 +100,7 @@ class SingleCircleDisplay : public MenuItem {
                     last_x = circle_center_x + coordinates_x[i%16];
                     last_y = circle_center_y + coordinates_y[i%16];
 
-                    tft->fillCircle(last_x, last_y, 6, (is_step_on ? target_pattern->colour : pattern_colour));  // draw a slightly larger colour circle
+                    tft->fillCircle(last_x, last_y, 6, (is_step_on ? target_pattern->get_colour() : pattern_colour));  // draw a slightly larger colour circle
                     count++;
                 }
             }
@@ -111,7 +111,7 @@ class SingleCircleDisplay : public MenuItem {
             // draw step markers around circle
             const int_fast8_t radius = 2;
             for (int_fast8_t i = 0 ; i < 16 ; i++) {
-                const int_fast16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : (is_step_on ? target_pattern->colour : pattern_colour);
+                const int_fast16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : (is_step_on ? target_pattern->get_colour() : pattern_colour);
                 tft->fillCircle(
                     circle_center_x + coordinates_x[i], 
                     circle_center_y + coordinates_y[i], 

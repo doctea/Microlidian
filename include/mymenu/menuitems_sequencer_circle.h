@@ -82,7 +82,7 @@ class CircleDisplay : public MenuItem {
                 int_fast8_t count = 0;
                 BasePattern *pattern = target_sequencer->get_pattern(seq);
                 //int16_t colour = color565(255 * seq, 255 - (255 * seq), seq) + (seq*8);
-                uint16_t colour = pattern->colour;
+                uint16_t colour = pattern->get_colour();
                 if (!pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR))
                     colour = tft->halfbright_565(colour);
                 for (int i = 0 ; i < 16 ; i++) {
@@ -135,7 +135,7 @@ class CircleDisplay : public MenuItem {
                 BasePattern *pattern = target_sequencer->get_pattern(seq);
                 colours(
                     pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR), 
-                    pattern->colour,
+                    pattern->get_colour(),
                     //tft->dim_565(pattern->colour, min(0,(PPQN/(1+BPM_CURRENT_TICK_OF_BEAT))-1)),
                     //tft->dim_565(pattern->colour, max(0,2-(BPM_CURRENT_TICK_OF_BEAT/8))),
                     BLACK

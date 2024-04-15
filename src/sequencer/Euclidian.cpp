@@ -141,13 +141,13 @@ arguments_t initial_arguments[] = {
     void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index) {
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
-        menu->add_page(label, this->colour);
+        menu->add_page(label, this->get_colour());
 
         EuclidianPatternControl *epc = new EuclidianPatternControl(label, this);
         menu->add(epc);
 
         snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
-        menu->add_page(label, this->colour, false);
+        menu->add_page(label, this->get_colour(), false);
 
         //snprintf(label, MENU_C_MAX, "Pattern %i")
         LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
@@ -155,7 +155,7 @@ arguments_t initial_arguments[] = {
         /*for (int i = 0 ; i < parameters->size() ; i++) {
             menu->add(parameter_manager->makeMenuItemsForParameter(parameters->get(i)));
         }*/
-        create_low_memory_parameter_controls(label, parameters, this->colour);
+        create_low_memory_parameter_controls(label, parameters, this->get_colour());
 
         #ifdef SIMPLE_SELECTOR
         OutputSelectorControl<EuclidianPattern> *selector = new OutputSelectorControl<EuclidianPattern>(
@@ -185,7 +185,7 @@ arguments_t initial_arguments[] = {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", i);
             menu->add(new PatternDisplay(label, this->get_pattern(i)));
-            this->get_pattern(i)->colour = menu->get_next_colour();
+            this->get_pattern(i)->get_colour() = menu->get_next_colour();
         }
 
         // add a page for the circle display that shows all tracks simultaneously
@@ -207,13 +207,13 @@ arguments_t initial_arguments[] = {
             nodes->add(output_processor.nodes.get(i));
         }*/
 
-        // single page for multitoggle to lock pattern parameters
+        // single page for multitoggle to lock patterns
         menu->add_page("Pattern lock", C_WHITE, false);
         ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Lock patterns", true);
         for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
             BasePattern *p = (BasePattern *)this->get_pattern(i);
 
-            MultiToggleItemClass<BasePattern> *option = new MultiToggleItemClass<BasePattern> (
+            MultiToggleColourItemClass<BasePattern> *option = new MultiToggleColourItemClass<BasePattern> (
                 p->get_output_label(),  // todo: make class auto-update 
                 p,
                 &BasePattern::set_locked,

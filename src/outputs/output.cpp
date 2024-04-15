@@ -89,8 +89,6 @@ void setup_output_parameters() {
         ObjectMultiToggleControl *toggle = new ObjectMultiToggleControl("Enable outputs", true);
         for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
             BaseOutput *output = this->nodes->get(i);
-            //menu->add(new ToggleControl(output->label, output->disabled));
-            // options for whether to auto-advance looper/sequencer/beatstep
 
             MultiToggleItemClass<BaseOutput> *option = new MultiToggleItemClass<BaseOutput> (
                 output->label,
@@ -98,6 +96,7 @@ void setup_output_parameters() {
                 &BaseOutput::set_enabled,
                 &BaseOutput::is_enabled
             );
+
             toggle->addItem(option);
         }
         menu->add(toggle);
@@ -139,24 +138,12 @@ void setup_output_parameters() {
             ));
 
             menu->add(new HarmonyStatus("Output", &this->last_note_number, &this->note_number, false));
-
-            //bar = new SubMenuItemBar("Quantise / chords");
-            /*scale_items_bar->add(new LambdaToggleControl("Quantise",    
-                [=](bool v) -> void { this->set_quantise(v); },
-                [=]() -> bool { return this->is_quantise(); }
-            ));*/
-
         //#endif
     }
 
     void MIDIOutputWrapper::create_menu_items() {
         // controls for cv-to-midi outputs..
 
-        /*LinkedList<FloatParameter*> *parameters = new LinkedList<FloatParameter*>();
-        for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
-            parameters->add(&midi_cc_parameters[i]);
-        }*/
-        
         char label[MENU_C_MAX];
         for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
             snprintf(label, MENU_C_MAX, "CV-to-MIDI: %s", midi_cc_parameters[i].label);
@@ -187,14 +174,7 @@ void setup_output_parameters() {
 
             // todo: use lowmemory controls instead of a full instance of each
             menu->add(midi_cc_parameters[i].makeControls());
-
-            // todo: a little widget that shows the inputs/output value?
         }
-
-        /*menu->add_page("CV-to-MIDI mod");
-        for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
-            menu->add(midi_cc_parameters[i].makeControls());
-        }*/
 
         // todo: probably move this to another more generic 'settings' page
         menu->add_page("MIDI Output");
@@ -219,6 +199,8 @@ void setup_output_parameters() {
             menu->add(external_cv_ticks_per_pulse_selector);
         #endif
 
+        // todo: make this a 'horizontal selector' like the SelectorControl above; maybe make a LambdaSelectorControl...
+        // todo: actually, maybe make SelectorControl capable of accepting callback lambdas so that we don't need to waste memory on a LinkedList implementation
         LambdaSelectorControl<uint32_t> *din_midi_clock_output_divider = new LambdaSelectorControl<uint32_t>(
             "DIN MIDI: send clock every X pulses", 
             [=](uint32_t v) -> void { set_din_midi_clock_output_divider(v); },
@@ -227,7 +209,6 @@ void setup_output_parameters() {
             true,
             true
         );
-        // todo: make this a 'horizontal selector' like the SelectorControl above; maybe make a LambdaSelectorControl...
         for (int i = 0 ; i < NUM_EXTERNAL_CV_TICKS_VALUES ; i++) {
             din_midi_clock_output_divider->add_available_value(
                 external_cv_ticks_per_pulse_values[i], 

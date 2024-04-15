@@ -23,7 +23,7 @@ class PatternDisplay : public MenuItem {
 
         void set_pattern(SimplePattern *pattern) {
             this->target_pattern = pattern;
-            this->default_fg = pattern->colour;
+            this->default_fg = pattern->get_colour();
         }
 
         virtual int display(Coord pos, bool selected, bool opened) override {
@@ -77,8 +77,8 @@ class PatternDisplay : public MenuItem {
                 const bool is_step_on = target_pattern->query_note_on_for_step(step);
                 const uint16_t colour = is_step_on ? 
                     //(actual_current_step == step ? RED      : BLUE) :     // current step active
-                    (actual_current_step == step ? C_WHITE  : target_pattern->colour) :     // current step active
-                    (actual_current_step == step ? GREY     : tft->halfbright_565(target_pattern->colour));      // current step inactive
+                    (actual_current_step == step ? C_WHITE  : target_pattern->get_colour()) :     // current step active
+                    (actual_current_step == step ? GREY     : tft->halfbright_565(target_pattern->get_colour()));      // current step inactive
 
                 if (is_step_on) {  // yer twisting my melon, man
                     tft->fillRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
