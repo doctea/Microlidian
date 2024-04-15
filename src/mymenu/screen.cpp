@@ -28,9 +28,6 @@ std::atomic<bool> frame_ready = false;
 
 #include "menu.h"
 
-//extern DisplayTranslator_Configured *tft;
-//extern DisplayTranslator_Configured displaytranslator;
-
 void setup_menu(bool pressed_state = HIGH);
 
 void setup_screen() {
@@ -39,16 +36,13 @@ void setup_screen() {
         pinMode(ENCODER_KNOB_R, INPUT_PULLUP);
         pinMode(PIN_BUTTON_A, INPUT_PULLDOWN);
         pinMode(PIN_BUTTON_B, INPUT_PULLDOWN);
-    
-        //tft = &displaytranslator; 
-        //tft->init();
 
         tft_print((char*)"Ready!");
         tft_clear();
 
         setup_menu(HIGH);
 
-        tft_print("HUP!");
+        tft_print("HUP!");      // <3 roo
         menu->updateDisplay();
 
         Debug_println("About to init menu.."); Serial_flush();
@@ -71,15 +65,11 @@ void push_display() {
     if (!menu->tft->ready()) return;
     if (!frame_ready) return;
     if (is_locked()) return;
+
     acquire_lock();
-        
-    //uint32_t interrupts = save_and_disable_interrupts();
     menu->updateDisplay();
-    //restore_interrupts(interrupts);
     last_drawn = millis();
-
     frame_ready = false;
-
     release_lock();
 }
 
@@ -97,7 +87,7 @@ void draw_screen() {
                 USBMIDI.read();
             //}
         #endif*/
-        delay(MENU_MS_BETWEEN_REDRAW/8);
+        //delay(MENU_MS_BETWEEN_REDRAW/8);
     };
     //menu_locked = true;
     acquire_lock();
@@ -152,9 +142,10 @@ void loop1() {
         if (cv_input_enabled) {
             if (parameter_manager->ready_for_next_update() && !is_locked()) {
                 acquire_lock();
-                //ATOMIC() {
+                //ATOMIC() 
+                {
                     parameter_manager->throttled_update_cv_input__all(time_between_cv_input_updates, false, false);
-                //}
+                }
                 release_lock();
                 last_cv_update = millis();
             }

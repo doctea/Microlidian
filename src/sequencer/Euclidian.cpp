@@ -185,7 +185,7 @@ arguments_t initial_arguments[] = {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", i);
             menu->add(new PatternDisplay(label, this->get_pattern(i)));
-            this->get_pattern(i)->get_colour() = menu->get_next_colour();
+            this->get_pattern(i)->colour = menu->get_next_colour();
         }
 
         // add a page for the circle display that shows all tracks simultaneously
