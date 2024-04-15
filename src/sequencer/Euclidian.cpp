@@ -178,6 +178,27 @@ arguments_t initial_arguments[] = {
     #include "mymenu/menuitems_outputselectorcontrol.h"
     #include "menuitems_object_multitoggle.h"
 
+    class PatternMultiToggleItem : public MultiToggleColourItemClass<BasePattern> {
+        public:
+        PatternMultiToggleItem(const char *label, BasePattern *target, void(BasePattern::*setter)(bool), bool(BasePattern::*getter)(), bool invert_colours = false) 
+            : MultiToggleColourItemClass<BasePattern>(label, target, setter, getter, invert_colours) 
+            {}
+
+        BasePattern *last_known_output = nullptr;
+        char cached_label[MENU_C_MAX/2];
+        virtual const char *get_label() override {
+            if (last_known_output!=this->target) {
+                snprintf(cached_label, MENU_C_MAX/2, "%s: %s", this->label, this->target->get_output_label());
+                //snprintf(cached_label, MENU_C_MAX/2, "%s", this->target->get_output_label());
+                last_known_output = this->target;
+            }
+            //static const char label[MENU_C_MAX];
+            //snprintf(label, MENU_C_MAX, "%s: %s", )
+            //return (String(this->label) + ": " + this->target->get_output_label()).c_str();
+            return cached_label;
+        }
+    };
+
     void EuclidianSequencer::make_menu_items(Menu *menu) {
         // add a page for the 'boxed' sequence display of all tracks
         menu->add_page("Euclidian", TFT_CYAN);
@@ -208,16 +229,18 @@ arguments_t initial_arguments[] = {
         }*/
 
         // single page for multitoggle to lock patterns
-        menu->add_page("Pattern lock", C_WHITE, false);
-        ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Lock patterns", true);
+        menu->add_page("Pattern locks", C_WHITE, false);
+        ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Allow changes", true);
         for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
             BasePattern *p = (BasePattern *)this->get_pattern(i);
 
-            MultiToggleColourItemClass<BasePattern> *option = new MultiToggleColourItemClass<BasePattern> (
-                p->get_output_label(),  // todo: make class auto-update 
+            PatternMultiToggleItem *option = new PatternMultiToggleItem(
+                (new String(String("Pattern ") + String(i)))->c_str(),
+                //p->get_output_label(),  // todo: make class auto-update 
                 p,
                 &BasePattern::set_locked,
-                &BasePattern::is_locked
+                &BasePattern::is_locked,
+                true
             );
             toggle->addItem(option);
         }
