@@ -189,7 +189,7 @@ arguments_t initial_arguments[] = {
         virtual const char *get_label() override {
             if (last_known_output!=this->target) {
                 snprintf(cached_label, MENU_C_MAX/2, "%s: %s", this->label, this->target->get_output_label());
-                //snprintf(cached_label, MENU_C_MAX/2, "%s", this->target->get_output_label());
+                //snprintf(cached_label, MENU_C_MAX/2, "%s", this->target->get_output_label()); // todo: hmm this seemed to be significantly faster to render - maybe because its twice the text to render?
                 last_known_output = this->target;
             }
             //static const char label[MENU_C_MAX];

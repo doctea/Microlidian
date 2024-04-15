@@ -37,6 +37,14 @@ class DebugPanel : public MenuItem {
             tft->print(tud_connected()?"yes\n":"--\n");
             tft->print("USB host mounted: ");
             tft->print(tud_mounted()?"yes\n":"--\n");
+            tft->print("Clock type: ");
+            #if defined(USE_UCLOCK_GENERIC) && defined(USE_UCLOCK)
+                tft->println("uClock - generic");
+            #elif defined(USE_UCLOCK)
+                tft->println("uClock - hardware");
+            #else
+                tft->println("Software")
+            #endif
             tft->println("Built at " __BUILD_TIME__);
             tft->println("Git info: " COMMIT_INFO);
             #ifdef ENABLE_CV_INPUT
