@@ -235,7 +235,7 @@ class EuclidianPattern : public SimplePattern {
     }
 
     virtual int get_tick_duration() {
-        return this->arguments.duration;
+        return this->used_arguments.duration;
     }
 
     /*virtual bool is_locked() {
