@@ -86,7 +86,7 @@ void setup_output_parameters() {
 
         menu->add_page("Outputs");
 
-        ObjectMultiToggleControl *toggle = new ObjectMultiToggleControl("Enable outputs", true);
+        ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Enable outputs", true);
         for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
             BaseOutput *output = this->nodes->get(i);
 

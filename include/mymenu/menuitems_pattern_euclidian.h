@@ -44,10 +44,10 @@ class EuclidianPatternControl : public SubMenuItemBar {
         #ifdef ENABLE_OTHER_CONTROLS
             //SubMenuItemBar *bar = new SubMenuItemBar("Arguments");
             //Menu *bar = menu;
-            this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Steps",    pattern, &EuclidianPattern::set_steps,      &EuclidianPattern::get_steps,    nullptr, 1, pattern->maximum_steps, true, true));
-            this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Pulses",   pattern, &EuclidianPattern::set_pulses,     &EuclidianPattern::get_pulses,   nullptr, 1, STEPS_PER_BAR, true, true));
-            this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Rotation", pattern, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, pattern->maximum_steps, true, true));
-            this->add(new ObjectNumberControl<EuclidianPattern,byte> ("Duration", pattern, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, 1, PPQN*BEATS_PER_BAR, true, true));
+            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Steps",    pattern, &EuclidianPattern::set_steps,      &EuclidianPattern::get_steps,    nullptr, 1, pattern->maximum_steps, true, true));
+            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Pulses",   pattern, &EuclidianPattern::set_pulses,     &EuclidianPattern::get_pulses,   nullptr, 1, STEPS_PER_BAR, true, true));
+            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Rotation", pattern, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, pattern->maximum_steps, true, true));
+            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Duration", pattern, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, 1, PPQN*BEATS_PER_BAR, true, true));
             //menu->debug = true;
             this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
             this->add(new ObjectActionConfirmItem<EuclidianPattern> ("Store" /*"Store as default"*/, pattern, &EuclidianPattern::store_current_arguments_as_default));

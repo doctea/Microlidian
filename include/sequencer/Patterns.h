@@ -68,17 +68,17 @@ class BasePattern {
     }
 
     // duration of the note about to be played
-    virtual int get_tick_duration() {
+    virtual int8_t get_tick_duration() {
         return PPQN;
     }
 
-    virtual void set_steps(byte steps) {
+    virtual void set_steps(int8_t steps) {
         this->steps = steps;
     }
-    virtual byte get_steps() {
+    virtual int8_t get_steps() {
         return this->steps;
     }
-    virtual byte get_effective_steps() {
+    virtual int8_t get_effective_steps() {
         return this->get_steps();
     }
 

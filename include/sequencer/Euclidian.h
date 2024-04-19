@@ -201,40 +201,40 @@ class EuclidianPattern : public SimplePattern {
         this->make_euclid();
     }
 
-    virtual byte get_effective_steps() override {
+    virtual int8_t get_effective_steps() override {
         return this->used_arguments.steps;
     }
 
-    virtual byte get_steps() override {
+    virtual int8_t get_steps() override {
         return this->arguments.steps;
     }
-    virtual void set_steps(byte steps) override {
+    virtual void set_steps(int8_t steps) override {
         this->arguments.steps = steps;
         this->used_arguments.steps = steps;
     }
-    virtual byte get_pulses() {
+    virtual int8_t get_pulses() {
         return this->arguments.pulses;
     }
-    virtual void set_pulses(byte pulses) {
+    virtual void set_pulses(int8_t pulses) {
         this->arguments.pulses = pulses;
         this->used_arguments.pulses = pulses;
     }
-    virtual byte get_rotation() {
+    virtual int8_t get_rotation() {
         return this->arguments.rotation;
     }
-    virtual void set_rotation(byte rotation) {
+    virtual void set_rotation(int8_t rotation) {
         this->arguments.rotation = rotation;
         this->used_arguments.rotation = rotation;
     }
-    virtual byte get_duration() {
+    virtual int8_t get_duration() {
         return this->arguments.duration;
     }
-    virtual void set_duration(byte duration) {
+    virtual void set_duration(int8_t duration) {
         this->arguments.duration = duration;
         used_arguments.duration = duration;
     }
 
-    virtual int get_tick_duration() {
+    virtual int8_t get_tick_duration() override {
         return this->used_arguments.duration;
     }
 
