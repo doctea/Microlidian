@@ -189,3 +189,29 @@ class SimplePattern : public BasePattern {
     #endif*/
 
 };
+
+
+#ifdef ENABLE_SCREEN
+    #include "menuitems_object_multitoggle.h"
+    
+    class PatternMultiToggleItem : public MultiToggleColourItemClass<BasePattern> {
+        public:
+        PatternMultiToggleItem(const char *label, BasePattern *target, void(BasePattern::*setter)(bool), bool(BasePattern::*getter)(), bool invert_colours = false) 
+            : MultiToggleColourItemClass<BasePattern>(label, target, setter, getter, invert_colours) 
+            {}
+
+        BasePattern *last_known_output = nullptr;
+        char cached_label[MENU_C_MAX/2];
+        virtual const char *get_label() override {
+            if (last_known_output!=this->target) {
+                snprintf(cached_label, MENU_C_MAX/2, "%s: %s", this->label, this->target->get_output_label());
+                //snprintf(cached_label, MENU_C_MAX/2, "%s", this->target->get_output_label()); // todo: hmm this seemed to be significantly faster to render - maybe because its twice the text to render?
+                last_known_output = this->target;
+            }
+            //static const char label[MENU_C_MAX];
+            //snprintf(label, MENU_C_MAX, "%s: %s", )
+            //return (String(this->label) + ": " + this->target->get_output_label()).c_str();
+            return cached_label;
+        }
+    };
+#endif
