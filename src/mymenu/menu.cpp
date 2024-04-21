@@ -74,17 +74,17 @@ void setup_menu(bool button_high_state = HIGH) {
 
     #ifdef PIN_BUTTON_A
         pushButtonA.attach(PIN_BUTTON_A, INPUT);
-        pushButtonA.interval(10);
+        pushButtonA.interval(5);
         pushButtonA.setPressedState(button_high_state);
     #endif
     #ifdef PIN_BUTTON_B
         pushButtonB.attach(PIN_BUTTON_B, INPUT);
-        pushButtonB.interval(10);
+        pushButtonB.interval(5);
         pushButtonB.setPressedState(button_high_state);
     #endif
     #ifdef PIN_BUTTON_C
         pushButtonB.attach(PIN_BUTTON_C, INPUT);
-        pushButtonB.interval(10);
+        pushButtonB.interval(5);
         pushButtonB.setPressedState(button_high_state);
     #endif
 
