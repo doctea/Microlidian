@@ -1,5 +1,4 @@
-#ifndef OUTPUT_PROCESSOR_H__INCLUDED
-#define OUTPUT_PROCESSOR_H__INCLUDED
+#pragma once
 
 #include "Config.h"
 
@@ -150,4 +149,3 @@ void setup_output();
 extern MIDIOutputWrapper *output_wrapper;
 extern MIDIOutputProcessor *output_processor;
 
-#endif

@@ -30,6 +30,8 @@
     #ifdef ENABLE_CLOCK_INPUT_CV
         #include "cv_input_clock.h"
     #endif
+
+    #include "outputs/output_voice.h"
 #endif
 
 #include "outputs/output_processor.h"
@@ -171,6 +173,8 @@ void setup() {
         Debug_printf("before setup_parameter_menu(), free RAM is %u\n", freeRam());
         setup_parameter_menu();
         Debug_printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
+
+        setup_cv_pitch_inputs();
     #endif
 
     #ifdef ENABLE_CV_INPUT
@@ -178,6 +182,9 @@ void setup() {
     #endif
 
     #ifdef ENABLE_SCREEN
+        #ifdef ENABLE_CV_INPUT
+            setup_cv_pitch_inputs_menu();
+        #endif
         setup_output_menu();
         setup_debug_menu();
         menu->setup_quickjump();
@@ -264,6 +271,10 @@ void do_tick(uint32_t in_ticks) {
             output_processor->process();
         }
     #endif
+
+    cv_chord_output_1->process();
+    cv_chord_output_2->process();
+    cv_chord_output_3->process();
 }
 
 void loop() {
