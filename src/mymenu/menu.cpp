@@ -131,7 +131,7 @@ void setup_menu(bool button_high_state = HIGH) {
     menu->add(bpm_selector);*/
 
     // debug scales page
-    #ifdef ENABLE_SCALES
+    /*#ifdef ENABLE_SCALES
         //menu->add_page("Scales");
         //menu->add(new ScaleMenuItem("Scales"));
 
@@ -144,7 +144,7 @@ void setup_menu(bool button_high_state = HIGH) {
             &MIDINoteTriggerCountOutput::get_scale_root,
             true
         ));
-    #endif
+    #endif*/
 
     //menu->add(&test_item_1);
 

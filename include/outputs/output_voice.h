@@ -58,6 +58,6 @@ class CVChordVoice : public BaseOutputProcessor {
 
         virtual void create_menu_items() {
             menu->add_page(this->label, this->colour);
-            menu->add(chord_player.make_menu_items());
+            menu->add(chord_player.make_menu_items(), this->colour);
         }
 };
