@@ -17,6 +17,13 @@ uint32_t external_cv_ticks_per_pulse_values[] = { 1, 2, 3, 4, 6, 8, 12, 16, 24 }
     }
 #endif
 
+void set_din_midi_clock_output_divider(uint32_t v) {
+    output_wrapper->set_din_midi_clock_output_divider(v);
+}
+uint32_t get_din_midi_clock_output_divider() {
+    return output_wrapper->get_din_midi_clock_output_divider();
+} 
+
 // todo: different modes to correlate with the midimuso mode + output availability..
 int8_t get_muso_note_for_drum(int8_t drum_note) {
     int8_t retval = 60;
@@ -171,9 +178,10 @@ void setup_output_parameters() {
             ));
 
             menu->add(bar);
-
-            // todo: use lowmemory controls instead of a full instance of each
+            
             menu->add(midi_cc_parameters[i].makeControls());
+            //use lowmemory controls instead of a full instance of each
+            //create_low_memory_parameter_controls(midi_cc_parameters[i].label, &midi_cc_parameters[i]);
         }
 
         // todo: probably move this to another more generic 'settings' page
@@ -201,7 +209,7 @@ void setup_output_parameters() {
 
         // todo: make this a 'horizontal selector' like the SelectorControl above; maybe make a LambdaSelectorControl...
         // todo: actually, maybe make SelectorControl capable of accepting callback lambdas so that we don't need to waste memory on a LinkedList implementation
-        LambdaSelectorControl<uint32_t> *din_midi_clock_output_divider = new LambdaSelectorControl<uint32_t>(
+        /*LambdaSelectorControl<uint32_t> *din_midi_clock_output_divider = new LambdaSelectorControl<uint32_t>(
             "DIN MIDI: send clock every X pulses", 
             [=](uint32_t v) -> void { set_din_midi_clock_output_divider(v); },
             [=](void) -> uint32_t { return this->get_din_midi_clock_output_divider(); },
@@ -214,7 +222,12 @@ void setup_output_parameters() {
                 external_cv_ticks_per_pulse_values[i], 
                 (new String(external_cv_ticks_per_pulse_values[i]))->c_str()
             );
-        }
+        }*/
+        SelectorControl<uint32_t> *din_midi_clock_output_divider = new SelectorControl<uint32_t>("DIN MIDI: send clock every X pulses");
+        din_midi_clock_output_divider->available_values = external_cv_ticks_per_pulse_values;
+        din_midi_clock_output_divider->num_values = NUM_EXTERNAL_CV_TICKS_VALUES;
+        din_midi_clock_output_divider->f_setter = ::set_din_midi_clock_output_divider;
+        din_midi_clock_output_divider->f_getter = ::get_din_midi_clock_output_divider;
         menu->add(din_midi_clock_output_divider);
     }
 
