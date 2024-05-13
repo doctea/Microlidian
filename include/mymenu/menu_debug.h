@@ -34,9 +34,11 @@ class DebugPanel : public MenuItem {
             tft->print("Serial: ");
             tft->print(Serial?"connected\n":"not connected\n");
             tft->print("USB host connected: ");
-            tft->print(tud_connected()?"yes\n":"--\n");
+            /*tft->print(tud_connected()?"yes\n":"--\n");     // not expected to work: https://github.com/hathach/tinyusb/issues/2478#issuecomment-2094344075
             tft->print("USB host mounted: ");
-            tft->print(tud_mounted()?"yes\n":"--\n");
+            tft->print(tud_mounted()?"yes\n":"--\n");       // not expected to work: https://github.com/hathach/tinyusb/issues/2478#issuecomment-2094344075
+            tft->print("USB host ready: ");*/
+            tft->print(tud_ready()?"yes\n":"--\n");
             tft->print("Clock type: ");
             #if defined(USE_UCLOCK_GENERIC) && defined(USE_UCLOCK)
                 tft->println("uClock - generic");
