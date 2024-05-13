@@ -179,9 +179,9 @@ void setup_output_parameters() {
 
             menu->add(bar);
             
-            menu->add(midi_cc_parameters[i].makeControls());
+            //menu->add(midi_cc_parameters[i].makeControls());
             //use lowmemory controls instead of a full instance of each
-            //create_low_memory_parameter_controls(midi_cc_parameters[i].label, &midi_cc_parameters[i]);
+            create_low_memory_parameter_controls(midi_cc_parameters[i].label, &midi_cc_parameters[i]);
         }
 
         // todo: probably move this to another more generic 'settings' page
