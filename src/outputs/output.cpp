@@ -154,10 +154,10 @@ void setup_output_parameters() {
         char label[MENU_C_MAX];
         for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
             snprintf(label, MENU_C_MAX, "CV-to-MIDI: %s", midi_cc_parameters[i].label);
-            menu->add_page(label);
+            menu->add_page(label, C_WHITE, false);
 
             snprintf(label, MENU_C_MAX, "Settings");
-            SubMenuItem *bar = new SubMenuItemBar(label);
+            SubMenuItem *bar = new SubMenuItemBar(label, true, false);
 
             snprintf(label, MENU_C_MAX, "Output CC");
             bar->add(new DirectNumberControl<byte>(
