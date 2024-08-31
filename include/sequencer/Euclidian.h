@@ -16,7 +16,8 @@ class Menu;
 
 #define MINIMUM_DENSITY 0.0f  // 0.10f
 #define MAXIMUM_DENSITY 1.5f
-#define DEFAULT_DURATION 1
+#define DEFAULT_DURATION 2      // minimum duration needs to be >=2 ticks -- if any lower then can end up with on+off happening within the same tick and usb_teensy_clocker gets notes stuck!
+#define MINIMUM_DURATION 2
 #define DEFAULT_DURATION_ENVELOPES 8
 
 #define BARS_PER_PHRASE 4

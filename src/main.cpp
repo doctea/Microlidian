@@ -91,7 +91,7 @@ void setup() {
     // overclock the CPU so that we can afford all those CPU cycles drawing the UI!
     //set_sys_clock_khz(225000, true);
     //set_sys_clock_khz(230000, true);
-    set_sys_clock_khz(200000, true);
+    set_sys_clock_khz(240000, true);
 
     ticked = false;
     started = false;
