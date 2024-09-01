@@ -40,9 +40,11 @@ void setup_screen() {
         tft_print((char*)"Ready!");
         tft_clear();
 
+        Debug_println("About to setup_menu.."); 
         setup_menu(HIGH);
 
         tft_print("HUP!");      // <3 roo
+        Debug_println("About to menu->updateDisplay() for the first time..");
         menu->updateDisplay();
 
         Debug_println("About to init menu.."); Serial_flush();

@@ -27,11 +27,6 @@
 
 #include "mymenu/menuitems_scale.h"
 
-#include "LinkedList.h"
-#include "parameters/Parameter.h"
-
-#include "mymenu_items/ParameterMenuItems_lowmemory.h"
-
 //DisplayTranslator *tft;
 DisplayTranslator_Configured *tft = nullptr;
 Menu *menu = nullptr; // = Menu();
@@ -148,29 +143,7 @@ void setup_menu(bool button_high_state = HIGH) {
 
     //menu->add(&test_item_1);
 
-    #ifdef ENABLE_EUCLIDIAN
-        menu->add_page("Mutation");
-        SubMenuItemColumns *submenu = new SubMenuItemColumns("Euclidian Mutations", 3);
-        submenu->add(new ObjectNumberControl<EuclidianSequencer,float>("Density", &sequencer, &EuclidianSequencer::set_density,        &EuclidianSequencer::get_density, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
-        submenu->add(new ObjectToggleControl<EuclidianSequencer>("Mutate", &sequencer, &EuclidianSequencer::set_mutated_enabled,       &EuclidianSequencer::is_mutate_enabled));
-        submenu->add(new ObjectToggleControl<EuclidianSequencer>("Reset", &sequencer,  &EuclidianSequencer::set_reset_before_mutate,   &EuclidianSequencer::should_reset_before_mutate));
-        submenu->add(new ObjectToggleControl<EuclidianSequencer>("Add phrase", &sequencer, &EuclidianSequencer::set_add_phrase_enabled,&EuclidianSequencer::is_add_phrase_enabled));
-        submenu->add(new ObjectToggleControl<EuclidianSequencer>("Fills", &sequencer,  &EuclidianSequencer::set_fills_enabled,         &EuclidianSequencer::is_fills_enabled));
-        submenu->add(new ObjectNumberControl<EuclidianSequencer,int>("Seed", &sequencer, &EuclidianSequencer::set_euclidian_seed,      &EuclidianSequencer::get_euclidian_seed, nullptr, 0, 16384, true, false));
-        submenu->add(new ObjectNumberControl<EuclidianSequencer,int_fast8_t>("Mut.Amt", &sequencer, &EuclidianSequencer::set_mutation_count,       &EuclidianSequencer::get_mutation_count, nullptr, 1, 8));
-        menu->add(submenu);
-
-        #ifdef ENABLE_CV_INPUT
-            menu->add_page("Mutation modulation", C_WHITE, false);
-            //menu->add(new SeparatorMenuItem("Mappable parameters"));
-            // add the sequencer modulation controls to this page
-            LinkedList<FloatParameter*> *sequencer_parameters = sequencer.getParameters();
-            /*for (int i = 0 ; i < sequencer_parameters->size() ; i++) {
-                menu->add(sequencer_parameters->get(i)->makeControls());
-            }*/
-            create_low_memory_parameter_controls("Mutation Parameters", sequencer_parameters);
-        #endif
-    #endif
+    // this is where euclidian menu was originally set up
     
     // enable encoder and separate buttons
     #ifdef PIN_BUTTON_A

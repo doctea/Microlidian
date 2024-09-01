@@ -122,10 +122,12 @@ void setup() {
         setup_parameter_inputs();
         Debug_printf("after setup_parameter_inputs(), free RAM is %u\n", freeRam());
         setup_output_parameters();
+        Debug_printf("after setup_parameter_outputs(), free RAM is %u\n", freeRam());
     #endif
 
     #ifdef ENABLE_SCREEN
         //delay(1000);    // see if giving 1 second to calm down will help reliability of screen initialisation... it does not. :(
+        Debug_printf("before setup_screen(), free RAM is %u\n", freeRam());
         setup_screen();
         Debug_printf("after setup_screen(), free RAM is %u\n", freeRam());
     #endif
@@ -150,8 +152,9 @@ void setup() {
     #ifdef ENABLE_EUCLIDIAN
         //Serial.println("setting up sequencer..");
         setup_sequencer();
-        output_processor->configure_sequencer(&sequencer);
+        output_processor->configure_sequencer(sequencer);
         #ifdef ENABLE_SCREEN
+            setup_menu_euclidian(sequencer);
             setup_sequencer_menu();
             Debug_printf("after setup_sequencer_menu, free RAM is %u\n", freeRam());
         #endif
@@ -159,7 +162,7 @@ void setup() {
 
     #if defined(ENABLE_CV_INPUT) && defined(ENABLE_EUCLIDIAN)
         //Serial.println("..calling sequencer.getParameters()..");
-        LinkedList<FloatParameter*> *params = sequencer.getParameters();
+        LinkedList<FloatParameter*> *params = sequencer->getParameters();
         //Serial.println("calling parameter_manager->addParameters.."); Serial.flush();
         //parameter_manager->addParameters(params);
         //params->clear();
@@ -266,7 +269,7 @@ void do_tick(uint32_t in_ticks) {
     output_wrapper->sendClock();
 
     #ifdef ENABLE_EUCLIDIAN
-        if (sequencer.is_running()) sequencer.on_tick(ticks);
+        if (sequencer->is_running()) sequencer->on_tick(ticks);
         if (is_bpm_on_sixteenth(ticks) && output_processor->is_enabled()) {
             output_processor->process();
         }

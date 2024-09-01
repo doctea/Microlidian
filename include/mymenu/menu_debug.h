@@ -122,7 +122,7 @@ void setup_debug_menu() {
     LambdaToggleControl *enable_output_processor_control = new LambdaToggleControl("Enable Output Processor", [=](bool v) -> void { output_processor->set_enabled(v); }, [=](void) -> bool { return output_processor->is_enabled(); });
     menu->add(enable_output_processor_control);
 
-    LambdaToggleControl *enable_sequencer_control = new LambdaToggleControl("Enable Sequencer", [=](bool v) -> void { sequencer.set_playing(v); }, [=](void) -> bool { return sequencer.is_running(); });
+    LambdaToggleControl *enable_sequencer_control = new LambdaToggleControl("Enable Sequencer", [=](bool v) -> void { sequencer->set_playing(v); }, [=](void) -> bool { return sequencer->is_running(); });
     menu->add(enable_sequencer_control);
     
     setup_messages_menu();

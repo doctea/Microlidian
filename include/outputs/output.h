@@ -1,5 +1,4 @@
-#ifndef MIDI_OUTPUT__INCLUDED
-#define MIDI_OUTPUT__INCLUDED
+#pragma once
 
 #include "Config.h"
 
@@ -16,12 +15,13 @@
 #include "bpm.h"
 
 #include "sequencer/Sequencer.h"
+#include "outputs/base_outputs.h"
 
 #include "midi_helpers.h"
 
-#define MAX_LABEL 40
-
-#include "midi_usb/midi_usb_rp2040.h"
+#if defined(ARDUINO_ARCH_RP2040)
+    #include "midi_usb/midi_usb_rp2040.h"
+#endif
 
 #include "ParameterManager.h"
 #include "parameters/MIDICCParameter.h"
@@ -213,44 +213,46 @@ class MIDIOutputWrapper : public IMIDICCTarget {
         #endif
     }
 
-    #define NUM_MIDI_CC_PARAMETERS 6
-    MIDICCParameter<> midi_cc_parameters[NUM_MIDI_CC_PARAMETERS] = {
-        MIDICCParameter<> ("A",     this, 1, 1, true),
-        MIDICCParameter<> ("B",     this, 2, 1, true),
-        MIDICCParameter<> ("C",     this, 3, 1, true),
-        MIDICCParameter<> ("Mix1",  this, 4, 1, true),
-        MIDICCParameter<> ("Mix2",  this, 5, 1, true),
-        MIDICCParameter<> ("Mix3",  this, 6, 1, true),
-    };
+    #ifdef ENABLE_CV_INPUT
+        #define NUM_MIDI_CC_PARAMETERS 6
+        MIDICCParameter<> midi_cc_parameters[NUM_MIDI_CC_PARAMETERS] = {
+            MIDICCParameter<> ("A",     this, 1, 1, true),
+            MIDICCParameter<> ("B",     this, 2, 1, true),
+            MIDICCParameter<> ("C",     this, 3, 1, true),
+            MIDICCParameter<> ("Mix1",  this, 4, 1, true),
+            MIDICCParameter<> ("Mix2",  this, 5, 1, true),
+            MIDICCParameter<> ("Mix3",  this, 6, 1, true),
+        };
 
-    void setup_parameters() {
-        for (int i = 0 ; i < 6 ; i++) {
-            parameter_manager->addParameter(&midi_cc_parameters[i]);
+        void setup_parameters() {
+            for (int i = 0 ; i < 6 ; i++) {
+                parameter_manager->addParameter(&midi_cc_parameters[i]);
+            }
+            midi_cc_parameters[0].connect_input(0/*parameter_manager->getInputForName("A")*/, 1.0f);
+            midi_cc_parameters[0].connect_input(1/*parameter_manager->getInputForName("A")*/, 0.f);
+            midi_cc_parameters[0].connect_input(2/*parameter_manager->getInputForName("A")*/, 0.f);
+
+            midi_cc_parameters[1].connect_input(0/*parameter_manager->getInputForName("B")*/, 0.f);
+            midi_cc_parameters[1].connect_input(1/*parameter_manager->getInputForName("B")*/, 1.0f);
+            midi_cc_parameters[1].connect_input(2/*parameter_manager->getInputForName("B")*/, 0.f);
+
+            midi_cc_parameters[2].connect_input(0/*parameter_manager->getInputForName("C")*/, 0.f);
+            midi_cc_parameters[2].connect_input(1/*parameter_manager->getInputForName("C")*/, 0.f);
+            midi_cc_parameters[2].connect_input(2/*parameter_manager->getInputForName("C")*/, 1.0f);
+
+            midi_cc_parameters[3].connect_input(0, 1.0f);
+            midi_cc_parameters[3].connect_input(1, 1.0f);
+            midi_cc_parameters[3].connect_input(2, .0f);
+
+            midi_cc_parameters[4].connect_input(0, .0f);
+            midi_cc_parameters[4].connect_input(1, 1.0f);
+            midi_cc_parameters[4].connect_input(2, 1.0f);
+
+            midi_cc_parameters[5].connect_input(0, 1.0f);
+            midi_cc_parameters[5].connect_input(1, .0f);
+            midi_cc_parameters[5].connect_input(2, 1.0f);
         }
-        midi_cc_parameters[0].connect_input(0/*parameter_manager->getInputForName("A")*/, 1.0f);
-        midi_cc_parameters[0].connect_input(1/*parameter_manager->getInputForName("A")*/, 0.f);
-        midi_cc_parameters[0].connect_input(2/*parameter_manager->getInputForName("A")*/, 0.f);
-
-        midi_cc_parameters[1].connect_input(0/*parameter_manager->getInputForName("B")*/, 0.f);
-        midi_cc_parameters[1].connect_input(1/*parameter_manager->getInputForName("B")*/, 1.0f);
-        midi_cc_parameters[1].connect_input(2/*parameter_manager->getInputForName("B")*/, 0.f);
-
-        midi_cc_parameters[2].connect_input(0/*parameter_manager->getInputForName("C")*/, 0.f);
-        midi_cc_parameters[2].connect_input(1/*parameter_manager->getInputForName("C")*/, 0.f);
-        midi_cc_parameters[2].connect_input(2/*parameter_manager->getInputForName("C")*/, 1.0f);
-
-        midi_cc_parameters[3].connect_input(0, 1.0f);
-        midi_cc_parameters[3].connect_input(1, 1.0f);
-        midi_cc_parameters[3].connect_input(2, .0f);
-
-        midi_cc_parameters[4].connect_input(0, .0f);
-        midi_cc_parameters[4].connect_input(1, 1.0f);
-        midi_cc_parameters[4].connect_input(2, 1.0f);
-
-        midi_cc_parameters[5].connect_input(0, 1.0f);
-        midi_cc_parameters[5].connect_input(1, .0f);
-        midi_cc_parameters[5].connect_input(2, 1.0f);
-    }
+    #endif
 
     #ifdef ENABLE_SCREEN
         void create_menu_items();
@@ -273,56 +275,6 @@ class MIDIOutputWrapper : public IMIDICCTarget {
         }
     #endif
 };
-
-
-#ifdef ENABLE_SCREEN
-    class Menu;
-#endif
-
-// class to receive triggers from a sequencer and return values to the owner Processor
-class BaseOutput {
-    public:
-    bool enabled = true;
-
-    char label[MAX_LABEL];
-    BaseOutput (const char *label) {
-        strncpy(this->label, label, MAX_LABEL);
-    }
-    
-    // event_value_1 = send a note on
-    // event_value_2 = send a note off
-    // event_value_3 = ??
-    virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) = 0;
-    virtual void reset() = 0;
-    virtual bool matches_label(const char *compare) {
-        return strcmp(compare, this->label)==0;
-    }
-
-    virtual bool should_go_on() = 0;
-    virtual bool should_go_off() = 0;
-
-    virtual void stop() {};
-    virtual void process() {};
-
-    virtual void loop() {};
-
-    void set_enabled(bool state) {
-        this->enabled = state;
-    }
-    bool is_enabled() {
-        return this->enabled;
-    }
-
-    #ifdef ENABLE_SCREEN
-        virtual void make_menu_items(Menu *menu, int index) {}
-        virtual void make_parameter_menu_items(Menu *menu, int index, uint16_t colour = C_WHITE);
-    #endif
-
-    virtual LinkedList<FloatParameter*> *get_parameters() {
-        return nullptr;
-    }
-};
-
 
 // track basic monophonic MIDI output
 class MIDIBaseOutput : public BaseOutput {
@@ -531,5 +483,3 @@ class MIDIDrumOutput : public MIDIBaseOutput {
 #endif
 
 void setup_output_parameters();
-
-#endif
