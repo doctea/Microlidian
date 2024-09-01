@@ -88,16 +88,18 @@ void auto_handle_start_wrapper() {
 #endif
 
 void setup() {
+    Debug_println("setup() starting");
+    Debug_printf("at start of setup(), free RAM is %u\n", freeRam());
+
     // overclock the CPU so that we can afford all those CPU cycles drawing the UI!
-    //set_sys_clock_khz(225000, true);
-    //set_sys_clock_khz(230000, true);
+    // 240mhz because, if we are to think about using the USB-Host-on-PIO thing, the system clock needs to be a multiple of 120mhz
     set_sys_clock_khz(240000, true);
 
     ticked = false;
     started = false;
 
     setup_serial();
-    Debug_println("setup() starting");
+    Debug_printf("after setup_serial(), free RAM is %u\n", freeRam());
 
     #ifdef USE_UCLOCK
         setup_uclock(do_tick, uClock.PPQN_24);
@@ -112,9 +114,13 @@ void setup() {
     #endif
 
     setup_midi();
+    Debug_printf("after setup_midi(), free RAM is %u\n", freeRam());
     setup_usb();
+    Debug_printf("after setup_usb(), free RAM is %u\n", freeRam());
+
     USBMIDI.setHandleStart(auto_handle_start_wrapper);
     setup_output();
+    Debug_printf("after setup_output(), free RAM is %u\n", freeRam());
 
     #ifdef ENABLE_CV_INPUT
         setup_cv_input();
