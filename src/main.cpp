@@ -178,6 +178,8 @@ void setup() {
         Debug_printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
 
         setup_cv_pitch_inputs();
+        Debug_printf("after setup_cv_pitch_inputs(), free RAM is %u\n", freeRam());
+
     #endif
 
     #ifdef ENABLE_CV_INPUT
@@ -187,9 +189,12 @@ void setup() {
     #ifdef ENABLE_SCREEN
         #ifdef ENABLE_CV_INPUT
             setup_cv_pitch_inputs_menu();
+            Debug_printf("after setup_cv_pitch_inputs_menu(), free RAM is %u\n", freeRam());
         #endif
         setup_output_menu();
+        Debug_printf("after setup_output_menu(), free RAM is %u\n", freeRam());
         setup_debug_menu();
+        Debug_printf("after setup_debug_menu(), free RAM is %u\n", freeRam());
         menu->setup_quickjump();
 
         menu->select_page(0);
