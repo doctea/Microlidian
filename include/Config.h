@@ -58,7 +58,7 @@
 #define ENABLE_CV_INPUT 0x48
 //#define ENABLE_PARAMETER_MAPPING
 
-#define ENABLE_DEBUG_SERIAL
+//#define ENABLE_DEBUG_SERIAL
 
 // defined in platformio.ini build flags
 //#define ENABLE_STORAGE
