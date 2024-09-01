@@ -1,6 +1,6 @@
 #pragma once
 
-#include "output_processor.h"
+#include "outputs/output_processor.h"
 #include "chord_player.h"
 
 #include "bpm.h"

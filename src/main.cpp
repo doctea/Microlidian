@@ -282,7 +282,7 @@ void do_tick(uint32_t in_ticks) {
 
 void loop() {
     uint32_t mics_start = micros();
-    //Serial.println("loop()");
+    Serial.println("loop()"); Serial.flush();
     
     //tft_print("MAIN!");
     
@@ -350,8 +350,11 @@ void loop() {
 
             //ATOMIC() 
             //{
-            if (output_processor->is_enabled())
+            if (output_processor->is_enabled()) {
+                Serial.println("output_processor->loop()"); Serial.flush();
                 output_processor->loop();
+                Serial.println("finished output_processor->loop()"); Serial.flush();
+            }
             //}
 
             #ifdef ENABLE_SCREEN
@@ -381,5 +384,7 @@ void loop() {
             }
         #endif
     }
+
+    Serial.println("end of loop()"); Serial.flush();
 }
 
