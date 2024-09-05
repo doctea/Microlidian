@@ -78,7 +78,7 @@
 //#define MIDI_SERIAL_HARDWARE    // THIS FUCKIN WORKS LADS!!!
 //#define MIDI_SERIAL_SPIO        // this fuckin works too!  
 
-#define ENABLE_ENVELOPES
+//#define ENABLE_ENVELOPES
 #define DEFAULT_ENVELOPE_CLASS Weirdolope
 //#define DEFAULT_ENVELOPE_CLASS RegularEnvelope
 

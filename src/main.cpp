@@ -45,6 +45,9 @@
     void uClockCheckTime(uint32_t micros_time);
 #endif
 
+// todo: move this elsewhere?
+RP2040DualMIDIOutputWrapper *output_wrapper;
+
 std::atomic<bool> started = false;
 std::atomic<bool> ticked = false;
 
@@ -119,7 +122,9 @@ void setup() {
     Debug_printf("after setup_usb(), free RAM is %u\n", freeRam());
 
     USBMIDI.setHandleStart(auto_handle_start_wrapper);
-    setup_output();
+
+    output_wrapper = new RP2040DualMIDIOutputWrapper();
+    setup_output(output_wrapper);
     Debug_printf("after setup_output(), free RAM is %u\n", freeRam());
 
     #ifdef ENABLE_CV_INPUT
@@ -127,6 +132,7 @@ void setup() {
         Debug_printf("after setup_cv_input(), free RAM is %u\n", freeRam());
         setup_parameter_inputs();
         Debug_printf("after setup_parameter_inputs(), free RAM is %u\n", freeRam());
+        output_wrapper->setup_parameters();
         setup_output_parameters();
         Debug_printf("after setup_parameter_outputs(), free RAM is %u\n", freeRam());
     #endif
@@ -197,6 +203,7 @@ void setup() {
             setup_cv_pitch_inputs_menu();
             Debug_printf("after setup_cv_pitch_inputs_menu(), free RAM is %u\n", freeRam());
         #endif
+        output_wrapper->create_menu_items();
         setup_output_menu();
         Debug_printf("after setup_output_menu(), free RAM is %u\n", freeRam());
         setup_debug_menu();

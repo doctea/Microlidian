@@ -9,7 +9,7 @@
 
 #include <string>
 
-extern MIDIOutputWrapper *output_wrapper;
+extern RP2040DualMIDIOutputWrapper *output_wrapper;
 
 void setup_storage() {
     Debug_println("setup_storage()...");

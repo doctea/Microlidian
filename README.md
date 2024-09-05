@@ -20,12 +20,13 @@ The aim here is to have a flexible and extensible MIDI generator based on the mu
 - [mymenu](https://github.com/doctea/mymenu)
 - [midihelpers](https://github.com/doctea/midihelpers)
 - [parameters](https://github.com/doctea/parameters)
+- [seqlib](https://github.com/doctea/seqlib)
 - [patched Encoder library](https://github.com/doctea/Encoder) 
 - [Vortigont LinkedList library](https://github.com/vortigont/LinkedList)
 - ~~[patched bodme/TFT_eSPI library](https://github.com/doctea/TFT_eSPI)~~ dont think this needed anymore?
 - Adafruit TinyUSB library patched with my patch from https://github.com/adafruit/Adafruit_TinyUSB_Arduino/issues/238
-- vscode+platformio
-- the gfx library by Bodmer for fast DMA writes
+- vscode+platformio+earlephilhower core
+- the TFT_eSPI gfx library by Bodmer for fast DMA writes
 
 ## Hardware/PCB wiring
 

@@ -9,6 +9,8 @@
 
 #include "menu.h"
 
+#include "midi_helpers.h"
+
 class CVChordVoice;
 extern CVChordVoice *cv_chord_output_1;
 extern CVChordVoice *cv_chord_output_2;
@@ -25,16 +27,16 @@ class CVChordVoice : public BaseOutputProcessor {
 
     char label[MENU_C_MAX];
 
-    MIDIOutputWrapper *output_wrapper = nullptr;
+    IMIDINoteTarget *output_target = nullptr;
 
     ChordPlayer chord_player = ChordPlayer(
-        [=](int8_t channel, int8_t note, int8_t velocity) -> void { output_wrapper->sendNoteOn(note, velocity, channel ); },
-        [=](int8_t channel, int8_t note, int8_t velocity) -> void { output_wrapper->sendNoteOff(note, velocity, channel ); }
+        [=](int8_t channel, int8_t note, int8_t velocity) -> void { output_target->sendNoteOn(note, velocity, channel ); },
+        [=](int8_t channel, int8_t note, int8_t velocity) -> void { output_target->sendNoteOff(note, velocity, channel ); }
     );
 
     public:
-        CVChordVoice(const char *label, MIDIOutputWrapper *output_wrapper, BaseParameterInput *initial_pitch_input, BaseParameterInput *initial_velocity_input, int8_t channel) {
-            this->output_wrapper = output_wrapper;
+        CVChordVoice(const char *label, IMIDINoteTarget *output_target, BaseParameterInput *initial_pitch_input, BaseParameterInput *initial_velocity_input, int8_t channel) {
+            this->output_target = output_target;
             this->pitch_input = initial_pitch_input;
             this->velocity_input = initial_velocity_input;
             this->channel = channel;
