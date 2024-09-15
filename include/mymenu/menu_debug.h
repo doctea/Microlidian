@@ -45,7 +45,7 @@ class DebugPanel : public MenuItem {
             #elif defined(USE_UCLOCK)
                 tft->println("uClock - hardware");
             #else
-                tft->println("Software")
+                tft->println("Software");
             #endif
             tft->println("Built at " __BUILD_TIME__);
             tft->println("Git info: " COMMIT_INFO);
