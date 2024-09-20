@@ -83,6 +83,77 @@ void setup_parameter_inputs() {
     tft_print("Finished setup_parameter_inputs()\n");
 }
 
+
+#define NUM_MIDI_CC_PARAMETERS 6
+FloatParameter *midi_cc_parameters[NUM_MIDI_CC_PARAMETERS];
+
+// todo: option to configure the CCs to be compatible with the CCs of the midimuso
+FLASHMEM
+void setup_parameter_outputs(IMIDICCTarget *wrapper) {
+    int c = 0;
+    FloatParameter *p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("A", wrapper, 1, 1, true, true));
+    p->connect_input(0, 1.0f); p->connect_input(1, 0.0f); p->connect_input(2, 0.0f);
+
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("B", wrapper, 1, 1, true, true));
+    p->connect_input(0, 0.0f); p->connect_input(1, 1.0f); p->connect_input(2, 0.0f);
+
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("C", wrapper, 1, 1, true, true));
+    p->connect_input(0, 0.0f); p->connect_input(1, 0.0f); p->connect_input(2, 1.0f);
+
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix1", wrapper, 1, 1, true, true));
+    p->connect_input(0, 1.0f); p->connect_input(1, 1.0f); p->connect_input(2, 0.0f);
+
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix2", wrapper, 1, 1, true, true));
+    p->connect_input(0, 0.0f); p->connect_input(1, 1.0f); p->connect_input(2, 1.0f);
+
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix3", wrapper, 1, 1, true, true));
+    p->connect_input(0, 1.0f); p->connect_input(1, 0.0f); p->connect_input(2, 1.0f);   
+}
+
+#ifdef ENABLE_SCREEN
+    #include "mymenu_items/ParameterMenuItems_lowmemory.h"
+    FLASHMEM
+    void create_parameter_output_menu_items() {
+        char label[MENU_C_MAX];
+        for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
+            snprintf(label, MENU_C_MAX, "CV-to-MIDI: %s", midi_cc_parameters[i]->label);
+            menu->add_page(label, C_WHITE, false);
+
+            /*
+            // todo: CC+channel selectors now moved to MIDICCParameter#addCustomTypeControls
+            snprintf(label, MENU_C_MAX, "Settings");
+            SubMenuItem *bar = new SubMenuItemBar(label, true, false);
+
+            snprintf(label, MENU_C_MAX, "Output CC");
+            bar->add(new DirectNumberControl<byte>(
+                label, 
+                &midi_cc_parameters[i].cc_number,
+                midi_cc_parameters[i].cc_number,
+                0,
+                MIDI_MAX_VELOCITY
+            ));
+
+            snprintf(label, MENU_C_MAX, "Output MIDI Channel");
+            bar->add(new DirectNumberControl<byte>(
+                label, 
+                &midi_cc_parameters[i].channel,
+                midi_cc_parameters[i].channel,
+                1,
+                16
+            ));
+
+            menu->add(bar);*/
+            
+            //menu->add(midi_cc_parameters[i].makeControls());
+            //use lowmemory controls instead of a full instance of each
+
+            // add a separator bar for the parameter; don't think we actually want this though...
+            //menu->add(new SeparatorMenuItem(midi_cc_parameters[i].label));            
+            create_low_memory_parameter_controls(midi_cc_parameters[i]->label, midi_cc_parameters[i]);
+        }
+    }
+#endif
+
 #ifdef ENABLE_SCREEN
 // set up the menus to provide control over the Parameters and ParameterInputs
 FLASHMEM void setup_parameter_menu() {
