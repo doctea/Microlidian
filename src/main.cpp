@@ -168,7 +168,7 @@ void setup() {
         setup_sequencer();
         output_processor->configure_sequencer(sequencer);
         #ifdef ENABLE_SCREEN
-            setup_menu_euclidian(sequencer);
+            setup_menu_euclidian_mutation(sequencer);
             setup_sequencer_menu();
             Debug_printf("after setup_sequencer_menu, free RAM is %u\n", freeRam());
         #endif

@@ -68,7 +68,7 @@
 
 #define TIME_BETWEEN_CV_INPUT_UPDATES 5
 
-#define MUTATE_EVERY_TICK
+#define SEQLIB_MUTATE_EVERY_TICK
 
 //#define Serial_println(X) { if (Serial) Serial.println(x); }
 
