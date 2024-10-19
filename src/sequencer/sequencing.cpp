@@ -19,12 +19,4 @@
         sequencer->reset_patterns();
     }
 
-    #ifdef ENABLE_SCREEN
-        void setup_sequencer_menu() {
-
-            sequencer->make_menu_items(menu);
-
-            menu->select_page(0);
-        }
-    #endif
 #endif

@@ -128,9 +128,11 @@ void setup() {
     setup_output(output_wrapper);
     Debug_printf("after setup_output(), free RAM is %u\n", freeRam());
 
-    #ifdef ENABLE_CV_INPUT
-        setup_cv_input();
-        Debug_printf("after setup_cv_input(), free RAM is %u\n", freeRam());
+    #ifdef ENABLE_PARAMETERS
+        #ifdef ENABLE_CV_INPUT
+            setup_cv_input();
+            Debug_printf("after setup_cv_input(), free RAM is %u\n", freeRam());
+        #endif
         setup_parameter_inputs();
         Debug_printf("after setup_parameter_inputs(), free RAM is %u\n", freeRam());
         setup_parameter_outputs(output_wrapper);
@@ -168,35 +170,31 @@ void setup() {
         setup_sequencer();
         output_processor->configure_sequencer(sequencer);
         #ifdef ENABLE_SCREEN
-            setup_menu_euclidian_mutation(sequencer);
-            setup_sequencer_menu();
-            Debug_printf("after setup_sequencer_menu, free RAM is %u\n", freeRam());
+            sequencer->make_menu_items(menu, false);
+            menu->select_page(0);   // todo: why do we do this?
+            Debug_printf("after setting up sequencer and menus, free RAM is %u\n", freeRam());
         #endif
     #endif
 
-    #if defined(ENABLE_CV_INPUT) && defined(ENABLE_EUCLIDIAN)
+    #if defined(ENABLE_PARAMETERS)
         //Serial.println("..calling sequencer.getParameters()..");
         LinkedList<FloatParameter*> *params = sequencer->getParameters();
-        //Serial.println("calling parameter_manager->addParameters.."); Serial.flush();
-        //parameter_manager->addParameters(params);
-        //params->clear();
-        //delete params;
         Debug_printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());
     #endif
 
-
-    #if defined(ENABLE_SCREEN) && defined(ENABLE_CV_INPUT)
+    #if defined(ENABLE_SCREEN) && defined(ENABLE_PARAMETERS)
         //menu->add_page("Parameter Inputs");
         Debug_printf("before setup_parameter_menu(), free RAM is %u\n", freeRam());
         setup_parameter_menu();
         Debug_printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
 
-        setup_cv_pitch_inputs();
+        #ifdef ENABLE_CV_INPUT
+            setup_cv_pitch_inputs();
+        #endif
         Debug_printf("after setup_cv_pitch_inputs(), free RAM is %u\n", freeRam());
-
     #endif
 
-    #ifdef ENABLE_CV_INPUT
+    #ifdef ENABLE_PARAMETERS
         parameter_manager->setDefaultParameterConnections();
     #endif
 
@@ -205,10 +203,12 @@ void setup() {
             setup_cv_pitch_inputs_menu();
             Debug_printf("after setup_cv_pitch_inputs_menu(), free RAM is %u\n", freeRam());
         #endif
-        create_parameter_output_menu_items();
+        #ifdef ENABLE_PARAMETERS
+            create_parameter_output_menu_items();
+        #endif
         output_wrapper->create_menu_items();
-        setup_output_menu();
-        Debug_printf("after setup_output_menu(), free RAM is %u\n", freeRam());
+        output_processor->create_menu_items();
+        Debug_printf("after creating output wrapper and processor menuitems, free RAM is %u\n", freeRam());
         setup_debug_menu();
         Debug_printf("after setup_debug_menu(), free RAM is %u\n", freeRam());
         menu->setup_quickjump();

@@ -28,7 +28,9 @@ class DebugPanel : public MenuItem {
             unsigned long time = millis()/1000;
             tft->setCursor(pos.x,pos.y);
             header("Statistics:", pos, selected, opened);
-            tft->printf("Parameters: %i\n", parameter_manager->available_parameters->size());
+            #ifdef ENABLE_PARAMETERS
+                tft->printf("Parameters: %i\n", parameter_manager->available_parameters->size());
+            #endif
             tft->printf("Free RAM: %u bytes\n", freeRam());
             tft->printf("Uptime: %02uh %02um %02us\n", time/60/60, (time/60)%60, (time)%60);
             tft->print("Serial: ");
