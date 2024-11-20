@@ -153,6 +153,14 @@ void loop1() {
             }
         }
     #endif
+
+    #ifdef ENABLE_CV_OUTPUT
+        if (/*ticked &&*/ cv_output_enabled && !is_locked()) {
+            acquire_lock();
+            dac_output.write(0, parameter_manager->getInputForName("LFO sync")->get_normal_value_unipolar()*65535.0);
+            release_lock();
+        }
+    #endif
 }
 
 #endif

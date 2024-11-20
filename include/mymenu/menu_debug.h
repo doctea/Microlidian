@@ -14,6 +14,10 @@
     #include "ADS1X15.h"
 #endif
 
+#ifdef ENABLE_CV_OUTPUT
+    #include "cv_output.h"
+#endif
+
 #include "__version.h"
 
 extern bool debug_flag, debug_stress_sequencer_load;
@@ -52,7 +56,12 @@ class DebugPanel : public MenuItem {
             tft->println("Built at " __BUILD_TIME__);
             tft->println("Git info: " COMMIT_INFO);
             #ifdef ENABLE_CV_INPUT
-                tft->printf("ADS1X15 version: %s\n", (char*)ADS1X15_LIB_VERSION);
+                tft->printf("ADS1X15 version: %s", (char*)ADS1X15_LIB_VERSION);
+                tft->printf(" @ 0x%2x\n", ENABLE_CV_INPUT);
+            #endif
+            #ifdef ENABLE_CV_OUTPUT
+                tft->printf("DAC8574 version: %s", (char*)DAC8574_LIB_VERSION);
+                tft->printf(" @ 0x%2x\n", ENABLE_CV_OUTPUT);
             #endif
             return tft->getCursorY();
         }
@@ -118,6 +127,10 @@ void setup_debug_menu() {
 
     #ifdef ENABLE_CV_INPUT
         menu->add(new ToggleControl<bool>("CV Input", &cv_input_enabled, nullptr));
+    #endif
+
+    #ifdef ENABLE_CV_OUTPUT
+        menu->add(new ToggleControl<bool>("CV Input", &cv_output_enabled, nullptr));
     #endif
 
     // basically just for debugging / testing speed

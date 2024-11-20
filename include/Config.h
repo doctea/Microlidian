@@ -55,7 +55,7 @@
 
 #define MIDI_SERIAL_OUT_PIN D6
 
-#define ENABLE_CV_INPUT 0x48
+//#define ENABLE_CV_INPUT 0x48
 #if defined(ENABLE_CV_INPUT) && !defined(ENABLE_PARAMETERS)
     #define ENABLE_PARAMETERS
 #endif

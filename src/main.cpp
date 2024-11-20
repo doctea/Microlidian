@@ -34,6 +34,10 @@
     #include "outputs/output_voice.h"
 #endif
 
+#ifdef ENABLE_CV_OUTPUT
+    #include "cv_output.h"
+#endif
+
 #include "outputs/output_processor.h"
 
 #include "core_safe.h"
@@ -216,6 +220,10 @@ void setup() {
         menu->select_page(0);
     #endif
 
+    #ifdef ENABLE_CV_OUTPUT
+        setup_cv_output();
+    #endif
+
     //debug_free_ram();
 
     started = true;
@@ -299,6 +307,12 @@ void do_tick(uint32_t in_ticks) {
     cv_chord_output_1->process();
     cv_chord_output_2->process();
     cv_chord_output_3->process();
+
+    /*#ifdef ENABLE_CV_OUTPUT
+        if (cv_output_enabled) {
+            dac_output.write(0, parameter_manager->getInputForName("LFO sync")->get_normal_value_unipolar()*65535.0);
+        }
+    #endif*/
 
     //last_processed_tick = in_ticks;
 }
