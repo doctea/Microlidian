@@ -138,48 +138,57 @@ void loop1() {
     #endif
 
     #ifdef ENABLE_CV_OUTPUT
-        ATOMIC() {
-        if (/*false && *//*ticked &&*/ cv_output_enabled && !is_locked() && !calibrating) {
-            acquire_lock();
-            static int8_t current_pitch = 0;
-            static uint32_t last_ticked = 0;
-            //if (ticks < last_ticked) 
-            //    current_pitch = 0;
-            //if (ticks - last_ticked >= (PPQN)) {
-            if (ticks != last_ticked) {
-                last_ticked = ticks;
-                /*current_pitch += 1; //+= 12;    // 
-                if (!is_valid_note(current_pitch)) 
-                    current_pitch = 0;*/
 
-                //current_pitch = (ticks / PPQN) % MIDI_MAX_NOTE;
-                current_pitch = ((BPM_CURRENT_BAR % 10) * 12);
-                
-                float calculated_voltage = get_voltage_for_pitch(current_pitch);
-                //float calculated_voltage = parameter_manager->getInputForName("LFO sync")->get_normal_value_unipolar() * 10.0;//*65535.0;
-                Serial.printf("Calculated voltage %3.3f => ", calculated_voltage);
-                calculated_voltage = get_calibrated_voltage(calculated_voltage);
-                Serial.printf("%3.3f\n", calculated_voltage);
+            if (!calibrating && cv_output_enabled && !is_locked()) {
+                acquire_lock();
+                static int8_t current_pitch = 0;
+                static uint32_t last_ticked = 0;
+                //if (ticks < last_ticked) 
+                //    current_pitch = 0;
+                //if (ticks - last_ticked >= (PPQN)) {
+                if (ticks != last_ticked) {
+                    last_ticked = ticks;
+                    /*current_pitch += 1; //+= 12;    // 
+                    if (!is_valid_note(current_pitch)) 
+                        current_pitch = 0;*/
 
-                calculated_voltage /= 10.0;
-                
-                //acquire_lock();
-                dac_output.write(
-                    0,                
-                    65535 - (calculated_voltage * 65535.0)
-                );
-                //release_lock();
+                    //current_pitch = (ticks / PPQN) % MIDI_MAX_NOTE;
+                    current_pitch = ((BPM_CURRENT_BAR % 10) * 12);
+                    
+                    float calculated_voltage = get_voltage_for_pitch(current_pitch);
+                    //float calculated_voltage = parameter_manager->getInputForName("LFO sync")->get_normal_value_unipolar() * 10.0;//*65535.0;
+                    Serial.printf("Calculated voltage %3.3f => ", calculated_voltage);
+                    calculated_voltage = get_calibrated_voltage(calculated_voltage);
+                    Serial.printf("%3.3f\n", calculated_voltage);
+
+                    calculated_voltage /= 10.0;
+                    
+                    //acquire_lock();
+                    dac_output.write(
+                        0,                
+                        65535 - (calculated_voltage * 65535.0)
+                    );
+                    //release_lock();
+                }
+                /*if (BPM_CURRENT_BAR_OF_PHRASE%2==0) {
+                    dac_output.write(0, 65535);
+                } else {
+                    dac_output.write(0, 0);
+                }*/
+            release_lock();
+            } else if (calibrating) {
+                Serial.println("Starting calibration..."); Serial.flush();
+                acquire_lock();
+
+                calibrate_unipolar_minimum();
+                calibrate_unipolar_maximum();
+
+                calibrating = false;
+                Serial.println("Finished calibration!"); Serial.flush();
+                release_lock();
             }
-            /*if (BPM_CURRENT_BAR_OF_PHRASE%2==0) {
-                dac_output.write(0, 65535);
-            } else {
-                dac_output.write(0, 0);
-            }*/
-           release_lock();
-        }
-        }
-    #endif
 
+    #endif
 
     static unsigned long last_pushed = 0;
     //if (last_pushed==0) delay(5000);

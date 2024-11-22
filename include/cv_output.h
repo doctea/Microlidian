@@ -12,4 +12,8 @@
 
     extern bool cv_output_enabled;
 
+
+    void calibrate_unipolar_minimum();
+    void calibrate_unipolar_maximum();
+
 #endif

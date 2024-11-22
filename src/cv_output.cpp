@@ -11,17 +11,32 @@
 
     DAC8574 dac_output(ENABLE_CV_OUTPUT);
 
+    bool cv_output_enabled = true;
+
     bool calibrating = false;
 
-    bool cv_output_enabled = true;
+    void start_calibration() {
+        calibrating = true;
+    }
 
     volatile float uni_max_output_voltage = 10.30, uni_min_output_voltage = -0.33;
     volatile float bi_max_output_voltage = uni_max_output_voltage,  bi_min_output_voltage = uni_min_output_voltage;
 
+
+    /*
+    from dac8574 datasheet at: https://www.ti.com/lit/ds/symlink/dac8574.pdf
+    DIN = DDIN – OE – (FSE – OE) × (DDIN – 1024) ÷ 64512
+    where:
+    DIN = Digital input code to the DAC after offset and gain correction
+    DDIN = Digital input code to the DAC before offset and gain correction
+    OE = measured DAC error at code 1024 (in LSBs)
+    FSE = measured DAC error at code 64512 (in LSBs)
+    */
+
     void calibrate_unipolar_minimum() {
         VoltageParameterInput *src = (VoltageParameterInput*)parameter_manager->getInputForName("A");
 
-        acquire_lock();
+        //acquire_lock();
         calibrating = true;
         ATOMIC(){
             // determine voltage at 0 point
@@ -38,14 +53,14 @@
 
             messages_log_add(String("uni: output     0 => ") + String(uni_min_output_voltage));
         }
-        calibrating = false;
-        release_lock();
+        //calibrating = false;
+        //release_lock();
     }
 
     void calibrate_unipolar_maximum() {
         VoltageParameterInput *src = (VoltageParameterInput*)parameter_manager->getInputForName("A");
 
-        acquire_lock();
+        //acquire_lock();
         calibrating = true;
         ATOMIC(){
             dac_output.write(0, 0);
@@ -65,9 +80,10 @@
 
             messages_log_add(String("uni: output 65535 => ") + String(uni_max_output_voltage));
         }
-        calibrating = false;
-        release_lock();
+        //calibrating = false;
+        //release_lock();
     }
+
 
     void calibrate_bipolar() {
         acquire_lock();
@@ -134,9 +150,10 @@
         dac_output.begin();
 
         menu->add_page("CV Output");
-        menu->add(new ActionConfirmItem("Calibrate unipolar MIN", &calibrate_unipolar_minimum));
+        /*menu->add(new ActionConfirmItem("Calibrate unipolar MIN", &calibrate_unipolar_minimum));
         menu->add(new ActionConfirmItem("Calibrate unipolar MAX", &calibrate_unipolar_maximum));
-        menu->add(new ActionConfirmItem("Calibrate bipolar",  &calibrate_bipolar));
+        menu->add(new ActionConfirmItem("Calibrate bipolar",  &calibrate_bipolar));*/
+        menu->add(new ActionConfirmItem("Start calibrating", &start_calibration));
 
         menu->add(new DirectNumberControl<volatile float>("uni min", &uni_min_output_voltage, uni_min_output_voltage, -20.0, 20.0));
         menu->add(new DirectNumberControl<volatile float>("uni max", &uni_max_output_voltage, uni_max_output_voltage, 0.0, 20.0));
