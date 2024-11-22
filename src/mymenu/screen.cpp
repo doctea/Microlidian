@@ -111,6 +111,8 @@ void setup1() {
     };
 }
 
+#include "cv_output.h"
+
 void loop1() {  
 
     #ifdef PROCESS_USB_ON_SECOND_CORE
@@ -119,6 +121,65 @@ void loop1() {
             USBMIDI.read();
         #endif
     #endif
+
+    #ifdef ENABLE_CV_INPUT
+        static unsigned long last_cv_update = 0;
+        if (cv_input_enabled) {
+            if (parameter_manager->ready_for_next_update() && !is_locked()) {
+                acquire_lock();
+                //ATOMIC() 
+                {
+                    parameter_manager->throttled_update_cv_input__all(time_between_cv_input_updates, false, false);
+                }
+                release_lock();
+                last_cv_update = millis();
+            }
+        }
+    #endif
+
+    #ifdef ENABLE_CV_OUTPUT
+        ATOMIC() {
+        if (/*false && *//*ticked &&*/ cv_output_enabled && !is_locked() && !calibrating) {
+            acquire_lock();
+            static int8_t current_pitch = 0;
+            static uint32_t last_ticked = 0;
+            //if (ticks < last_ticked) 
+            //    current_pitch = 0;
+            //if (ticks - last_ticked >= (PPQN)) {
+            if (ticks != last_ticked) {
+                last_ticked = ticks;
+                /*current_pitch += 1; //+= 12;    // 
+                if (!is_valid_note(current_pitch)) 
+                    current_pitch = 0;*/
+
+                //current_pitch = (ticks / PPQN) % MIDI_MAX_NOTE;
+                current_pitch = ((BPM_CURRENT_BAR % 10) * 12);
+                
+                float calculated_voltage = get_voltage_for_pitch(current_pitch);
+                //float calculated_voltage = parameter_manager->getInputForName("LFO sync")->get_normal_value_unipolar() * 10.0;//*65535.0;
+                Serial.printf("Calculated voltage %3.3f => ", calculated_voltage);
+                calculated_voltage = get_calibrated_voltage(calculated_voltage);
+                Serial.printf("%3.3f\n", calculated_voltage);
+
+                calculated_voltage /= 10.0;
+                
+                //acquire_lock();
+                dac_output.write(
+                    0,                
+                    65535 - (calculated_voltage * 65535.0)
+                );
+                //release_lock();
+            }
+            /*if (BPM_CURRENT_BAR_OF_PHRASE%2==0) {
+                dac_output.write(0, 65535);
+            } else {
+                dac_output.write(0, 0);
+            }*/
+           release_lock();
+        }
+        }
+    #endif
+
 
     static unsigned long last_pushed = 0;
     //if (last_pushed==0) delay(5000);
@@ -139,28 +200,7 @@ void loop1() {
             last_pushed = millis();
         }
     }
-    #ifdef ENABLE_CV_INPUT
-        static unsigned long last_cv_update = 0;
-        if (cv_input_enabled) {
-            if (parameter_manager->ready_for_next_update() && !is_locked()) {
-                acquire_lock();
-                //ATOMIC() 
-                {
-                    parameter_manager->throttled_update_cv_input__all(time_between_cv_input_updates, false, false);
-                }
-                release_lock();
-                last_cv_update = millis();
-            }
-        }
-    #endif
 
-    #ifdef ENABLE_CV_OUTPUT
-        if (/*ticked &&*/ cv_output_enabled && !is_locked()) {
-            acquire_lock();
-            dac_output.write(0, parameter_manager->getInputForName("LFO sync")->get_normal_value_unipolar()*65535.0);
-            release_lock();
-        }
-    #endif
 }
 
 #endif
