@@ -157,9 +157,9 @@ void loop1() {
                     
                     float calculated_voltage = get_voltage_for_pitch(current_pitch);
                     //float calculated_voltage = parameter_manager->getInputForName("LFO sync")->get_normal_value_unipolar() * 10.0;//*65535.0;
-                    Serial.printf("Calculated voltage %3.3f => ", calculated_voltage);
+                    //Serial.printf("Calculated voltage %3.3f => ", calculated_voltage);
                     calculated_voltage = get_calibrated_voltage(calculated_voltage);
-                    Serial.printf("%3.3f\n", calculated_voltage);
+                    //Serial.printf("%3.3f\n", calculated_voltage);
 
                     calculated_voltage /= 10.0;
                     
