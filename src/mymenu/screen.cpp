@@ -168,6 +168,10 @@ void loop1() {
                         0,                
                         65535 - (calculated_voltage * 65535.0)
                     );
+                    dac_output.write(
+                        1,                
+                        65535 - (calculated_voltage * 65535.0)
+                    );
                     //release_lock();
                 }
                 /*if (BPM_CURRENT_BAR_OF_PHRASE%2==0) {
@@ -180,8 +184,8 @@ void loop1() {
                 Serial.println("Starting calibration..."); Serial.flush();
                 acquire_lock();
 
-                calibrate_unipolar_minimum();
-                calibrate_unipolar_maximum();
+                calibrate_unipolar_minimum(0, "A");
+                calibrate_unipolar_maximum(0, "A");
 
                 calibrating = false;
                 Serial.println("Finished calibration!"); Serial.flush();

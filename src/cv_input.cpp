@@ -56,11 +56,11 @@ void setup_parameter_inputs() {
     tft_print("..setup_parameter_inputs...");
 
     // initialise the voltage source inputs
-    // todo: improve this bit, maybe name the voltage sources?
+    // NOTE: for some reason inputs 1 + 2 (B + C) seem to be swapped on this revision of the hardware; so swap them here in software.
     VoltageParameterInput *vpi1 = new VoltageParameterInput((char*)"A", "CV Inputs", parameter_manager->voltage_sources->get(0));
-    VoltageParameterInput *vpi2 = new VoltageParameterInput((char*)"B", "CV Inputs", parameter_manager->voltage_sources->get(1));
-    VoltageParameterInput *vpi3 = new VoltageParameterInput((char*)"C", "CV Inputs", parameter_manager->voltage_sources->get(2));
-
+    VoltageParameterInput *vpi2 = new VoltageParameterInput((char*)"B", "CV Inputs", parameter_manager->voltage_sources->get(2));
+    VoltageParameterInput *vpi3 = new VoltageParameterInput((char*)"C", "CV Inputs", parameter_manager->voltage_sources->get(1));
+    
     //vpi3->input_type = UNIPOLAR;
     // todo: set up 1v/oct inputs to map to MIDI source_ids...
 
@@ -163,6 +163,10 @@ FLASHMEM void setup_parameter_menu() {
     // ask ParameterManager to add all the menu items for the ParameterInputs
     parameter_manager->addAllParameterInputMenuItems(menu, true);
     Debug_printf("after addAllParameterInput, free ram is %i\n", rp2040.getFreeHeap());
+
+    // ask ParameterManager to build overviews for the ParameterInput groups; currently this must be done after those controls have already been created.
+    parameter_manager->addAllParameterInputOverviews(menu);
+    Debug_printf("after addAllParameterInputOverviews, free ram is %i\n", rp2040.getFreeHeap());
 
     //parameter_manager->addAllVoltageSourceMenuItems(menu);
     //Serial.println("About to addAllVoltageSourceCalibrationMenuItems().."); Serial.flush();

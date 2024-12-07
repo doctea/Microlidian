@@ -19,7 +19,9 @@
         calibrating = true;
     }
 
-    volatile float uni_max_output_voltage = 10.30, uni_min_output_voltage = -0.33;
+    //volatile float uni_max_output_voltage = 9.557, uni_min_output_voltage = -0.331;
+    //volatile float uni_max_output_voltage = 9.557, uni_min_output_voltage = 0.331;
+    volatile float uni_max_output_voltage = 9.53, uni_min_output_voltage = 0.33;
     volatile float bi_max_output_voltage = uni_max_output_voltage,  bi_min_output_voltage = uni_min_output_voltage;
 
     #define O_VALUE  1024
@@ -38,7 +40,114 @@
     FSE = measured DAC error at code 64512 (in LSBs)
     */
 
-    void calibrate_unipolar_maximum() {
+    uint16_t calibrate_find_dac_value_for(int channel, char *input_name, float intended_voltage) {
+        VoltageParameterInput *src = (VoltageParameterInput*)parameter_manager->getInputForName(input_name);
+
+        parameter_manager->update_voltage_sources();
+        parameter_manager->update_inputs();
+        src->read();
+        parameter_manager->update_voltage_sources();
+        parameter_manager->update_inputs();
+        src->read();
+        src->get_voltage();
+
+        //float intended_voltage = 0.0;
+        int guess_din = (intended_voltage/10.0) * 65535;
+        if (guess_din==0) 
+            guess_din = 3000;
+        else if (guess_din==65535)
+            guess_din = 64000;
+        int last_guess_din = guess_din;
+        float actual_read = 0.0f;
+        float last_read = actual_read;
+
+        bool overshot = false;
+        float tolerance = 0.001;
+
+        Serial.printf("----\nStarting calibrate_find_dac_value_for(%i, '%s', %3.3f)\n", channel, input_name, intended_voltage);
+        Serial.printf("Starting with guess_din of %i.\n", guess_din);
+
+        ATOMIC(){
+            do {
+                dac_output.write(channel, guess_din);
+                delay(1);
+                parameter_manager->update_voltage_sources();
+                parameter_manager->update_inputs();
+                src->read();
+                parameter_manager->update_voltage_sources();
+                parameter_manager->update_inputs();
+                src->read();
+                actual_read = src->get_voltage();
+                actual_read = 10.0 - actual_read;   // INVERT THE *READING*
+
+                if (actual_read > intended_voltage) {
+                    if (last_guess_din < guess_din) {
+                        Serial.println("OVERSHOT 1!");
+                        overshot = true;
+                        tolerance *= 2.0;
+                        Serial.printf("Set tolerance to %3.3f\n", tolerance);
+                    }
+                    last_guess_din = guess_din;
+
+                    guess_din--;
+                } else if (actual_read < intended_voltage) {
+                    if (last_guess_din > guess_din) {
+                        Serial.println("OVERSHOT 2!");
+                        overshot = true;
+                        tolerance *= 2.0;
+                        Serial.printf("Set tolerance to %3.3f\n", tolerance);
+                    }
+                    last_guess_din = guess_din;
+    
+                    guess_din++;
+                } //else {
+                //}
+
+                /*if (overshot && fabs(actual_read - intended_voltage) > fabs(last_read - intended_voltage)) {
+                    Serial.println("Breaking because changing found a less-accurate number 1!\n");
+                    guess_din = last_guess_din;
+                    break;
+                } else if (overshot) {
+                    Serial.println("Breaking because changing found a less-accurate number 2!\n");
+                    break;
+                }*/
+
+                //last_guess_din = guess_din;
+
+                last_read = actual_read;
+
+                Serial.printf("Finding %3.3f:\t", intended_voltage);
+                Serial.printf("Tried %i\t", last_guess_din);
+                Serial.printf("And got result %3.3f\n", last_read);
+                //Serial.printf(" (wanted %3.3f)\n", intended_voltage);
+
+            } while (fabs(actual_read) - fabs(intended_voltage) > tolerance);
+
+            Serial.printf("got actual_read=%3.3f ", actual_read);
+            Serial.printf("(%3.3f distance from intended %3.3f, with final tolerance %3.3f) ", fabs(actual_read) - fabs(intended_voltage), intended_voltage, tolerance);
+            Serial.printf("and last_guess_din=%i\n", last_guess_din);           
+        }
+
+        //return (actual_read/10.0) * 65535.0;
+        return guess_din;
+    }
+
+    void calibrate_unipolar_minimum(int channel, char *input_name) {
+        //calibrating = true;
+
+        uni_min_output_voltage = (10.0 * (calibrate_find_dac_value_for(channel, input_name, 0.0) / 65535.0));
+        //uni_min_output_voltage *= -1.0;
+        Serial.printf("calibrate_unipolar_minimum found %3.3f\n", uni_min_output_voltage);
+    }
+
+    void calibrate_unipolar_maximum(int channel, char *input_name) {
+        uni_max_output_voltage = 10.0 * (calibrate_find_dac_value_for(channel, input_name, 10.0) / 65535.0);
+
+        //uni_max_output_voltage = 10.0 + (10.0 - uni_max_output_voltage);
+        Serial.printf("calibrate_unipolar_maximum found %3.3f\n", uni_max_output_voltage);
+    }
+
+    /*void calibrate_unipolar_maximum() {
         VoltageParameterInput *src = (VoltageParameterInput*)parameter_manager->getInputForName("A");
 
         //acquire_lock();
@@ -69,9 +178,9 @@
         }
         //calibrating = false;
         //release_lock();
-    }
+    }*/
 
-    void calibrate_unipolar_minimum() {
+    /*void calibrate_unipolar_minimum() {
         VoltageParameterInput *src = (VoltageParameterInput*)parameter_manager->getInputForName("A");
 
         //acquire_lock();
@@ -105,39 +214,15 @@
         }
         //calibrating = false;
         //release_lock();
-    }
-
-
-    /*void calibrate_bipolar() {
-        acquire_lock();
-        ATOMIC(){
-            // determine voltage at 0 point
-            VoltageParameterInput *src = (VoltageParameterInput*)parameter_manager->getInputForName("A");
-
-            dac_output.write(0, 0);
-            delay(500);
-            parameter_manager->update_inputs();
-            bi_min_output_voltage = src->get_voltage();
-
-            delay(500);
-
-            dac_output.write(0, 65535);
-            delay(500);
-            parameter_manager->update_inputs();
-            bi_max_output_voltage = src->get_voltage();
-
-            messages_log_add(String(" bi: output     0 => ") + String(bi_min_output_voltage));
-            messages_log_add(String(" bi: output "65535" => ") + String(bi_max_output_voltage));
-        }
-        release_lock();
     }*/
+   
 
     float map(float x, float in_min, float in_max, float out_min, float out_max) {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 
     // todo: returns intended voltage calibrated for the hardware...
-    /*float get_calibrated_voltage(float intended_voltage) {
+    float get_calibrated_voltage(float intended_voltage) {
         // if 0.0 gives -0.351
             // then to get real 0.0 we need to add 0.351 to it
         // if 10.0 gives 10.297
@@ -145,8 +230,8 @@
             // so therefore max should be 10.0 - (10.297-10.0) ?
 
         // zero offset = uni_min_output_voltage * -65535
-        float zero_offset = uni_min_output_voltage *- 1; // * -65535.0;
-        float apex_offset = uni_max_output_voltage - 10.0;
+        float zero_offset = uni_min_output_voltage; // * -65535.0;
+        float apex_offset = uni_max_output_voltage;
         //float total_range = uni_max_output_voltage - uni_min_output_voltage;
         //float total_range = uni_max_output_voltage - zero_offset + apex_offset;
 
@@ -157,19 +242,19 @@
         //intended_voltage = map(intended_voltage, 0.0, 10.0, uni_min_output_voltage, total_range);
 
         float real_zero = zero_offset;
-        float real_apex = 10.0 - apex_offset;
-        Serial.printf("real_zero=%3.3f, ",    real_zero);
-        Serial.printf("real_apex=%3.3f, ",    real_apex);
-        Serial.printf("uni_max_output_voltage=%3.3f, ", uni_max_output_voltage);
-        Serial.printf("apex_offset=%3.3f, ",    apex_offset);
-        Serial.printf(" => ");
+        float real_apex = apex_offset;
+        //Serial.printf("real_zero=%3.3f, ",    real_zero);
+        //Serial.printf("real_apex=%3.3f, ",    real_apex);
+        //Serial.printf("uni_max_output_voltage=%3.3f, ", uni_max_output_voltage);
+        //Serial.printf("apex_offset=%3.3f, ",    apex_offset);
+        //Serial.printf(" => \n");
 
         intended_voltage = map(intended_voltage, 0.0, 10.0, real_zero, real_apex);
 
         return intended_voltage;
-    }*/
+    }
 
-   float get_calibrated_voltage(float intended_voltage) {
+   /*float get_calibrated_voltage(float intended_voltage) {
         // DIN = DDIN – OE – (FSE – OE) × (DDIN – 1024) ÷ 64512
         //intended_voltage = 10.0 - intended_voltage;
         uint32_t DDIN = (intended_voltage / 10.0) * 65535.0;
@@ -185,7 +270,7 @@
         Serial.printf("=> %3.3f\n", result);
 
         return result;
-   }
+   }*/
 
     void setup_cv_output() {
         dac_output.begin();
@@ -195,16 +280,14 @@
         menu->add(new ActionConfirmItem("Calibrate unipolar MAX", &calibrate_unipolar_maximum));
         menu->add(new ActionConfirmItem("Calibrate bipolar",  &calibrate_bipolar));*/
         menu->add(new ActionConfirmItem("Start calibrating", &start_calibration));
-
-        /*
+      
         menu->add(new DirectNumberControl<volatile float>("uni min", &uni_min_output_voltage, uni_min_output_voltage, -20.0, 20.0));
         menu->add(new DirectNumberControl<volatile float>("uni max", &uni_max_output_voltage, uni_max_output_voltage, 0.0, 20.0));
-        menu->add(new DirectNumberControl<volatile float>("bi min", &bi_min_output_voltage, bi_min_output_voltage, -20.0, 20.0));
-        menu->add(new DirectNumberControl<volatile float>("bi max", &bi_max_output_voltage, bi_max_output_voltage, 0.0, 20.0));
-        */
-
-       menu->add(new DirectNumberControl<int32_t>("OE",  &OE,  OE,  -16384, 16384));
-       menu->add(new DirectNumberControl<int32_t>("FSE", &FSE, FSE, -16384, 16384));
+        //menu->add(new DirectNumberControl<volatile float>("bi min", &bi_min_output_voltage, bi_min_output_voltage, -20.0, 20.0));
+        //menu->add(new DirectNumberControl<volatile float>("bi max", &bi_max_output_voltage, bi_max_output_voltage, 0.0, 20.0));
+        
+        //menu->add(new DirectNumberControl<int32_t>("OE",  &OE,  OE,  -16384, 16384));
+        //menu->add(new DirectNumberControl<int32_t>("FSE", &FSE, FSE, -16384, 16384));
 
     }
 #endif
