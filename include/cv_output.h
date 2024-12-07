@@ -3,7 +3,7 @@
 #ifdef ENABLE_CV_OUTPUT
     #include "DAC8574.h"
 
-    extern DAC8574 dac_output;
+    extern DAC8574 *dac_output;
 
     extern bool calibrating;
 
@@ -11,7 +11,6 @@
     float get_calibrated_voltage(float intended_voltage);
 
     extern bool cv_output_enabled;
-
 
     void calibrate_unipolar_minimum(int, char*);
     void calibrate_unipolar_maximum(int, char*);

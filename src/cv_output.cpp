@@ -9,7 +9,7 @@
     #include "SimplyAtomic.h"
     #include "core_safe.h"
 
-    DAC8574 dac_output(ENABLE_CV_OUTPUT);
+    DAC8574 *dac_output; //(ENABLE_CV_OUTPUT);
 
     bool cv_output_enabled = true;
 
@@ -69,7 +69,7 @@
 
         ATOMIC(){
             do {
-                dac_output.write(channel, guess_din);
+                dac_output->write(channel, guess_din);
                 delay(1);
                 parameter_manager->update_voltage_sources();
                 parameter_manager->update_inputs();
@@ -271,23 +271,48 @@
 
         return result;
    }*/
+  
+
+    #include "parameters/CVOutputParameter.h"
 
     void setup_cv_output() {
-        dac_output.begin();
+        dac_output = new DAC8574(ENABLE_CV_OUTPUT);
+        dac_output->begin();
 
+        CVOutputParameter<DAC8574,float> *output_a = new CVOutputParameter<DAC8574,float>("CVO-A", dac_output, 0, VALUE_TYPE::UNIPOLAR, true);
+        CVOutputParameter<DAC8574,float> *output_b = new CVOutputParameter<DAC8574,float>("CVO-B", dac_output, 1, VALUE_TYPE::UNIPOLAR, true);
+        CVOutputParameter<DAC8574,float> *output_c = new CVOutputParameter<DAC8574,float>("CVO-C", dac_output, 2, VALUE_TYPE::UNIPOLAR, true);
+        CVOutputParameter<DAC8574,float> *output_d = new CVOutputParameter<DAC8574,float>("CVO-D", dac_output, 3, VALUE_TYPE::UNIPOLAR, true);
+
+        /*LinkedList<FloatParameter*> list = new LinkedList<FloatParameter*>();
+        list->add(output_a);
+        list->add(output_b);
+        list->add(output_c);
+        list->add(output_d);*/
+
+        parameter_manager->addParameter(output_a);
+        parameter_manager->addParameter(output_b);
+        parameter_manager->addParameter(output_c);
+        parameter_manager->addParameter(output_d);
+
+        menu->add_page("CVO-A");
+        menu->add(parameter_manager->makeMenuItemsForParameter(output_a));
+        menu->add_page("CVO-B");
+        menu->add(parameter_manager->makeMenuItemsForParameter(output_b));
+        menu->add_page("CVO-C");
+        menu->add(parameter_manager->makeMenuItemsForParameter(output_c));
+        menu->add_page("CVO-D");
+        menu->add(parameter_manager->makeMenuItemsForParameter(output_d));
+
+    //}
+
+    //void setup_cv_output_menu() {
+        /*
         menu->add_page("CV Output");
-        /*menu->add(new ActionConfirmItem("Calibrate unipolar MIN", &calibrate_unipolar_minimum));
-        menu->add(new ActionConfirmItem("Calibrate unipolar MAX", &calibrate_unipolar_maximum));
-        menu->add(new ActionConfirmItem("Calibrate bipolar",  &calibrate_bipolar));*/
         menu->add(new ActionConfirmItem("Start calibrating", &start_calibration));
       
         menu->add(new DirectNumberControl<volatile float>("uni min", &uni_min_output_voltage, uni_min_output_voltage, -20.0, 20.0));
         menu->add(new DirectNumberControl<volatile float>("uni max", &uni_max_output_voltage, uni_max_output_voltage, 0.0, 20.0));
-        //menu->add(new DirectNumberControl<volatile float>("bi min", &bi_min_output_voltage, bi_min_output_voltage, -20.0, 20.0));
-        //menu->add(new DirectNumberControl<volatile float>("bi max", &bi_max_output_voltage, bi_max_output_voltage, 0.0, 20.0));
-        
-        //menu->add(new DirectNumberControl<int32_t>("OE",  &OE,  OE,  -16384, 16384));
-        //menu->add(new DirectNumberControl<int32_t>("FSE", &FSE, FSE, -16384, 16384));
-
+        */
     }
 #endif
