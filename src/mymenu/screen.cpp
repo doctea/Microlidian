@@ -126,6 +126,8 @@ void loop1() {
         static unsigned long last_cv_update = 0;
         if (cv_input_enabled) {
             if (parameter_manager->ready_for_next_update() && !is_locked()) {
+                parameter_manager->process_calibration();
+
                 acquire_lock();
                 //ATOMIC() 
                 {

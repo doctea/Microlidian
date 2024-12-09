@@ -21,8 +21,8 @@
 
     //volatile float uni_max_output_voltage = 9.557, uni_min_output_voltage = -0.331;
     //volatile float uni_max_output_voltage = 9.557, uni_min_output_voltage = 0.331;
-    volatile float uni_max_output_voltage = 9.53, uni_min_output_voltage = 0.33;
-    volatile float bi_max_output_voltage = uni_max_output_voltage,  bi_min_output_voltage = uni_min_output_voltage;
+    //volatile float uni_max_output_voltage = 9.53, uni_min_output_voltage = 0.33;
+    //volatile float bi_max_output_voltage = uni_max_output_voltage,  bi_min_output_voltage = uni_min_output_voltage;
 
     #define O_VALUE  1024
     #define FS_VALUE 64512
@@ -40,8 +40,7 @@
     FSE = measured DAC error at code 64512 (in LSBs)
     */
 
-    uint16_t calibrate_find_dac_value_for(int channel, char *input_name, float intended_voltage) {
-        VoltageParameterInput *src = (VoltageParameterInput*)parameter_manager->getInputForName(input_name);
+    uint16_t calibrate_find_dac_value_for(int channel, VoltageParameterInput *src, float intended_voltage, bool inverted) {
 
         parameter_manager->update_voltage_sources();
         parameter_manager->update_inputs();
@@ -64,21 +63,31 @@
         bool overshot = false;
         float tolerance = 0.001;
 
-        Serial.printf("----\nStarting calibrate_find_dac_value_for(%i, '%s', %3.3f)\n", channel, input_name, intended_voltage);
+        Serial.printf("----\nStarting calibrate_find_dac_value_for(%i, '%s', %3.3f)\n", channel, src->name, intended_voltage);
         Serial.printf("Starting with guess_din of %i.\n", guess_din);
+
+        //if (inverted) intended_voltage = 10.0 - intended_voltage;
 
         ATOMIC(){
             do {
-                dac_output->write(channel, guess_din);
-                delay(1);
+                dac_output->write(
+                    channel, 
+                    //inverted ? (65535 - guess_din) : 
+                    guess_din
+                );
+                //delay(1);
+                /*
                 parameter_manager->update_voltage_sources();
                 parameter_manager->update_inputs();
                 src->read();
                 parameter_manager->update_voltage_sources();
                 parameter_manager->update_inputs();
                 src->read();
-                actual_read = src->get_voltage();
-                actual_read = 10.0 - actual_read;   // INVERT THE *READING*
+                */
+                actual_read = src->fetch_current_voltage();
+                actual_read = src->fetch_current_voltage();
+                actual_read = src->fetch_current_voltage();
+                actual_read = inverted ? 10.0 - actual_read : actual_read;   // INVERT THE *READING*
 
                 if (actual_read > intended_voltage) {
                     if (last_guess_din < guess_din) {
@@ -118,7 +127,10 @@
 
                 Serial.printf("Finding %3.3f:\t", intended_voltage);
                 Serial.printf("Tried %i\t", last_guess_din);
-                Serial.printf("And got result %3.3f\n", last_read);
+                Serial.printf("And got result %3.3f", last_read);
+                if (inverted) Serial.printf(" (inverted)");
+                Serial.println();
+
                 //Serial.printf(" (wanted %3.3f)\n", intended_voltage);
 
             } while (fabs(actual_read) - fabs(intended_voltage) > tolerance);
@@ -132,7 +144,13 @@
         return guess_din;
     }
 
-    void calibrate_unipolar_minimum(int channel, char *input_name) {
+    uint16_t calibrate_find_dac_value_for(int channel, char *input_name, float intended_voltage, bool inverted) {
+        VoltageParameterInput *src = (VoltageParameterInput*)parameter_manager->getInputForName(input_name);
+
+        return calibrate_find_dac_value_for(channel, src, intended_voltage, inverted);
+    }
+
+    /*void calibrate_unipolar_minimum(int channel, char *input_name) {
         //calibrating = true;
 
         uni_min_output_voltage = (10.0 * (calibrate_find_dac_value_for(channel, input_name, 0.0) / 65535.0));
@@ -145,7 +163,7 @@
 
         //uni_max_output_voltage = 10.0 + (10.0 - uni_max_output_voltage);
         Serial.printf("calibrate_unipolar_maximum found %3.3f\n", uni_max_output_voltage);
-    }
+    }*/
 
     /*void calibrate_unipolar_maximum() {
         VoltageParameterInput *src = (VoltageParameterInput*)parameter_manager->getInputForName("A");
@@ -222,7 +240,7 @@
     }
 
     // todo: returns intended voltage calibrated for the hardware...
-    float get_calibrated_voltage(float intended_voltage) {
+    /*float get_calibrated_voltage(float intended_voltage) {
         // if 0.0 gives -0.351
             // then to get real 0.0 we need to add 0.351 to it
         // if 10.0 gives 10.297
@@ -252,7 +270,7 @@
         intended_voltage = map(intended_voltage, 0.0, 10.0, real_zero, real_apex);
 
         return intended_voltage;
-    }
+    }*/
 
    /*float get_calibrated_voltage(float intended_voltage) {
         // DIN = DDIN – OE – (FSE – OE) × (DDIN – 1024) ÷ 64512
@@ -283,6 +301,10 @@
         CVOutputParameter<DAC8574,float> *output_b = new CVOutputParameter<DAC8574,float>("CVO-B", dac_output, 1, VALUE_TYPE::UNIPOLAR, true);
         CVOutputParameter<DAC8574,float> *output_c = new CVOutputParameter<DAC8574,float>("CVO-C", dac_output, 2, VALUE_TYPE::UNIPOLAR, true);
         CVOutputParameter<DAC8574,float> *output_d = new CVOutputParameter<DAC8574,float>("CVO-D", dac_output, 3, VALUE_TYPE::UNIPOLAR, true);
+
+        output_a->set_parameter_input_for_calibration((VoltageParameterInput*)parameter_manager->getInputForName("A"));
+        output_b->set_parameter_input_for_calibration((VoltageParameterInput*)parameter_manager->getInputForName("B"));
+        output_c->set_parameter_input_for_calibration((VoltageParameterInput*)parameter_manager->getInputForName("C"));
 
         /*LinkedList<FloatParameter*> list = new LinkedList<FloatParameter*>();
         list->add(output_a);
