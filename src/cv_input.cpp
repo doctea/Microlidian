@@ -87,26 +87,26 @@ void setup_parameter_inputs() {
 #define NUM_MIDI_CC_PARAMETERS 6
 FloatParameter *midi_cc_parameters[NUM_MIDI_CC_PARAMETERS];
 
-// todo: option to configure the CCs to be compatible with the CCs of the midimuso
+// todo: configure the CCs to be compatible with the CCs of the midimuso by default etc
 FLASHMEM
 void setup_parameter_outputs(IMIDICCTarget *wrapper) {
     int c = 0;
-    FloatParameter *p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("A", wrapper, 1, 1, true, true));
+    FloatParameter *p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("A", wrapper, 0, 1, true, true));
     p->connect_input(0, 1.0f); p->connect_input(1, 0.0f); p->connect_input(2, 0.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("B", wrapper, 1, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("B", wrapper,    1, 1, true, true));
     p->connect_input(0, 0.0f); p->connect_input(1, 1.0f); p->connect_input(2, 0.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("C", wrapper, 1, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("C", wrapper,    7, 1, true, true));
     p->connect_input(0, 0.0f); p->connect_input(1, 0.0f); p->connect_input(2, 1.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix1", wrapper, 1, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix1", wrapper, 11, 1, true, true));
     p->connect_input(0, 1.0f); p->connect_input(1, 1.0f); p->connect_input(2, 0.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix2", wrapper, 1, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix2", wrapper, 74, 1, true, true));
     p->connect_input(0, 0.0f); p->connect_input(1, 1.0f); p->connect_input(2, 1.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix3", wrapper, 1, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix3", wrapper, 76, 1, true, true));
     p->connect_input(0, 1.0f); p->connect_input(1, 0.0f); p->connect_input(2, 1.0f);   
 }
 
@@ -117,7 +117,7 @@ void setup_parameter_outputs(IMIDICCTarget *wrapper) {
         char label[MENU_C_MAX];
         for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
             snprintf(label, MENU_C_MAX, "CV-to-MIDI: %s", midi_cc_parameters[i]->label);
-            menu->add_page(label, C_WHITE, false);
+            menu->add_page(label, C_WHITE);
 
             /*
             // todo: CC+channel selectors now moved to MIDICCParameter#addCustomTypeControls

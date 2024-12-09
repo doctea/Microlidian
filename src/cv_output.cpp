@@ -41,7 +41,6 @@
     */
 
     uint16_t calibrate_find_dac_value_for(int channel, VoltageParameterInput *src, float intended_voltage, bool inverted) {
-
         parameter_manager->update_voltage_sources();
         parameter_manager->update_inputs();
         src->read();
@@ -293,6 +292,8 @@
 
     #include "parameters/CVOutputParameter.h"
 
+    #include "mymenu_items/ParameterMenuItems_lowmemory.h"
+
     void setup_cv_output() {
         dac_output = new DAC8574(ENABLE_CV_OUTPUT);
         dac_output->begin();
@@ -318,13 +319,17 @@
         parameter_manager->addParameter(output_d);
 
         menu->add_page("CVO-A");
-        menu->add(parameter_manager->makeMenuItemsForParameter(output_a));
+        create_low_memory_parameter_controls(output_a->label, output_a);
+        //menu->add(parameter_manager->makeMenuItemsForParameter(output_a));
         menu->add_page("CVO-B");
-        menu->add(parameter_manager->makeMenuItemsForParameter(output_b));
+        create_low_memory_parameter_controls(output_b->label, output_b);
+        //menu->add(parameter_manager->makeMenuItemsForParameter(output_b));
         menu->add_page("CVO-C");
-        menu->add(parameter_manager->makeMenuItemsForParameter(output_c));
+        create_low_memory_parameter_controls(output_c->label, output_c);
+        //menu->add(parameter_manager->makeMenuItemsForParameter(output_c));
         menu->add_page("CVO-D");
-        menu->add(parameter_manager->makeMenuItemsForParameter(output_d));
+        create_low_memory_parameter_controls(output_d->label, output_d);
+        //menu->add(parameter_manager->makeMenuItemsForParameter(output_d));
 
     //}
 
