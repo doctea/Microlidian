@@ -56,11 +56,11 @@ void setup_parameter_inputs() {
     tft_print("..setup_parameter_inputs...");
 
     // initialise the voltage source inputs
-    // todo: improve this bit, maybe name the voltage sources?
+    // NOTE: for some reason inputs 1 + 2 (B + C) seem to be swapped on this revision of the hardware; so swap them here in software.
     VoltageParameterInput *vpi1 = new VoltageParameterInput((char*)"A", "CV Inputs", parameter_manager->voltage_sources->get(0));
-    VoltageParameterInput *vpi2 = new VoltageParameterInput((char*)"B", "CV Inputs", parameter_manager->voltage_sources->get(1));
-    VoltageParameterInput *vpi3 = new VoltageParameterInput((char*)"C", "CV Inputs", parameter_manager->voltage_sources->get(2));
-
+    VoltageParameterInput *vpi2 = new VoltageParameterInput((char*)"B", "CV Inputs", parameter_manager->voltage_sources->get(2));
+    VoltageParameterInput *vpi3 = new VoltageParameterInput((char*)"C", "CV Inputs", parameter_manager->voltage_sources->get(1));
+    
     //vpi3->input_type = UNIPOLAR;
     // todo: set up 1v/oct inputs to map to MIDI source_ids...
 
@@ -87,26 +87,26 @@ void setup_parameter_inputs() {
 #define NUM_MIDI_CC_PARAMETERS 6
 FloatParameter *midi_cc_parameters[NUM_MIDI_CC_PARAMETERS];
 
-// todo: option to configure the CCs to be compatible with the CCs of the midimuso
+// todo: configure the CCs to be compatible with the CCs of the midimuso by default etc
 FLASHMEM
 void setup_parameter_outputs(IMIDICCTarget *wrapper) {
     int c = 0;
-    FloatParameter *p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("A", wrapper, 1, 1, true, true));
+    FloatParameter *p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("A", wrapper, 0, 1, true, true));
     p->connect_input(0, 1.0f); p->connect_input(1, 0.0f); p->connect_input(2, 0.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("B", wrapper, 1, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("B", wrapper,    1, 1, true, true));
     p->connect_input(0, 0.0f); p->connect_input(1, 1.0f); p->connect_input(2, 0.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("C", wrapper, 1, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("C", wrapper,    7, 1, true, true));
     p->connect_input(0, 0.0f); p->connect_input(1, 0.0f); p->connect_input(2, 1.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix1", wrapper, 1, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix1", wrapper, 11, 1, true, true));
     p->connect_input(0, 1.0f); p->connect_input(1, 1.0f); p->connect_input(2, 0.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix2", wrapper, 1, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix2", wrapper, 74, 1, true, true));
     p->connect_input(0, 0.0f); p->connect_input(1, 1.0f); p->connect_input(2, 1.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix3", wrapper, 1, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix3", wrapper, 76, 1, true, true));
     p->connect_input(0, 1.0f); p->connect_input(1, 0.0f); p->connect_input(2, 1.0f);   
 }
 
@@ -117,7 +117,7 @@ void setup_parameter_outputs(IMIDICCTarget *wrapper) {
         char label[MENU_C_MAX];
         for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
             snprintf(label, MENU_C_MAX, "CV-to-MIDI: %s", midi_cc_parameters[i]->label);
-            menu->add_page(label, C_WHITE, false);
+            menu->add_page(label, C_WHITE);
 
             /*
             // todo: CC+channel selectors now moved to MIDICCParameter#addCustomTypeControls
@@ -163,6 +163,10 @@ FLASHMEM void setup_parameter_menu() {
     // ask ParameterManager to add all the menu items for the ParameterInputs
     parameter_manager->addAllParameterInputMenuItems(menu, true);
     Debug_printf("after addAllParameterInput, free ram is %i\n", rp2040.getFreeHeap());
+
+    // ask ParameterManager to build overviews for the ParameterInput groups; currently this must be done after those controls have already been created.
+    parameter_manager->addAllParameterInputOverviews(menu);
+    Debug_printf("after addAllParameterInputOverviews, free ram is %i\n", rp2040.getFreeHeap());
 
     //parameter_manager->addAllVoltageSourceMenuItems(menu);
     //Serial.println("About to addAllVoltageSourceCalibrationMenuItems().."); Serial.flush();
