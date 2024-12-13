@@ -184,14 +184,35 @@
     #include "parameters/CVOutputParameter.h"
     #include "mymenu_items/ParameterMenuItems_lowmemory.h"
 
+    #include "outputs/output_processor.h"
+
+    #include "outputs/output_voice.h"
+
+    extern MIDIOutputProcessor *output_processor;
+    extern CVChordVoice *cv_chord_output_1;
+
+    CVOutputParameter<DAC8574,float> 
+        *output_a = nullptr,
+        *output_b = nullptr,
+        *output_c = nullptr,
+        *output_d = nullptr;
+
     void setup_cv_output() {
         dac_output = new DAC8574(ENABLE_CV_OUTPUT);
+        //dac_output->setWriteMode(DAC8574_MODE_WRITE_CACHE);
         dac_output->begin();
 
-        CVOutputParameter<DAC8574,float> *output_a = new CVOutputParameter<DAC8574,float>("CVO-A", dac_output, 0, VALUE_TYPE::UNIPOLAR, true);
-        CVOutputParameter<DAC8574,float> *output_b = new CVOutputParameter<DAC8574,float>("CVO-B", dac_output, 1, VALUE_TYPE::UNIPOLAR, true);
-        CVOutputParameter<DAC8574,float> *output_c = new CVOutputParameter<DAC8574,float>("CVO-C", dac_output, 2, VALUE_TYPE::UNIPOLAR, true);
-        CVOutputParameter<DAC8574,float> *output_d = new CVOutputParameter<DAC8574,float>("CVO-D", dac_output, 3, VALUE_TYPE::UNIPOLAR, true);
+        output_a = new CVOutputParameter<DAC8574,float>("CVO-A", dac_output, 0, VALUE_TYPE::UNIPOLAR, true);
+        output_b = new CVOutputParameter<DAC8574,float>("CVO-B", dac_output, 1, VALUE_TYPE::UNIPOLAR, true);
+        output_c = new CVOutputParameter<DAC8574,float>("CVO-C", dac_output, 2, VALUE_TYPE::UNIPOLAR, true);
+        output_d = new CVOutputParameter<DAC8574,float>("CVO-D", dac_output, 3, VALUE_TYPE::UNIPOLAR, true);
+
+        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-A", output_processor->nodes, output_a));
+        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-B", output_processor->nodes, output_b));
+        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-C", output_processor->nodes, output_c));
+        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-D", output_processor->nodes, output_d));
+
+        //cv_chord_output_1->set_output_target(output_a);
 
         output_a->set_parameter_input_for_calibration((VoltageParameterInput*)parameter_manager->getInputForName("A"));
         output_b->set_parameter_input_for_calibration((VoltageParameterInput*)parameter_manager->getInputForName("B"));

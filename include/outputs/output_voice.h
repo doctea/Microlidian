@@ -11,6 +11,8 @@
 
 #include "midi_helpers.h"
 
+#include "mymenu_items/ParameterInputMenuItems.h"
+
 class CVChordVoice;
 extern CVChordVoice *cv_chord_output_1;
 extern CVChordVoice *cv_chord_output_2;
@@ -58,8 +60,43 @@ class CVChordVoice : public BaseOutputProcessor {
             this->chord_player.on_pre_clock(ticks, new_note, velocity);        
         }
 
+        virtual void set_output_target(IMIDINoteTarget *output_target) {
+            this->output_target = output_target;
+        }
+
+        void set_parameter_input_pitch(BaseParameterInput *parameter_input) {
+            this->pitch_input = parameter_input;
+        }
+        BaseParameterInput *get_parameter_input_pitch() {
+            return this->pitch_input;
+        }
+        void set_parameter_input_velocity(BaseParameterInput *parameter_input) {
+            this->velocity_input = parameter_input;
+        }
+        BaseParameterInput *get_parameter_input_velocity() {
+            return this->velocity_input;
+        }
+
         virtual void create_menu_items() {
             menu->add_page(this->label, this->colour);
+            SubMenuItemBar *selectors = new SubMenuItemBar("Inputs");
+            selectors->add(new ParameterInputSelectorControl<CVChordVoice>(
+                "Pitch", 
+                this, 
+                &CVChordVoice::set_parameter_input_pitch, 
+                &CVChordVoice::get_parameter_input_pitch, 
+                parameter_manager->get_available_pitch_inputs(), 
+                this->pitch_input
+            ));
+            selectors->add(new ParameterInputSelectorControl<CVChordVoice>(
+                "Velocity", 
+                this, 
+                &CVChordVoice::set_parameter_input_velocity, 
+                &CVChordVoice::get_parameter_input_velocity, 
+                parameter_manager->available_inputs, 
+                this->velocity_input
+            ));
+            menu->add(selectors, this->colour);
             menu->add(chord_player.make_menu_items(), this->colour);
         }
 };

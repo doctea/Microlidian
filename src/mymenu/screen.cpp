@@ -82,7 +82,7 @@ void update_screen_dontcare() {
 void draw_screen() {
     //if (locked || menu==nullptr) 
     //    return;
-    while (is_locked() || ticked || frame_ready) {
+    //while (is_locked() || ticked || frame_ready) {
         /*#if defined(PROCESS_USB_ON_SECOND_CORE) && defined(USE_TINYUSB)
             // doing this here instead of on first core means that two Microlidians powered up together won't clock drift badly
             //ATOMIC() {
@@ -90,7 +90,7 @@ void draw_screen() {
             //}
         #endif*/
         //delay(MENU_MS_BETWEEN_REDRAW/8);
-    };
+    //};
     //menu_locked = true;
     acquire_lock();
     //uint32_t interrupts = save_and_disable_interrupts();
@@ -190,8 +190,8 @@ void loop1() {
 
     static unsigned long last_pushed = 0;
     //if (last_pushed==0) delay(5000);
-    while(is_locked()) {
-        delay(MENU_MS_BETWEEN_REDRAW/8);
+    //while(is_locked()) {
+    //    delay(MENU_MS_BETWEEN_REDRAW/16);
 
         /*#ifdef PROCESS_USB_ON_SECOND_CORE
             // doing this here instead of on first core means that two Microlidians powered up together won't clock drift badly
@@ -200,9 +200,9 @@ void loop1() {
                 USBMIDI.read();
             #endif
         #endif*/
-    }
+    //}
     ATOMIC() {
-        if (menu!=nullptr && millis() - last_pushed > MENU_MS_BETWEEN_REDRAW) {
+        if (!is_locked() && menu!=nullptr && millis() - last_pushed > MENU_MS_BETWEEN_REDRAW) {
             draw_screen();
             last_pushed = millis();
         }
