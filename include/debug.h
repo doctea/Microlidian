@@ -19,7 +19,9 @@ void reset_upload_firmware();
     #endif
 #endif
 #ifndef Debug_printf
-    //#define F(x) { x} 
+    #ifndef F
+        #define F(x) x
+    #endif
     #ifdef ENABLE_DEBUG_SERIAL
         #define Debug_println(X)    if(Serial)Serial.println(X)
         #define Debug_printf(...)   if(Serial)Serial.printf(__VA_ARGS__)
