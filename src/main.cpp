@@ -128,6 +128,11 @@ void setup() {
     setup_usb();
     Debug_printf("after setup_usb(), free RAM is %u\n", freeRam());
 
+    #ifdef ENABLE_STORAGE
+        setup_storage();
+        Debug_printf("after setup_storage(), free RAM is %u\n", freeRam());
+    #endif
+
     output_wrapper = new RP2040DualMIDIOutputWrapper();
     setup_output(output_wrapper);
     Debug_printf("after setup_output(), free RAM is %u\n", freeRam());
@@ -135,14 +140,14 @@ void setup() {
     #ifdef ENABLE_PARAMETERS
         #ifdef ENABLE_CV_INPUT
             setup_cv_input();
-            Debug_printf("after setup_cv_input(), free RAM is %u\n", freeRam());
+            Debug_printf("after setup_cv_input(), free RAM is\t%u\n", freeRam());
         #endif
         setup_parameter_inputs();
-        Debug_printf("after setup_parameter_inputs(), free RAM is %u\n", freeRam());
+        Debug_printf("after setup_parameter_inputs(), free RAM is\t%u\n", freeRam());
         setup_parameter_outputs(output_wrapper);
-        Debug_printf("after setup_parameter_outputs(), free RAM is %u\n", freeRam());
-        setup_output_parameters();
-        Debug_printf("after setup_parameter_outputs(), free RAM is %u\n", freeRam());
+        Debug_printf("after setup_parameter_outputs(), free RAM is\t%u\n", freeRam());
+        setup_output_processor_parameters();
+        Debug_printf("after setup_output_processor_parameters(), free RAM is\t%u\n", freeRam());
     #endif
 
     #ifdef ENABLE_SCREEN
@@ -150,7 +155,12 @@ void setup() {
         Debug_printf("before setup_screen(), free RAM is %u\n", freeRam());
         setup_screen();
         Debug_printf("after setup_screen(), free RAM is %u\n", freeRam());
+
+        #ifdef ENABLE_STORAGE
+            setup_storage_menu();
+        #endif
     #endif
+
 
     // check if the two buttons are held down, if so, enter firmware reset mode as quickly as possible!
     #ifdef ENABLE_SCREEN
@@ -160,14 +170,6 @@ void setup() {
             reset_upload_firmware();
         }
     #endif
-
-    #ifdef ENABLE_STORAGE
-        setup_storage();
-        #ifdef ENABLE_SCREEN
-            setup_storage_menu();
-        #endif
-        Debug_printf("after setup_storage(), free RAM is %u\n", freeRam());
-    #endif    
 
     #ifdef ENABLE_EUCLIDIAN
         //Serial.println("setting up sequencer..");
