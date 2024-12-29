@@ -130,7 +130,7 @@ void setup_debug_menu() {
     #endif
 
     #ifdef ENABLE_CV_OUTPUT
-        menu->add(new ToggleControl<bool>("CV Input", &cv_output_enabled, nullptr));
+        menu->add(new ToggleControl<bool>("CV Output", &cv_output_enabled, nullptr));
     #endif
 
     // basically just for debugging / testing speed
