@@ -226,7 +226,9 @@ void setup() {
         setup_cv_output();
     #endif
 
-    //debug_free_ram();
+    #ifdef LOAD_CALIBRATION_ON_BOOT
+        parameter_manager->load_all_calibrations();
+    #endif
 
     started = true;
 

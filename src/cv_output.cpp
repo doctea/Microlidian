@@ -214,9 +214,9 @@
 
         //cv_chord_output_1->set_output_target(output_a);
 
-        output_a->set_parameter_input_for_calibration((VoltageParameterInput*)parameter_manager->getInputForName("A"));
-        output_b->set_parameter_input_for_calibration((VoltageParameterInput*)parameter_manager->getInputForName("B"));
-        output_c->set_parameter_input_for_calibration((VoltageParameterInput*)parameter_manager->getInputForName("C"));
+        output_a->set_calibration_parameter_input((VoltageParameterInput*)parameter_manager->getInputForName("A"));
+        output_b->set_calibration_parameter_input((VoltageParameterInput*)parameter_manager->getInputForName("B"));
+        output_c->set_calibration_parameter_input((VoltageParameterInput*)parameter_manager->getInputForName("C"));
 
         /*LinkedList<FloatParameter*> list = new LinkedList<FloatParameter*>();
         list->add(output_a);

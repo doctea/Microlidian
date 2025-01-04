@@ -11,6 +11,10 @@ void debug_free_ram();
 void reset_rp2040();
 void reset_upload_firmware();
 
+#define Serial_println(X)   if(Serial)Serial.println(X)
+#define Serial_printf(...)  if(Serial)Serial.printf(__VA_ARGS__)
+#define Serial_print(X)     if(Serial)Serial.print(X)
+
 #ifndef Serial_flush
     #ifdef SERIAL_FLUSH_REALLY
         #define Serial_flush() if(Serial)Serial.flush()

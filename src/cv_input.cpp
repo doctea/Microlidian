@@ -39,7 +39,7 @@ void setup_cv_input() {
     Wire.begin();
 
     #ifdef ENABLE_CV_INPUT
-        parameter_manager->addADCDevice(new ADCPimoroni24v(ENABLE_CV_INPUT, &Wire, 5.0)); //, 5.0)); //, 2, MAX_INPUT_VOLTAGE_24V));
+        parameter_manager->addADCDevice(new ADCPimoroni24v(ENABLE_CV_INPUT, &Wire, 5.0));
     #endif
 
     parameter_manager->auto_init_devices();
@@ -97,16 +97,16 @@ void setup_parameter_outputs(IMIDICCTarget *wrapper) {
     p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("B", wrapper,    1, 1, true, true));
     p->connect_input(0, 0.0f); p->connect_input(1, 1.0f); p->connect_input(2, 0.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("C", wrapper,    7, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("C", wrapper,    20, 1, true, true));   // should be 7 for midimuso
     p->connect_input(0, 0.0f); p->connect_input(1, 0.0f); p->connect_input(2, 1.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix1", wrapper, 11, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix1", wrapper, 33, 1, true, true));   // was 11
     p->connect_input(0, 1.0f); p->connect_input(1, 1.0f); p->connect_input(2, 0.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix2", wrapper, 74, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix2", wrapper, 34, 1, true, true));   // was 74
     p->connect_input(0, 0.0f); p->connect_input(1, 1.0f); p->connect_input(2, 1.0f);
 
-    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix3", wrapper, 76, 1, true, true));
+    p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("Mix3", wrapper, 35, 1, true, true));   // was 76
     p->connect_input(0, 1.0f); p->connect_input(1, 0.0f); p->connect_input(2, 1.0f);   
 }
 
