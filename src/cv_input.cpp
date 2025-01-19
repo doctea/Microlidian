@@ -90,6 +90,7 @@ FloatParameter *midi_cc_parameters[NUM_MIDI_CC_PARAMETERS];
 // todo: configure the CCs to be compatible with the CCs of the midimuso by default etc
 FLASHMEM
 void setup_parameter_outputs(IMIDICCTarget *wrapper) {
+    //Serial.println("setup_parameter_outputs called...\n"); Serial.flush();
     int c = 0;
     FloatParameter *p = midi_cc_parameters[c++] = parameter_manager->addParameter(new MIDICCParameter<>("A", wrapper, 0, 1, true, true));
     p->connect_input(0, 1.0f); p->connect_input(1, 0.0f); p->connect_input(2, 0.0f);
@@ -113,10 +114,17 @@ void setup_parameter_outputs(IMIDICCTarget *wrapper) {
 #ifdef ENABLE_SCREEN
     #include "mymenu_items/ParameterMenuItems_lowmemory.h"
     FLASHMEM
-    void create_parameter_output_menu_items() {
+    void create_midi_parameter_output_menu_items() {
         char label[MENU_C_MAX];
         for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
+            if (midi_cc_parameters[i]==nullptr) {
+                Serial.printf("WARNING: midi_cc_parameters[%i] is nullptr!\n"); 
+                continue;
+            }
+
+            //Serial.printf("create_midi_parameter_output_menu_items processing [%i/%i] @ %p...\n", i+1, NUM_MIDI_CC_PARAMETERS, midi_cc_parameters[i]); Serial.flush();
             snprintf(label, MENU_C_MAX, "CV-to-MIDI: %s", midi_cc_parameters[i]->label);
+            //Serial.printf("Created label for page '%s'\n", label); Serial.flush();
             menu->add_page(label, C_WHITE);
 
             /*

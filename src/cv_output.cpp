@@ -198,7 +198,12 @@
         *output_d = nullptr;
 
     void setup_cv_output() {
+        //Serial.println("setup_cv_output()"); Serial.flush();
+
         dac_output = new DAC8574(ENABLE_CV_OUTPUT);
+        #ifdef ENABLE_CV_OUTPUT_BANK
+            dac_output->setExtendedAddress(ENABLE_CV_OUTPUT_BANK);
+        #endif
         //dac_output->setWriteMode(DAC8574_MODE_WRITE_CACHE);
         dac_output->begin();
 
@@ -218,6 +223,9 @@
         output_b->set_calibration_parameter_input((VoltageParameterInput*)parameter_manager->getInputForName("B"));
         output_c->set_calibration_parameter_input((VoltageParameterInput*)parameter_manager->getInputForName("C"));
 
+        output_a->set_slot_0_amount(1.0);
+        output_a->set_slot_0_input(parameter_manager->getInputForName("LFO sync"));
+
         /*LinkedList<FloatParameter*> list = new LinkedList<FloatParameter*>();
         list->add(output_a);
         list->add(output_b);
@@ -229,7 +237,9 @@
         parameter_manager->addParameter(output_c);
         parameter_manager->addParameter(output_d);
 
-        menu->add_page("CVO-A");
+        //Serial.println("setup_cv_output about to do create_low_memory_parameter_controls.."); Serial.flush();
+
+        /*menu->add_page("CVO-A");
         create_low_memory_parameter_controls(output_a->label, output_a);
         //menu->add(parameter_manager->makeMenuItemsForParameter(output_a));
         menu->add_page("CVO-B");
@@ -241,6 +251,7 @@
         menu->add_page("CVO-D");
         create_low_memory_parameter_controls(output_d->label, output_d);
         //menu->add(parameter_manager->makeMenuItemsForParameter(output_d));
+        */
 
     //}
 

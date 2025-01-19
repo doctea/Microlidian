@@ -50,7 +50,7 @@
 #endif
 
 FLASHMEM void setup_parameter_outputs(IMIDICCTarget *);
-FLASHMEM void create_parameter_output_menu_items();
+FLASHMEM void create_midi_parameter_output_menu_items();
 
 // todo: move this elsewhere?
 RP2040DualMIDIOutputWrapper *output_wrapper;
@@ -141,11 +141,14 @@ void setup() {
         #ifdef ENABLE_CV_INPUT
             setup_cv_input();
             Debug_printf("after setup_cv_input(), free RAM is\t%u\n", freeRam());
+
+            setup_parameter_inputs();
+            Debug_printf("after setup_parameter_inputs(), free RAM is\t%u\n", freeRam());
         #endif
-        setup_parameter_inputs();
-        Debug_printf("after setup_parameter_inputs(), free RAM is\t%u\n", freeRam());
-        setup_parameter_outputs(output_wrapper);
-        Debug_printf("after setup_parameter_outputs(), free RAM is\t%u\n", freeRam());
+        #ifdef ENABLE_CV_INPUT  // these are midi outputs!
+            setup_parameter_outputs(output_wrapper);
+            Debug_printf("after setup_parameter_outputs(), free RAM is\t%u\n", freeRam());
+        #endif
         setup_output_processor_parameters();
         Debug_printf("after setup_output_processor_parameters(), free RAM is\t%u\n", freeRam());
     #endif
@@ -196,8 +199,8 @@ void setup() {
 
         #ifdef ENABLE_CV_INPUT
             setup_cv_pitch_inputs();
+            Debug_printf("after setup_cv_pitch_inputs(), free RAM is %u\n", freeRam());
         #endif
-        Debug_printf("after setup_cv_pitch_inputs(), free RAM is %u\n", freeRam());
     #endif
 
     #ifdef ENABLE_PARAMETERS
@@ -206,15 +209,22 @@ void setup() {
 
     #ifdef ENABLE_SCREEN
         #ifdef ENABLE_CV_INPUT
+            Debug_printf("before setup_cv_pitch_inputs_menu(), free RAM is %u\n", freeRam());
             setup_cv_pitch_inputs_menu();
-            Debug_printf("after setup_cv_pitch_inputs_menu(), free RAM is %u\n", freeRam());
+            Debug_printf("after setup_cv_pitch_inputs_menu(), free RAM is %u\n", freeRam()); Serial_flush();
         #endif
         #ifdef ENABLE_PARAMETERS
-            create_parameter_output_menu_items();
+            Debug_printf("before create_midi_parameter_output_menu_items(), free RAM is %u\n", freeRam()); Serial_flush();
+            //Serial.println("bouta create_midi_parameter_output_menu_items?"); Serial.flush();
+            create_midi_parameter_output_menu_items();
+            Debug_printf("after create_midi_parameter_output_menu_items(), free RAM is %u\n", freeRam()); Serial_flush();
         #endif
+        //Serial.println("getting this far 2?"); Serial.flush();
+        Debug_printf("before output_wrapper->create_menu_items(), free RAM is %u\n", freeRam()); Serial_flush();
         output_wrapper->create_menu_items();
+        Debug_printf("before output_processor->create_menu_items(), free RAM is %u\n", freeRam()); Serial_flush();
         output_processor->create_menu_items();
-        Debug_printf("after creating output wrapper and processor menuitems, free RAM is %u\n", freeRam());
+        Debug_printf("after creating output wrapper and processor menuitems, free RAM is %u\n", freeRam()); Serial_flush();
         setup_debug_menu();
         Debug_printf("after setup_debug_menu(), free RAM is %u\n", freeRam());
         menu->setup_quickjump();
