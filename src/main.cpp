@@ -125,8 +125,10 @@ void setup() {
 
     setup_midi();
     Debug_printf("after setup_midi(), free RAM is %u\n", freeRam());
-    setup_usb();
-    Debug_printf("after setup_usb(), free RAM is %u\n", freeRam());
+    #ifdef USE_TINYUSB
+        setup_usb();
+        Debug_printf("after setup_usb(), free RAM is %u\n", freeRam());
+    #endif
 
     #ifdef ENABLE_STORAGE
         setup_storage();
@@ -196,11 +198,11 @@ void setup() {
         Debug_printf("before setup_parameter_menu(), free RAM is %u\n", freeRam());
         setup_parameter_menu();
         Debug_printf("after setup_parameter_menu(), free RAM is %u\n", freeRam());
+    #endif
 
-        #ifdef ENABLE_CV_INPUT
-            setup_cv_pitch_inputs();
-            Debug_printf("after setup_cv_pitch_inputs(), free RAM is %u\n", freeRam());
-        #endif
+    #if defined(ENABLE_PARAMETERS) && defined(ENABLE_CV_INPUT)
+        setup_cv_pitch_inputs();
+        Debug_printf("after setup_cv_pitch_inputs(), free RAM is %u\n", freeRam());
     #endif
 
     #ifdef ENABLE_PARAMETERS

@@ -7,8 +7,6 @@
 
 // callbacks for use by the midihelpers and parameters libraries.
 
-int time_between_cv_input_updates = TIME_BETWEEN_CV_INPUT_UPDATES;
-
 void clock_mode_changed(ClockMode old_mode, ClockMode new_mode) {
     #ifdef CLOCK_EXTERNAL_CV
         if (new_mode==CLOCK_EXTERNAL_CV) {
