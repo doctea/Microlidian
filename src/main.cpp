@@ -136,7 +136,7 @@ void setup() {
     #endif
 
     output_wrapper = new RP2040DualMIDIOutputWrapper();
-    setup_output(output_wrapper);
+    setup_output(output_wrapper, new ChosenDrumKitMIDIOutputProcessor(output_wrapper));
     Debug_printf("after setup_output(), free RAM is %u\n", freeRam());
 
     #ifdef ENABLE_PARAMETERS
@@ -151,14 +151,12 @@ void setup() {
             setup_parameter_outputs(output_wrapper);
             Debug_printf("after setup_parameter_outputs(), free RAM is\t%u\n", freeRam());
         #endif
-        setup_output_processor_parameters();
-        Debug_printf("after setup_output_processor_parameters(), free RAM is\t%u\n", freeRam());
     #endif
 
     #ifdef ENABLE_SCREEN
         //delay(1000);    // see if giving 1 second to calm down will help reliability of screen initialisation... it does not. :(
         Debug_printf("before setup_screen(), free RAM is %u\n", freeRam());
-        setup_screen();
+        setup_screen(LOW);
         Debug_printf("after setup_screen(), free RAM is %u\n", freeRam());
 
         #ifdef ENABLE_STORAGE
@@ -174,24 +172,34 @@ void setup() {
         if (pushButtonA.read() && pushButtonB.read()) {
             reset_upload_firmware();
         }
+
+        pushButtonA.resetStateChange();
+        pushButtonB.resetStateChange();
     #endif
 
     #ifdef ENABLE_EUCLIDIAN
         //Serial.println("setting up sequencer..");
-        setup_sequencer();
+        sequencer = new EuclidianSequencer(output_processor->nodes);
         output_processor->configure_sequencer(sequencer);
+        sequencer->initialise_patterns();
+        sequencer->reset_patterns();
+        output_processor->setup_parameters();
+        setup_output_processor_parameters();
+
+        #if defined(ENABLE_PARAMETERS)
+            //Serial.println("..calling sequencer.getParameters()..");
+            LinkedList<FloatParameter*> *params = sequencer->getParameters();
+            Debug_printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());
+        #endif
+
+        Debug_printf("after setup_output_processor_parameters(), free RAM is\t%u\n", freeRam());
         #ifdef ENABLE_SCREEN
-            sequencer->make_menu_items(menu, false);
+            sequencer->make_menu_items(menu, COMBINE_NONE);
             menu->select_page(0);   // todo: why do we do this?
             Debug_printf("after setting up sequencer and menus, free RAM is %u\n", freeRam());
         #endif
     #endif
 
-    #if defined(ENABLE_PARAMETERS)
-        //Serial.println("..calling sequencer.getParameters()..");
-        LinkedList<FloatParameter*> *params = sequencer->getParameters();
-        Debug_printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());
-    #endif
 
     #if defined(ENABLE_SCREEN) && defined(ENABLE_PARAMETERS)
         //menu->add_page("Parameter Inputs");

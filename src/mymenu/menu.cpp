@@ -68,19 +68,19 @@ void setup_menu(bool button_high_state = HIGH) {
     #endif
 
     #ifdef PIN_BUTTON_A
-        pushButtonA.attach(PIN_BUTTON_A, INPUT);
+        pushButtonA.attach(PIN_BUTTON_A, button_high_state==HIGH ? INPUT_PULLDOWN : INPUT_PULLUP);
         pushButtonA.interval(5);
         pushButtonA.setPressedState(button_high_state);
     #endif
     #ifdef PIN_BUTTON_B
-        pushButtonB.attach(PIN_BUTTON_B, INPUT);
+        pushButtonB.attach(PIN_BUTTON_B, button_high_state==HIGH ? INPUT_PULLDOWN : INPUT_PULLUP);
         pushButtonB.interval(5);
         pushButtonB.setPressedState(button_high_state);
     #endif
     #ifdef PIN_BUTTON_C
-        pushButtonB.attach(PIN_BUTTON_C, INPUT);
-        pushButtonB.interval(5);
-        pushButtonB.setPressedState(button_high_state);
+        pushButtonC.attach(PIN_BUTTON_C, button_high_state==HIGH ? INPUT_PULLDOWN : INPUT_PULLUP);
+        pushButtonC.interval(5);
+        pushButtonC.setPressedState(button_high_state);
     #endif
 
     tft = &displaytranslator; 
@@ -147,10 +147,10 @@ void setup_menu(bool button_high_state = HIGH) {
     
     // enable encoder and separate buttons
     #ifdef PIN_BUTTON_A
-        pinMode(PIN_BUTTON_A, INPUT_PULLUP);
+        pinMode(PIN_BUTTON_A, INPUT_PULLDOWN);
     #endif
     #ifdef PIN_BUTTON_B
-        pinMode(PIN_BUTTON_B, INPUT_PULLUP);
+        pinMode(PIN_BUTTON_B, INPUT_PULLDOWN);
     #endif
     #ifdef PIN_BUTTON_C
         pinMode(PIN_BUTTON_C, INPUT_PULLUP);

@@ -89,9 +89,11 @@ bool load_from_slot(int slot) {
                 if (output_wrapper->load_parse_key_value(key,value)) {
                     // succeeded loading via output_wrapper MIDIOutputWrapper
                     //Serial.printf(">>output_wrapper handled line\t%s\n", line.c_str());
-                } else if (parameter_manager->fast_load_parse_key_value(key,value)) {
+                } else if (parameter_manager->load_parse_line(line)) {
                     // succeeded loading via parameter_manager ..
                     //Serial.printf(">>parameter_manager handled line\t%s\n", line.c_str());
+                } else if (parameter_manager->load_parse_line_parameter(line)) {
+                    
                 } else {
                     messages_log_add(String("!!Failed to parse line\t'") + key + "=" + value);
                 }

@@ -30,18 +30,18 @@ std::atomic<bool> frame_ready = false;
 
 void setup_menu(bool pressed_state = HIGH);
 
-void setup_screen() {
+void setup_screen(bool pressed_state) {
     #ifdef ENABLE_SCREEN
         pinMode(ENCODER_KNOB_L, INPUT_PULLUP);
         pinMode(ENCODER_KNOB_R, INPUT_PULLUP);
-        pinMode(PIN_BUTTON_A, INPUT_PULLDOWN);
-        pinMode(PIN_BUTTON_B, INPUT_PULLDOWN);
+        pinMode(PIN_BUTTON_A, INPUT);
+        pinMode(PIN_BUTTON_B, INPUT);
 
         tft_print((char*)"Ready!");
         tft_clear();
 
         Debug_println("About to setup_menu.."); 
-        setup_menu(HIGH);
+        setup_menu(pressed_state);
 
         tft_print("HUP!");      // <3 roo
         Debug_println("About to menu->updateDisplay() for the first time..");

@@ -7,7 +7,7 @@
 
 #include "mymenu.h"
 
-void setup_screen();
+void setup_screen(bool pressed_state);
 void push_display();
 void update_screen_dontcare();
 bool update_screen();

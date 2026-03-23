@@ -4,7 +4,7 @@ This work is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/
 
 WIP.
 
-Project for XIAO RP2040 mcu with st7789 screen and rotary encoder.  In some ways the little brother of and using components and libraries from the [usb_midi_clocker](https://github.com/doctea/usb_midi_clocker) project.  
+Project for XIAO RP2350 (was RP2040) mcu with st7789 screen and rotary encoder.  In some ways the little brother of and using components and libraries from the [usb_midi_clocker](https://github.com/doctea/usb_midi_clocker) project.  
 
 The aim here is to have a flexible and extensible MIDI generator based on the mutating Euclidian features from [drum2musocv](https://github.com/doctea/drum2musocv), but aiming to be a bit more modular and extensible.
 
@@ -45,7 +45,7 @@ The aim here is to have a flexible and extensible MIDI generator based on the mu
 
 - Use env:pcb with -DBUILD_BREADBOARD
 
-Seeed XIAO RP2040 pins.  Counting clockwise starting from top-right:-
+Seeed XIAO RP2040/RP2350 pins.  Counting clockwise starting from top-right:-
 
 - 3.3v
 - gnd
