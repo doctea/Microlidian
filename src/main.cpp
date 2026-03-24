@@ -16,6 +16,9 @@
 //#include "midi_usb/midi_usb_rp2040.h"
 
 #include "sequencer/sequencing.h"
+#include "sequencer/Multi/MultiSequencer.h"
+#include "sequencer/Euclidian/Sequencer.h"
+#include "sequencer/Insects/AntTrailPattern.h"
 
 #ifdef ENABLE_STORAGE
     #include "storage/storage.h"
@@ -179,12 +182,21 @@ void setup() {
 
     #ifdef ENABLE_EUCLIDIAN
         //Serial.println("setting up sequencer..");
-        sequencer = new EuclidianSequencer(output_processor->nodes);
-        output_processor->configure_sequencer(sequencer);
-        sequencer->initialise_patterns();
-        sequencer->reset_patterns();
+        sequencer = new MultiSequencer();
+
+        EuclidianSequencer *euclidian_sequencer = new EuclidianSequencer(output_processor->nodes);
+        output_processor->configure_sequencer(euclidian_sequencer);
+        euclidian_sequencer->initialise_patterns();
+        euclidian_sequencer->reset_patterns();
         output_processor->setup_parameters();
         setup_output_processor_parameters();
+
+        ((MultiSequencer*)sequencer)->addSequencer(euclidian_sequencer);
+
+        SimpleSequencer *insect_sequencer = new SimpleSequencer(output_processor->nodes);
+        insect_sequencer->add_pattern(new AntTrailPattern(output_processor->nodes));
+        insect_sequencer->steps = 16;
+        ((MultiSequencer*)sequencer)->addSequencer(insect_sequencer);
 
         #if defined(ENABLE_PARAMETERS)
             //Serial.println("..calling sequencer.getParameters()..");
