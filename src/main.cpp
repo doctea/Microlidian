@@ -195,7 +195,7 @@ void setup() {
 
         SimpleSequencer *insect_sequencer = new SimpleSequencer(output_processor->nodes);
         insect_sequencer->add_pattern(new AntTrailPattern(output_processor->nodes));
-        insect_sequencer->steps = 16;
+        insect_sequencer->get_pattern(0)->set_steps(16);
         ((MultiSequencer*)sequencer)->addSequencer(insect_sequencer);
 
         #if defined(ENABLE_PARAMETERS)
