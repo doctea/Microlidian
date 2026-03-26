@@ -186,19 +186,21 @@ void setup() {
         sequencer = new MultiSequencer();
 
         // set up Euclidian Sequencer and patterns, and add to MultiSequencer
-        /*EuclidianSequencer *euclidian_sequencer = new EuclidianSequencer(output_processor->nodes);
+        EuclidianSequencer *euclidian_sequencer = new EuclidianSequencer(output_processor->nodes);
         output_processor->configure_sequencer(euclidian_sequencer);
         euclidian_sequencer->initialise_patterns();
         euclidian_sequencer->reset_patterns();
         output_processor->setup_parameters();
         setup_output_processor_parameters();
-        ((MultiSequencer*)sequencer)->addSequencer(euclidian_sequencer);*/
+        ((MultiSequencer*)sequencer)->addSequencer(euclidian_sequencer);
 
         // set up Insect Sequencer and patterns, and add to MultiSequencer
         SimpleSequencer *insect_sequencer = new SimpleSequencer(output_processor->nodes);
         // insect_sequencer->add_pattern(new AntTrailPattern(output_processor->nodes));
+        // set up Turing Machine pattern
         insect_sequencer->add_pattern(new TuringMachinePattern(output_processor->nodes));
         insect_sequencer->get_pattern(0)->set_steps(16);
+        insect_sequencer->get_pattern(0)->set_output(output_processor->get_output_for_label("Melody"));
         ((MultiSequencer*)sequencer)->addSequencer(insect_sequencer);
 
         #if defined(ENABLE_PARAMETERS)
