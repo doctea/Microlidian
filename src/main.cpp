@@ -101,6 +101,24 @@ void auto_handle_start_wrapper() {
     #define F(X) X
 #endif
 
+// #ifdef ENABLE_PARAMETERS
+//   repeating_timer_t parameter_timer;
+//   bool parameter_repeating_callback(repeating_timer_t *rt) {
+//     if (started) {
+//       parameter_manager->throttled_update_cv_input__all(5, false, false);
+//     }
+//     return true;
+//   }
+// #endif
+
+#ifdef USE_TINYUSB
+  repeating_timer_t usb_timer;
+  bool usb_repeating_callback(repeating_timer_t *rt) {
+    while(USBMIDI.read()) {}
+    return true;
+  }
+#endif
+
 void setup() {
     Debug_println("setup() starting");
     Debug_printf("at start of setup(), free RAM is %u\n", freeRam());
@@ -290,6 +308,15 @@ void setup() {
         //Serial_flush();
     #endif
     started = true;
+
+    // set up repeating timers to process tasks
+    // #ifdef ENABLE_PARAMETERS
+    //     add_repeating_timer_ms(5, parameter_repeating_callback, nullptr, &parameter_timer);
+    // #endif
+    #ifdef USE_TINYUSB
+        add_repeating_timer_us(250, usb_repeating_callback, nullptr, &usb_timer);
+    #endif
+
 }
 
 //volatile bool ticked = false;
@@ -314,7 +341,33 @@ void add_loop_length(int length) {
 void read_serial_buffer() {
     //uint32_t interrupts = save_and_disable_interrupts();
     if (Serial) {
-        Serial.read();
+        while (Serial.available()) {
+            char c = Serial.read();
+            if (c == 'd') {
+                menu->knob_left();
+                menu->send_frame = true;
+            } else if (c == 'f') {
+                menu->knob_right();
+                menu->send_frame = true;
+            } else if (c == 'a') {
+                menu->button_back();
+                menu->send_frame = true;
+            } else if (c == 'b') {
+                menu->button_select();
+                menu->button_select_released();
+                menu->send_frame = true;
+            } else if (c == 'e') {
+                menu->send_frame = true;
+            } else if (c == 'L') {
+                menu->send_frame = true;
+                menu->send_frame_live = !menu->send_frame_live;
+            }
+            /*else {
+                messages_log_add(String("Wanted a char like 'd' aka value for turning the knob left = ") + String((int)'d'));
+                messages_log_add(String("got serial char: ") + String((int)c));
+            }
+            messages_log_add(String("got serial char: ") + c);*/
+        }
         Serial.clearWriteError();
     }
     //restore_interrupts(interrupts);
@@ -366,14 +419,15 @@ void loop() {
     
     // doing this on the second core means that two Microlidians powered up at the same time won't drift too much
     // however, it causes crashes...
-    #ifndef PROCESS_USB_ON_SECOND_CORE
-        #ifdef USE_TINYUSB
-            ATOMIC()
-            {
-                USBMIDI.read();
-            }
-        #endif
-    #endif
+    // we do this with a repeating timer instead now
+    // #ifndef PROCESS_USB_ON_SECOND_CORE
+    //     #ifdef USE_TINYUSB
+    //         ATOMIC()
+    //         {
+    //             USBMIDI.read();
+    //         }
+    //     #endif
+    // #endif
 
     ATOMIC() 
     {
@@ -424,7 +478,7 @@ void loop() {
             //Serial.printf("early return because %i + %i >= %i + %i\n", micros(), loop_average, last_ticked_at_micros, micros_per_tick);
             //Serial.flush();
         } else {
-            //read_serial_buffer();
+            read_serial_buffer();
 
             //ATOMIC() 
             //{

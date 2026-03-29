@@ -1,5 +1,4 @@
-#ifndef DEBUG__INCLUDED
-#define DEBUG__INCLUDED
+#pragma once
 
 #include <Arduino.h>
 
@@ -46,4 +45,3 @@ volatile extern int tft_time;
 volatile extern int missed_micros;
 volatile extern int sequencer_time;
 
-#endif

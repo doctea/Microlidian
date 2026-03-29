@@ -212,10 +212,10 @@
         output_c = new CVOutputParameter<DAC8574,float>("CVO-C", dac_output, 2, VALUE_TYPE::UNIPOLAR, true);
         output_d = new CVOutputParameter<DAC8574,float>("CVO-D", dac_output, 3, VALUE_TYPE::UNIPOLAR, true);
 
-        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-A", output_processor->nodes, output_a));
-        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-B", output_processor->nodes, output_b));
-        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-C", output_processor->nodes, output_c));
-        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-D", output_processor->nodes, output_d));
+        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-A", 1, output_a, output_processor->nodes));
+        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-B", 1, output_b, output_processor->nodes));
+        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-C", 1, output_c, output_processor->nodes));
+        output_processor->addNode(new MIDINoteTriggerCountOutput("CVO-D", 1, output_d, output_processor->nodes));
 
         //cv_chord_output_1->set_output_target(output_a);
 
