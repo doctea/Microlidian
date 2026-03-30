@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "ParameterManager.h"
 #include "outputs/output.h"
+#include "outputs/output_processor.h"
 
 #include <string>
 
@@ -86,6 +87,12 @@ bool load_from_slot(int slot) {
                 //value.replace("\r","");
 
                 //if (continue_before_parse_2) continue;
+                // todo: fix all this..!
+                // maybe we can have a global list of ISaveableParameterHosts that we loop through and call load_parse_key_value on each of them, instead of hardcoding output_wrapper and parameter_manager here? 
+                // (ai suggestion) we could even have different types of ISaveableParameterHost for different types of data, eg ParameterInputs vs Parameters vs OutputNodes vs SequencerPatterns, and then when we call load_parse_key_value we can pass in the type of data we're trying to parse so that it can ignore lines that don't match that type, which would save us having to loop through loads of irrelevant lines for each ISaveableParameterHost
+                // (another ai suggestion) we could have the ISaveableParameterHost itself determine whether a line is relevant to it or not, by having some kind of identifier in the line that it can check for, eg "parameter_input_" for ParameterInputs, "parameter_" for Parameters, "output_node_" for OutputNodes, "sequencer_pattern_" for SequencerPatterns, etc - this would be a bit less efficient than having different types of ISaveableParameterHost for each type of data, since we'd still be calling load_parse_key_value on every line for every ISaveableParameterHost, but it would be simpler to implement and still save us having to loop through loads of irrelevant lines within each load_parse_key_value function
+                // but perhaps we just use ini-style [section headers] in the save files to separate out different types of data, and then we can have the load function keep track of which section it's currently in and only call load_parse_key_value on the relevant ISaveableParameterHosts for that section? this would be more efficient and also make the save files easier to read for humans, but would require a bit more work to implement
+                //          that is already how we handle the behaviours in the nexus6 pattern save files.  maybe even nesting these is the way to go?
                 if (output_wrapper->load_parse_key_value(key,value)) {
                     // succeeded loading via output_wrapper MIDIOutputWrapper
                     //Serial.printf(">>output_wrapper handled line\t%s\n", line.c_str());
@@ -93,6 +100,10 @@ bool load_from_slot(int slot) {
                     // succeeded loading via parameter_manager ..
                     //Serial.printf(">>parameter_manager handled line\t%s\n", line.c_str());
                 } else if (parameter_manager->load_parse_line_parameter(line)) {
+
+                } else if (sequencer->load_parse_key_value(key, value)) {
+
+                } else if (output_processor->load_parse_key_value(key, value)) {
                     
                 } else {
                     messages_log_add(String("!!Failed to parse line\t'") + key + "=" + value);
@@ -130,6 +141,12 @@ bool save_to_slot(int slot) {
 
             // get MIDIOutputWrapper lines
             output_wrapper->add_all_save_lines(lines);
+
+            // get all the sequencer lines
+            sequencer->add_save_lines_saveable_parameters(lines);
+
+            // get all the output nodes lines
+            output_processor->save_pattern_add_lines(lines);
 
             // save them to file
             const uint_fast16_t size = lines->size();
