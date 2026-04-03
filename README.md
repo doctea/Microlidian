@@ -14,6 +14,7 @@ The aim here is to have a flexible and extensible MIDI generator based on the mu
 - USB-Type C input for syncing to USB MIDI clock and sending out MIDI
 - 3 bipolar CV inputs (using Pimoroni ADC board)
 - TRS MIDI out for sending 16+ rhythm tracks to a MIDIMUSO-CV12 board (or other MIDI devices!).
+- (experimental) Time signature control
 
 ## Requirements
 
