@@ -205,6 +205,12 @@ void loop1() {
         if (!is_locked() && menu!=nullptr && millis() - last_pushed > MENU_MS_BETWEEN_REDRAW) {
             draw_screen();
             last_pushed = millis();
+
+            /*if (ticks % 12 == 0 && Serial) {
+                // attempt to push the framebuffer out over serial
+                //Serial.println("pushing framebuffer.."); Serial.flush();
+                //menu->tft->push_framebuffer_serial();
+            }*/
         }
     }
 
