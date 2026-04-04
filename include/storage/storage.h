@@ -6,6 +6,13 @@
 #include "sequencer/sequencing.h"
 #include "outputs/output_processor.h"
 
+#define PRESET_SLOT_FILEPATH_FORMAT "slots/preset-%i.txt"
+#define MAXFILEPATH 32
+
+#define FILE_READ_MODE "r"
+#define FILE_WRITE_MODE "w"
+#define FILEPATH_CALIBRATION_FORMAT       "calib_volt_src_%i.txt"
+
 void setup_saveloadlib();
 
 class SettingsRoot : public ISaveableSettingHost {
@@ -29,3 +36,7 @@ extern SettingsRoot *settings_root;
 #ifdef ENABLE_SCREEN
     void setup_storage_menu();
 #endif
+
+
+bool save_to_slot(int slot);
+bool load_from_slot(int slot);
