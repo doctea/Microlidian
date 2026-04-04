@@ -44,6 +44,8 @@ class CVChordVoice : public BaseOutputProcessor {
             this->channel = channel;
             this->colour = menu->get_next_colour();
             strncpy(this->label, label, MENU_C_MAX);
+            
+            this->set_path_segment(label);
         }
 
         virtual void process() override {

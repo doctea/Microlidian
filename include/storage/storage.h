@@ -65,9 +65,9 @@ class SettingsRoot : public ISaveableSettingHost {
             // }
         #endif
 
-
         // todo: add parameter manager here as well;
         //      it has parameter inputs that need to be saved globally
+        //      anything else..?
 
     }
 };
