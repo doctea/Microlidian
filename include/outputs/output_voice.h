@@ -99,4 +99,55 @@ class CVChordVoice : public BaseOutputProcessor {
             menu->add(selectors, this->colour);
             menu->add(chord_player.make_menu_items(), this->colour);
         }
+
+        virtual void setup_saveable_settings() override {
+            BaseOutputProcessor::setup_saveable_settings();
+
+            register_setting(new LSaveableSetting<int8_t>(
+                "MIDI channel",
+                "ChordVoice",
+                &this->channel,
+                [=](int8_t v) { this->channel = v; },
+                [=]() -> int8_t { return this->channel; }
+            ));
+            
+            register_child(chord_player);
+
+            // @@TODO: hmmm, do we need some way to be able to identify the target_output between sessions..?
+            // but as its an IMIDINoteTarget pointer, we can't just save the pointer value... 
+            // maybe we need some kind of unique ID for the output_target and then look it up on load?
+            // actually it seems that its just a MIDIOutputWrapper, which will always point at our single
+            // instance of MIDIOutputWrapper, so we can get away without this for now.
+            //register_setting(new Output)
+
+            // we do need to save the parameter_input_pitch and parameter_input_velocity though, so we will need some way to identify those on load as well; maybe we can just save the label of the parameter input and look it up on load?
+            register_setting(new LSaveableSetting<const char*>(
+                "Pitch Parameter Input",
+                "ModInputs",
+                [=](const char* group_and_name) {
+                    BaseParameterInput *input = parameter_manager->getInputForGroupAndName(group_and_name);
+                    this->set_parameter_input_pitch(input);
+                },
+                [=]() -> const char* {
+                    BaseParameterInput *input = this->get_parameter_input_pitch();
+                    if (input==nullptr) return "";
+                    return input->get_group_and_name();
+                }
+            ));
+
+            register_setting(new LSaveableSetting<const char*>(
+                "Velocity Parameter Input",
+                "ModInputs",
+                [=](const char* group_and_name) {
+                    BaseParameterInput *input = parameter_manager->getInputForGroupAndName(group_and_name);
+                    this->set_parameter_input_velocity(input);
+                },
+                [=]() -> const char* {
+                    BaseParameterInput *input = this->get_parameter_input_velocity();
+                    if (input==nullptr) return "";
+                    return input->get_group_and_name();
+                }
+            ));
+
+        }
 };

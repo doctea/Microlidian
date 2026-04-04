@@ -30,3 +30,6 @@ void setup_parameter_menu();
 extern ParameterManager *parameter_manager;
 
 extern bool cv_input_enabled;
+
+// how many mixable parameters for outputing MIDI CCs we should allow
+#define NUM_MIDI_CC_PARAMETERS 6

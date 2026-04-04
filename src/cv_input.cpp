@@ -86,7 +86,6 @@ void setup_parameter_inputs() {
 }
 
 
-#define NUM_MIDI_CC_PARAMETERS 6
 FloatParameter *midi_cc_parameters[NUM_MIDI_CC_PARAMETERS];
 
 // todo: configure the CCs to be compatible with the CCs of the midimuso by default etc

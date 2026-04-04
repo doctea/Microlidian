@@ -32,7 +32,7 @@ void setup_saveloadlib() {
     Serial.println("setup_saveloadlib() finished!");
 
     // for debug, try opening the file and print its contents to serial:
-    //debug_print_file("/slots/preset-0.txt");
+    debug_print_file("/slots/preset-0.txt");
    
     // // for debug, print the whole settings tree to serial
     // although this works to print out the settings tree,
@@ -144,10 +144,41 @@ void load_from_slot_7() {   load_from_slot(7);}
             snprintf(label, MENU_C_MAX, "Preset slot %i", i);
             DualMenuItem *submenuitem = new DualMenuItem(label);
 
-            submenuitem->add(new ActionConfirmItem("Load", functions[i].load, false));
-            submenuitem->add(new ActionConfirmItem("Save", functions[i].save, false));
+            snprintf(label, MENU_C_MAX, "Load %i", i);
+            submenuitem->add(new ActionConfirmItem(label, functions[i].load, false));
+
+            snprintf(label, MENU_C_MAX, "Save %i", i);
+            submenuitem->add(new ActionConfirmItem(label, functions[i].save, false));
 
             menu->add(submenuitem);
         }
+
+        // options to dump files to serial for debugging
+        SubMenuItemBar *debug_bar = new SubMenuItemBar("Dump file to serial", true, true);
+        for (int i = 0 ; i < sizeof(functions)/sizeof(functions_t) ; i++) {
+            char label[MENU_C_MAX];
+            snprintf(label, MENU_C_MAX, "%i", i);
+            debug_bar->add(
+                new LambdaActionConfirmItem(
+                    label, 
+                    [=]() { 
+                        char filename[MAXFILEPATH];
+                        snprintf(filename, MAXFILEPATH, PRESET_SLOT_FILEPATH_FORMAT, i);
+                        acquire_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
+                        ATOMIC() {
+                            debug_print_file(filename);
+                        }
+                        release_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
+                    }
+                )
+            );
+        }
+        menu->add(debug_bar);
+
+        // option to dump the whole settings tree to serial for debugging
+        menu->add(new ActionConfirmItem("Dump settings tree to serial", []() { 
+            sl_print_tree_to_print(settings_root, Serial, 10); }, false)
+        );
+
     }
 #endif

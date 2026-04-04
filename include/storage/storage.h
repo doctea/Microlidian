@@ -6,6 +6,11 @@
 #include "sequencer/sequencing.h"
 #include "outputs/output_processor.h"
 
+#ifdef ENABLE_CV_INPUT
+    #include "outputs/output_voice.h"
+    #include "cv_input.h"
+#endif
+
 extern RP2040OutputWrapperClass *output_wrapper; // @@ TODO: find a suitable place to put this in a header
 
 #define PRESET_SLOT_FILEPATH_FORMAT "slots/preset-%i.txt"
@@ -20,7 +25,7 @@ void setup_saveloadlib();
 class SettingsRoot : public ISaveableSettingHost {
     public:
     SettingsRoot() {
-        this->path_segment = "root";
+        this->set_path_segment("root");
         this->seg_hash = sl_fnv1a_16(this->path_segment);
     }
 
@@ -31,9 +36,34 @@ class SettingsRoot : public ISaveableSettingHost {
         register_child(output_processor);
         register_child(output_wrapper);
 
-        // todo: add parameter manage here as well;
+        register_setting(new LSaveableSetting<uint8_t>(
+            "Time Signature Denominator",
+            [=](uint8_t v) { set_time_signature_denominator(v); },
+            [=]() -> uint8_t { return get_time_signature_denominator(); }
+        ));
+        register_setting(new LSaveableSetting<uint8_t>(
+            "Time Signature Numerator",
+            [=](uint8_t v) { set_time_signature_numerator(v); },
+            [=]() -> uint8_t { return get_time_signature_numerator(); }
+        ));
+
+        // CV Pitch settings
+        #ifdef ENABLE_CV_INPUT
+            register_child(cv_chord_output_1);
+            register_child(cv_chord_output_2);
+            register_child(cv_chord_output_3);
+
+            // add the midi_cc_parameters, too!
+            // these are not strictly only CV_INPUT things, as can also mix internal LFOs and Envelopes etc
+            // @@TODO: this will need Parameter converting to new ISaveableSetting system as well
+            for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
+                register_child(midi_cc_parameters[i]);
+            }
+        #endif
+
+
+        // todo: add parameter manager here as well;
         //      it has parameter inputs that need to be saved globally
-        // todo: add the MIDI output wrapper here as well, since it has settings that need to be saved globally
 
     }
 };
