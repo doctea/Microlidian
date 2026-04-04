@@ -28,6 +28,10 @@ class SettingsRoot : public ISaveableSettingHost {
         register_child(sequencer);
         register_child(output_processor);
 
+        // todo: add parameter manage here as well;
+        //      it has parameter inputs that need to be saved globally
+        // todo: add the MIDI output wrapper here as well, since it has settings that need to be saved globally
+
     }
 };
 

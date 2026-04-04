@@ -28,6 +28,11 @@ void setup_saveloadlib() {
     Serial.printf("Before sl_setup_all(), free RAM is %u\n", freeRam());
     sl_setup_all(settings_root);
     Serial.printf("After sl_setup_all(), free RAM is %u\n", freeRam());
+
+    Serial.println("setup_saveloadlib() finished!");
+
+    // for debug, try opening the file and print its contents to serial:
+    //debug_print_file("/slots/preset-0.txt");
    
     // // for debug, print the whole settings tree to serial
     // although this works to print out the settings tree,
@@ -41,7 +46,7 @@ bool save_to_slot(int slot) {
     char filename[MAXFILEPATH];
     snprintf(filename, MAXFILEPATH, PRESET_SLOT_FILEPATH_FORMAT, slot);
 
-    acquire_lock();
+    // acquire_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
 
     Serial.printf("Saving to slot %i (file %s)...\n", slot, filename); Serial.flush();
     uint32_t micros_at_start_of_save = micros();
@@ -49,7 +54,7 @@ bool save_to_slot(int slot) {
     uint32_t micros_at_end_of_save = micros();
     Serial.printf("Finished saving to slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save)); Serial.flush();
 
-    release_lock();
+    // release_lock();// @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
 
     if (status) {
         messages_log_add(String("Saved to slot ") + String(slot));
@@ -73,8 +78,13 @@ bool load_from_slot(int slot) {
         return false;
     }
 
+    
+    acquire_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
+
     //Serial.printf("Loading from slot %i (file %s)...\n", slot, filename); Serial.flush();
     bool status = sl_load_from_file(filename);
+
+    release_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
 
     if (status) {
         messages_log_add(String("Loaded from slot ") + String(slot));
@@ -87,31 +97,23 @@ bool load_from_slot(int slot) {
     }
 }
 
+void save_to_slot_0() {     save_to_slot(0);}
+void save_to_slot_1() {     save_to_slot(1);}
+void save_to_slot_2() {     save_to_slot(2);}
+void save_to_slot_3() {     save_to_slot(3);}
+void save_to_slot_4() {     save_to_slot(4);}
+void save_to_slot_5() {     save_to_slot(5);}
+void save_to_slot_6() {     save_to_slot(6);}
+void save_to_slot_7() {     save_to_slot(7);}
 
-void save_to_slot_0() {
-    //return 
-    save_to_slot(0);
-}
-void load_from_slot_0() {
-    //return
-    load_from_slot(0);
-}
-void save_to_slot_1() {
-    //return
-    save_to_slot(1);
-}
-void load_from_slot_1() {
-    //return
-    load_from_slot(1);
-}
-void save_to_slot_2() {
-    //return
-    save_to_slot(2);
-}
-void load_from_slot_2() {
-    //return
-    load_from_slot(2);
-}
+void load_from_slot_0() {   load_from_slot(0);}
+void load_from_slot_1() {   load_from_slot(1);}
+void load_from_slot_2() {   load_from_slot(2);}
+void load_from_slot_3() {   load_from_slot(3);}
+void load_from_slot_4() {   load_from_slot(4);}
+void load_from_slot_5() {   load_from_slot(5);}
+void load_from_slot_6() {   load_from_slot(6);}
+void load_from_slot_7() {   load_from_slot(7);}
 
 #include "mymenu.h"
 
@@ -129,7 +131,12 @@ void load_from_slot_2() {
         functions_t functions[] = {
             { &save_to_slot_0, &load_from_slot_0 },
             { &save_to_slot_1, &load_from_slot_1 },
-            { &save_to_slot_2, &load_from_slot_2 }
+            { &save_to_slot_2, &load_from_slot_2 },
+            { &save_to_slot_3, &load_from_slot_3 },
+            { &save_to_slot_4, &load_from_slot_4 },
+            { &save_to_slot_5, &load_from_slot_5 },
+            { &save_to_slot_6, &load_from_slot_6 },
+            { &save_to_slot_7, &load_from_slot_7 }
         };
 
         for (int i = 0 ; i < sizeof(functions)/sizeof(functions_t) ; i++) {
