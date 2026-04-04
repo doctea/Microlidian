@@ -111,7 +111,7 @@ class CVChordVoice : public BaseOutputProcessor {
                 [=]() -> int8_t { return this->channel; }
             ));
             
-            register_child(chord_player);
+            register_child(&chord_player);
 
             // @@TODO: hmmm, do we need some way to be able to identify the target_output between sessions..?
             // but as its an IMIDINoteTarget pointer, we can't just save the pointer value... 
@@ -124,6 +124,7 @@ class CVChordVoice : public BaseOutputProcessor {
             register_setting(new LSaveableSetting<const char*>(
                 "Pitch Parameter Input",
                 "ModInputs",
+                nullptr,
                 [=](const char* group_and_name) {
                     BaseParameterInput *input = parameter_manager->getInputForGroupAndName(group_and_name);
                     this->set_parameter_input_pitch(input);
@@ -138,6 +139,7 @@ class CVChordVoice : public BaseOutputProcessor {
             register_setting(new LSaveableSetting<const char*>(
                 "Velocity Parameter Input",
                 "ModInputs",
+                nullptr,
                 [=](const char* group_and_name) {
                     BaseParameterInput *input = parameter_manager->getInputForGroupAndName(group_and_name);
                     this->set_parameter_input_velocity(input);

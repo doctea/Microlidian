@@ -33,3 +33,4 @@ extern bool cv_input_enabled;
 
 // how many mixable parameters for outputing MIDI CCs we should allow
 #define NUM_MIDI_CC_PARAMETERS 6
+extern FloatParameter *midi_cc_parameters[NUM_MIDI_CC_PARAMETERS];

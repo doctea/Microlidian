@@ -38,11 +38,15 @@ class SettingsRoot : public ISaveableSettingHost {
 
         register_setting(new LSaveableSetting<uint8_t>(
             "Time Signature Denominator",
+            "TimeSigs",
+            nullptr,
             [=](uint8_t v) { set_time_signature_denominator(v); },
             [=]() -> uint8_t { return get_time_signature_denominator(); }
         ));
         register_setting(new LSaveableSetting<uint8_t>(
             "Time Signature Numerator",
+            "TimeSigs",
+            nullptr,
             [=](uint8_t v) { set_time_signature_numerator(v); },
             [=]() -> uint8_t { return get_time_signature_numerator(); }
         ));
@@ -56,9 +60,9 @@ class SettingsRoot : public ISaveableSettingHost {
             // add the midi_cc_parameters, too!
             // these are not strictly only CV_INPUT things, as can also mix internal LFOs and Envelopes etc
             // @@TODO: this will need Parameter converting to new ISaveableSetting system as well
-            for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
-                register_child(midi_cc_parameters[i]);
-            }
+            // for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
+            //     register_child(midi_cc_parameters[i]);
+            // }
         #endif
 
 
