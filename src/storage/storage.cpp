@@ -44,7 +44,10 @@ bool save_to_slot(int slot) {
     acquire_lock();
 
     Serial.printf("Saving to slot %i (file %s)...\n", slot, filename); Serial.flush();
+    uint32_t micros_at_start_of_save = micros();
     bool status = sl_save_to_file(settings_root, filename);
+    uint32_t micros_at_end_of_save = micros();
+    Serial.printf("Finished saving to slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save)); Serial.flush();
 
     release_lock();
 
