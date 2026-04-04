@@ -11,6 +11,10 @@
     #include "cv_input.h"
 #endif
 
+#ifdef ENABLE_PARAMETERS
+    #include "ParameterManager.h"
+#endif
+
 extern RP2040OutputWrapperClass *output_wrapper; // @@ TODO: find a suitable place to put this in a header
 
 #define PRESET_SLOT_FILEPATH_FORMAT "slots/preset-%i.txt"
@@ -51,6 +55,7 @@ class SettingsRoot : public ISaveableSettingHost {
             [=]() -> uint8_t { return get_time_signature_numerator(); }
         ));
 
+
         // CV Pitch settings
         #ifdef ENABLE_CV_INPUT
             register_child(cv_chord_output_1);
@@ -68,7 +73,9 @@ class SettingsRoot : public ISaveableSettingHost {
         // todo: add parameter manager here as well;
         //      it has parameter inputs that need to be saved globally
         //      anything else..?
-
+        #ifdef ENABLE_PARAMETERS
+            register_child(parameter_manager);
+        #endif
     }
 };
 
