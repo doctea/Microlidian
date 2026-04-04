@@ -6,6 +6,8 @@
 #include "sequencer/sequencing.h"
 #include "outputs/output_processor.h"
 
+extern RP2040OutputWrapperClass *output_wrapper; // @@ TODO: find a suitable place to put this in a header
+
 #define PRESET_SLOT_FILEPATH_FORMAT "slots/preset-%i.txt"
 #define MAXFILEPATH 32
 
@@ -27,6 +29,7 @@ class SettingsRoot : public ISaveableSettingHost {
         
         register_child(sequencer);
         register_child(output_processor);
+        register_child(output_wrapper);
 
         // todo: add parameter manage here as well;
         //      it has parameter inputs that need to be saved globally
