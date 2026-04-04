@@ -152,11 +152,6 @@ void setup() {
         Debug_printf("after setup_usb(), free RAM is %u\n", freeRam());
     #endif
 
-    #ifdef ENABLE_STORAGE
-        setup_storage();
-        Debug_printf("after setup_storage(), free RAM is %u\n", freeRam());
-    #endif
-
     output_wrapper = new RP2040DualMIDIOutputWrapper();
     setup_output(output_wrapper, new ChosenDrumKitMIDIOutputProcessor(output_wrapper));
     Debug_printf("after setup_output(), free RAM is %u\n", freeRam());
@@ -185,7 +180,6 @@ void setup() {
             setup_storage_menu();
         #endif
     #endif
-
 
     // check if the two buttons are held down, if so, enter firmware reset mode as quickly as possible!
     #ifdef ENABLE_SCREEN
@@ -216,7 +210,9 @@ void setup() {
         SimpleSequencer *insect_sequencer = new SimpleSequencer(output_processor->nodes);
         // insect_sequencer->add_pattern(new AntTrailPattern(output_processor->nodes));
         // set up Turing Machine pattern
+        // TODO: rename this, move it somewhere else, it's not really an "insect" pattern
         insect_sequencer->add_pattern(new TuringMachinePattern(output_processor->nodes));
+        insect_sequencer->get_pattern(0)->set_path_segment("pattern_0");
         insect_sequencer->get_pattern(0)->set_steps(16);
         insect_sequencer->get_pattern(0)->set_output(output_processor->get_output_for_label("Melody"));
         ((MultiSequencer*)sequencer)->addSequencer(insect_sequencer);
@@ -285,6 +281,13 @@ void setup() {
         parameter_manager->load_all_calibrations();
     #endif
 
+    // setup the saveloadlib tree
+    #ifdef ENABLE_STORAGE
+        Serial.println("Setting up saveloadlib..."); Serial.flush();
+        setup_saveloadlib();
+        Serial.println("Finished setting up saveloadlib!"); Serial.flush();
+    #endif
+
     started = true;
 
     #ifdef DEBUG_ENVELOPES
@@ -292,7 +295,7 @@ void setup() {
     #endif
 
     #ifdef ENABLE_SCREEN
-    menu->set_last_message((String("Started up, free RAM is ") + String(freeRam())).c_str());
+        menu->set_last_message((String("Started up, free RAM is ") + String(freeRam())).c_str());
     #endif
 
     Debug_printf("at end of setup(), free RAM is %u\n", freeRam());

@@ -141,3 +141,30 @@ Seeed XIAO RP2040/RP2350 pins.  Counting clockwise starting from top-right:-
   - Tried: adding a delay before setup
   - Tried+fixed: added pullup resistor to display RES pin
 
+
+
+
+
+----
+
+## Development notes - saveloadlib implementation
+
+- Root
+  - System settings
+    - MIDI settings
+    - Calibration settings
+  - Clock settings
+    - BPM?
+    - Clock source?
+    - Time signature?
+  - Sequencers
+    - EuclidianSequencer
+      - EuclidianPatterns
+      - Own settings
+    - OtherSequencer
+      - TuringMachine pattern(s)
+      - Own settings
+  - OutputProcessor
+    - Quantisation/scale/key settings
+    - OutputNodes
+  - ParameterInputs (managed by ParameterManager)
