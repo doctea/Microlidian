@@ -26,6 +26,10 @@ extern RP2040OutputWrapperClass *output_wrapper; // @@ TODO: find a suitable pla
 
 void setup_saveloadlib();
 
+void debug_print_file(const char* filepath);
+void queue_file_output(const char* filepath);
+bool process_queued_file_output();
+
 #ifdef ENABLE_TESTSAVELOAD
     #include "saveload_test.h"
 #endif

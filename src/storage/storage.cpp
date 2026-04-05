@@ -38,7 +38,7 @@ void setup_saveloadlib() {
     Serial.println("setup_saveloadlib() finished!");
 
     // for debug, try opening the file and print its contents to serial:
-    //debug_print_file("/slots/preset-0.txt");
+    debug_print_file("/slots/preset-0.txt");
    
     // // for debug, print the whole settings tree to serial
     // although this works to print out the settings tree,
@@ -102,6 +102,31 @@ bool load_from_slot(int slot) {
         //Serial.printf("Failed to load from slot %i (file %s)!\n", slot, filename); Serial.flush();
         return false;
     }
+}
+
+
+static char queued_filename[MAXFILEPATH] = "";
+void queue_file_output(const char *filename) {
+    strncpy(queued_filename, filename, MAXFILEPATH);
+    queued_filename[MAXFILEPATH-1] = '\0'; // ensure null termination
+}
+bool process_queued_file_output() {
+    static bool is_outputting = false;
+    if (is_outputting) {
+        return false; // still outputting previous file, don't start a new one yet
+    }
+    char filename[MAXFILEPATH];
+    strncpy(filename, queued_filename, MAXFILEPATH);
+    filename[MAXFILEPATH-1] = '\0'; // ensure null termination
+    if (filename[0] == '\0') {
+        return false; // no file queued
+    }
+    is_outputting = true;
+    Serial.printf("Outputting file %s to serial...\n", filename); Serial.flush();
+    debug_print_file(filename);
+    queued_filename[0] = '\0'; // clear the queue
+    is_outputting = false;
+    return true;
 }
 
 void save_to_slot_0() {     save_to_slot(0);}
@@ -168,14 +193,10 @@ void load_from_slot_7() {   load_from_slot(7);}
             debug_bar->add(
                 new LambdaActionConfirmItem(
                     label, 
-                    [=]() { 
+                    [=]() {
                         char filename[MAXFILEPATH];
                         snprintf(filename, MAXFILEPATH, PRESET_SLOT_FILEPATH_FORMAT, i);
-                        acquire_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
-                        ATOMIC() {
-                            //debug_print_file(filename);
-                        }
-                        release_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
+                        queue_file_output(filename);
                     }
                 )
             );

@@ -10,6 +10,10 @@
 #include "outputs/output_processor.h"
 #include "sequencer/sequencing.h"
 
+#ifdef ENABLE_STORAGE
+    #include "storage/storage.h"
+#endif
+
 #ifdef ENABLE_CV_INPUT
     #include "ADS1X15.h"
 #endif
@@ -34,6 +38,10 @@ class DebugPanel : public MenuItem {
             header("Statistics:", pos, selected, opened);
             #ifdef ENABLE_PARAMETERS
                 tft->printf("Parameters: %i\n", parameter_manager->available_parameters->size());
+            #endif
+            #ifdef ENABLE_STORAGE
+                SL_TreeCounts sl_counts = sl_count_tree(SL_ROOT);
+                tft->printf("Save tree: %u nodes %u settings ~%lu KB\n", sl_counts.nodes, sl_counts.settings, (unsigned long)sl_counts.bytes/1024);
             #endif
             tft->printf("Free RAM: %u bytes\n", freeRam());
             tft->printf("Uptime: %02uh %02um %02us\n", time/60/60, (time/60)%60, (time)%60);

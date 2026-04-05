@@ -523,6 +523,8 @@ void loop() {
         #endif
     }
 
+    process_queued_file_output();
+
     //Serial.println("end of loop()"); Serial.flush();
 }
 
