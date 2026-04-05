@@ -26,6 +26,10 @@ extern RP2040OutputWrapperClass *output_wrapper; // @@ TODO: find a suitable pla
 
 void setup_saveloadlib();
 
+#ifdef ENABLE_TESTSAVELOAD
+    #include "saveload_test.h"
+#endif
+
 class SettingsRoot : public SHStorage<16, 4> {  // all top-level hosts as children
     public:
     SettingsRoot() {
@@ -35,6 +39,12 @@ class SettingsRoot : public SHStorage<16, 4> {  // all top-level hosts as childr
 
     virtual void setup_saveable_settings() override {
         // register top nodes of hierarchy
+
+        #ifdef ENABLE_TESTSAVELOAD
+            // test object
+            test_object = new TestSaveableObject();
+            register_child(test_object);
+        #endif
         
         register_child(sequencer);
         register_child(output_processor);

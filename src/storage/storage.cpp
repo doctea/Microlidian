@@ -1,9 +1,15 @@
 #include "storage/storage.h"
 #include "saveload_settings.h"
 
+#include "saveload_test.h"
+
 #include "core_safe.h"
 
 SettingsRoot *settings_root;
+
+#ifdef ENABLE_TESTSAVELOAD
+    TestSaveableObject *test_object;
+#endif
 
 void setup_saveloadlib() {
 

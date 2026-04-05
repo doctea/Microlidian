@@ -23,6 +23,7 @@
 
 #ifdef ENABLE_STORAGE
     #include "storage/storage.h"
+    #include "saveload_test.h"
 #endif
 
 #ifdef ENABLE_SCREEN
@@ -286,6 +287,10 @@ void setup() {
         Serial.println("Setting up saveloadlib..."); Serial.flush();
         setup_saveloadlib();
         Serial.println("Finished setting up saveloadlib!"); Serial.flush();
+        
+        #ifdef ENABLE_TESTSAVELOAD
+            test_object->create_menu_items();
+        #endif
     #endif
 
     started = true;
