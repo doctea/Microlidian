@@ -26,7 +26,7 @@ extern RP2040OutputWrapperClass *output_wrapper; // @@ TODO: find a suitable pla
 
 void setup_saveloadlib();
 
-class SettingsRoot : public ISaveableSettingHost {
+class SettingsRoot : public SHStorage<16, 4> {  // all top-level hosts as children
     public:
     SettingsRoot() {
         this->set_path_segment("root");

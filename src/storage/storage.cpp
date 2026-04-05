@@ -32,7 +32,7 @@ void setup_saveloadlib() {
     Serial.println("setup_saveloadlib() finished!");
 
     // for debug, try opening the file and print its contents to serial:
-    debug_print_file("/slots/preset-0.txt");
+    //debug_print_file("/slots/preset-0.txt");
    
     // // for debug, print the whole settings tree to serial
     // although this works to print out the settings tree,
@@ -46,7 +46,8 @@ bool save_to_slot(int slot) {
     char filename[MAXFILEPATH];
     snprintf(filename, MAXFILEPATH, PRESET_SLOT_FILEPATH_FORMAT, slot);
 
-    // acquire_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
+    // acquire_lock() prevents core 1 from being interrupted mid-transaction by LittleFS flash writes
+    acquire_lock();
 
     Serial.printf("Saving to slot %i (file %s)...\n", slot, filename); Serial.flush();
     uint32_t micros_at_start_of_save = micros();
@@ -54,7 +55,7 @@ bool save_to_slot(int slot) {
     uint32_t micros_at_end_of_save = micros();
     Serial.printf("Finished saving to slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save)); Serial.flush();
 
-    // release_lock();// @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
+    release_lock();
 
     if (status) {
         messages_log_add(String("Saved to slot ") + String(slot));
@@ -166,7 +167,7 @@ void load_from_slot_7() {   load_from_slot(7);}
                         snprintf(filename, MAXFILEPATH, PRESET_SLOT_FILEPATH_FORMAT, i);
                         acquire_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
                         ATOMIC() {
-                            debug_print_file(filename);
+                            //debug_print_file(filename);
                         }
                         release_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
                     }
