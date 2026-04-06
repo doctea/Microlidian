@@ -111,7 +111,7 @@ class CVChordVoice : public BaseOutputProcessor {
                 &this->channel,
                 [=](int8_t v) { this->channel = v; },
                 [=]() -> int8_t { return this->channel; }
-            ));
+            ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
             
             register_child(&chord_player);
 
@@ -136,7 +136,7 @@ class CVChordVoice : public BaseOutputProcessor {
                     if (input==nullptr) return "";
                     return input->get_group_and_name();
                 }
-            ));
+            ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
 
             register_setting(new LSaveableSetting<const char*>(
                 "Velocity Parameter Input",
@@ -151,7 +151,7 @@ class CVChordVoice : public BaseOutputProcessor {
                     if (input==nullptr) return "";
                     return input->get_group_and_name();
                 }
-            ));
+            ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
 
         }
 };

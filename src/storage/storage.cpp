@@ -46,6 +46,26 @@ void setup_saveloadlib() {
     //sl_print_tree_to_print(settings_root, Serial, 10);
 }
 
+// save/load system settings
+void save_system_settings() {
+    acquire_lock();
+    bool status = sl_save_to_file(settings_root, SYSTEM_SETTINGS_FILEPATH, SL_SCOPE_SYSTEM);
+    release_lock();
+    if (status) {
+        messages_log_add("Saved system settings");
+    } else {
+        messages_log_add("Failed to save system settings");
+    }
+}
+void load_system_settings() {
+    if (!LittleFS.exists(SYSTEM_SETTINGS_FILEPATH)) {
+        messages_log_add(String("System settings file does not exist: ") + String(SYSTEM_SETTINGS_FILEPATH));
+        return;
+    }
+    acquire_lock();
+    bool status = sl_load_from_file(SYSTEM_SETTINGS_FILEPATH, SL_SCOPE_SYSTEM);
+    release_lock();
+}
 
 bool save_to_slot(int slot) {
 
@@ -57,7 +77,7 @@ bool save_to_slot(int slot) {
 
     Serial.printf("Saving to slot %i (file %s)...\n", slot, filename); Serial.flush();
     uint32_t micros_at_start_of_save = micros();
-    bool status = sl_save_to_file(settings_root, filename);
+    bool status = sl_save_to_file(settings_root, filename, SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
     uint32_t micros_at_end_of_save = micros();
     Serial.printf("Finished saving to slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save)); Serial.flush();
 
@@ -89,7 +109,7 @@ bool load_from_slot(int slot) {
     acquire_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
 
     //Serial.printf("Loading from slot %i (file %s)...\n", slot, filename); Serial.flush();
-    bool status = sl_load_from_file(filename);
+    bool status = sl_load_from_file(filename, SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
 
     release_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
 
@@ -184,6 +204,11 @@ void load_from_slot_7() {   load_from_slot(7);}
 
             menu->add(submenuitem);
         }
+
+        DualMenuItem *system_settings_bar = new DualMenuItem("System settings");
+        system_settings_bar->add(new ActionConfirmItem("Load", &load_system_settings, false));
+        system_settings_bar->add(new ActionConfirmItem("Save", &save_system_settings, false));
+        menu->add(system_settings_bar);
 
         // options to dump files to serial for debugging
         SubMenuItemBar *debug_bar = new SubMenuItemBar("Dump file to serial", true, true);

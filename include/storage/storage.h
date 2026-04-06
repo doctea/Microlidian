@@ -17,12 +17,14 @@
 
 extern RP2040OutputWrapperClass *output_wrapper; // @@ TODO: find a suitable place to put this in a header
 
+#define SYSTEM_SETTINGS_FILEPATH "system.txt"
+
 #define PRESET_SLOT_FILEPATH_FORMAT "slots/preset-%i.txt"
 #define MAXFILEPATH 32
 
 #define FILE_READ_MODE "r"
 #define FILE_WRITE_MODE "w"
-#define FILEPATH_CALIBRATION_FORMAT       "calib_volt_src_%i.txt"
+#define FILEPATH_CALIBRATION_FORMAT "calib_volt_src_%i.txt"
 
 void setup_saveloadlib();
 
@@ -60,14 +62,14 @@ class SettingsRoot : public SHStorage<16, 4> {  // all top-level hosts as childr
             nullptr,
             [=](uint8_t v) { set_time_signature_denominator(v); },
             [=]() -> uint8_t { return get_time_signature_denominator(); }
-        ));
+        ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
         register_setting(new LSaveableSetting<uint8_t>(
             "Time Signature Numerator",
             "TimeSigs",
             nullptr,
             [=](uint8_t v) { set_time_signature_numerator(v); },
             [=]() -> uint8_t { return get_time_signature_numerator(); }
-        ));
+        ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
 
 
         // CV Pitch settings
@@ -99,6 +101,7 @@ extern SettingsRoot *settings_root;
     void setup_storage_menu();
 #endif
 
-
+void save_system_settings();
+void load_system_settings();
 bool save_to_slot(int slot);
 bool load_from_slot(int slot);
