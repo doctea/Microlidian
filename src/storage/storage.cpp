@@ -226,6 +226,14 @@ void load_from_slot_7() {   load_from_slot(7);}
                 )
             );
         }
+        debug_bar->add(
+            new LambdaActionConfirmItem(
+                "System", 
+                []() {
+                    queue_file_output(SYSTEM_SETTINGS_FILEPATH);
+                }
+            )
+        );
         menu->add(debug_bar);
 
         // option to dump the whole settings tree to serial for debugging
