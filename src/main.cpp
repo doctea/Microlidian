@@ -287,6 +287,9 @@ void setup() {
         Serial.println("Setting up saveloadlib..."); Serial.flush();
         setup_saveloadlib();
         Serial.println("Finished setting up saveloadlib!"); Serial.flush();
+
+        // load system settings from flash, if they exist
+        load_system_settings();
         
         #ifdef ENABLE_TESTSAVELOAD
             test_object->create_menu_items();
