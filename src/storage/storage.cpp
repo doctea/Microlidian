@@ -34,16 +34,23 @@ void setup_saveloadlib() {
     Serial.printf("Before sl_setup_all(), free RAM is %u\n", freeRam());
     sl_setup_all(settings_root);
     Serial.printf("After sl_setup_all(), free RAM is %u\n", freeRam());
-
-    Serial.println("setup_saveloadlib() finished!");
-
+    
     // for debug, try opening the file and print its contents to serial:
-    debug_print_file("/slots/preset-0.txt");
-   
-    // // for debug, print the whole settings tree to serial
-    // although this works to print out the settings tree,
-    // it causes the display to fail to update afterwards, so commenting out for now
-    //sl_print_tree_to_print(settings_root, Serial, 10);
+    // acquire_lock();
+    // debug_print_file("/slots/preset-0.txt");
+    // release_lock();
+    
+    sl_validate_tree(settings_root, Serial);  
+    // NOTE: do NOT call sl_print_tree_to_print() here during setup().
+    // Its internal Serial.flush() per-line call invokes tud_task() on RP2040/TinyUSB,
+    // which processes all USB events (including MIDI RX callbacks) mid-setup, and 
+    // appears to corrupt SPI/DMA state used by the display driver, causing the display
+    // to permanently stop updating.  Use the "Dump settings tree to serial" menu button
+    // instead (which goes through process_queued_file_output, safely deferred to loop).
+    // sl_print_tree_to_print(settings_root, Serial);
+    
+    Serial.println("setup_saveloadlib() finished!");
+    
 }
 
 // save/load system settings
@@ -126,25 +133,50 @@ bool load_from_slot(int slot) {
 
 
 static char queued_filename[MAXFILEPATH] = "";
+// use "$$$savetree" as a special case to dump the whole sttings tree to serial instead of a file
 void queue_file_output(const char *filename) {
     strncpy(queued_filename, filename, MAXFILEPATH);
     queued_filename[MAXFILEPATH-1] = '\0'; // ensure null termination
 }
+
+inline void reset_queuedfile() {
+    queued_filename[0] = '\0';
+}
+
+// process the queued file output, if any, by printing the file contents to serial.  
+// special case given if filename is "$$$savetree", the whole settings tree will be printed instead of a file.
+// Returns true if a file was output, false if no file was queued or if still outputting a previous file.
 bool process_queued_file_output() {
     static bool is_outputting = false;
-    if (is_outputting) {
+
+    if (is_outputting) 
         return false; // still outputting previous file, don't start a new one yet
-    }
+
     char filename[MAXFILEPATH];
     strncpy(filename, queued_filename, MAXFILEPATH);
     filename[MAXFILEPATH-1] = '\0'; // ensure null termination
-    if (filename[0] == '\0') {
+
+    if (filename[0] == '\0') 
         return false; // no file queued
+
+    if (strcmp(filename, "$$$savetree") == 0) {
+        ATOMIC() {
+            acquire_lock();
+            Serial.println("Dumping settings tree to serial...");
+            is_outputting = true; // set this early to prevent any other queued outputs from starting while we're still outputting this one
+            sl_print_tree_to_print(settings_root, Serial, 10);
+            sl_validate_tree(settings_root, Serial);  // print validation warnings at the end
+            is_outputting = false;
+            reset_queuedfile(); // clear the queue
+            release_lock();
+        }
+        return true;
     }
+
     is_outputting = true;
     Serial.printf("Outputting file %s to serial...\n", filename); Serial.flush();
     debug_print_file(filename);
-    queued_filename[0] = '\0'; // clear the queue
+    reset_queuedfile(); // clear the queue
     is_outputting = false;
     return true;
 }
@@ -237,9 +269,9 @@ void load_from_slot_7() {   load_from_slot(7);}
         menu->add(debug_bar);
 
         // option to dump the whole settings tree to serial for debugging
-        menu->add(new ActionConfirmItem("Dump settings tree to serial", []() { 
-            sl_print_tree_to_print(settings_root, Serial, 10); }, false)
-        );
+        menu->add(new ActionConfirmItem("Dump settings tree to serial", []() {
+            queue_file_output("$$$savetree");
+        }));
 
     }
 #endif

@@ -28,6 +28,9 @@
 
 #ifdef ENABLE_SCREEN
     #include "mymenu/screen.h"
+    #ifdef ENABLE_ACCENTS
+        #include "mymenu/menuitems_accent.h"
+    #endif
 #endif
 
 #ifdef ENABLE_CV_INPUT
@@ -195,6 +198,11 @@ void setup() {
     #endif
 
     #ifdef ENABLE_EUCLIDIAN
+
+        #ifdef ENABLE_ACCENTS
+            global_accent_source = new StepAccentSource(TIME_SIG_MAX_STEPS_PER_BAR);
+        #endif
+        
         //Serial.println("setting up sequencer..");
         sequencer = new MultiSequencer();
 
@@ -226,6 +234,10 @@ void setup() {
 
         Debug_printf("after setup_output_processor_parameters(), free RAM is\t%u\n", freeRam());
         #ifdef ENABLE_SCREEN
+            #ifdef ENABLE_ACCENTS
+                global_accent_source->make_menu_items();
+            #endif
+
             sequencer->make_menu_items(menu, COMBINE_NONE);
             menu->select_page(0);   // todo: why do we do this?
             Debug_printf("after setting up sequencer and menus, free RAM is %u\n", freeRam());
@@ -289,7 +301,9 @@ void setup() {
         Serial.println("Finished setting up saveloadlib!"); Serial.flush();
 
         // load system settings from flash, if they exist
+        Serial.println("Loading system settings..."); Serial.flush();
         load_system_settings();
+        Serial.println("Finished loading system settings!"); Serial.flush();
         
         #ifdef ENABLE_TESTSAVELOAD
             test_object->create_menu_items();

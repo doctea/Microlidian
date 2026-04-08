@@ -4,6 +4,8 @@
 #include "sequencer/Multi/MultiSequencer.h"
 #include "outputs/base_outputs.h"
 
+#include "accent/IAccentSource.h"
+
 #ifdef ENABLE_SCREEN
     #include "mymenu.h"
 #endif
@@ -12,6 +14,7 @@
 
 #ifdef ENABLE_EUCLIDIAN
     MultiSequencer *sequencer = nullptr;
+    //IAccentSource* global_accent_source;
     /*
     // call this after the menu has already been set up
     void setup_sequencer() {

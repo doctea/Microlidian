@@ -36,7 +36,7 @@ bool process_queued_file_output();
     #include "saveload_test.h"
 #endif
 
-class SettingsRoot : public SHStorage<16, 4> {  // all top-level hosts as children
+class SettingsRoot : public SHDynamic<16, 4> {  // all top-level hosts as children
     public:
     SettingsRoot() {
         this->set_path_segment("root");
@@ -63,6 +63,7 @@ class SettingsRoot : public SHStorage<16, 4> {  // all top-level hosts as childr
             [=](uint8_t v) { set_time_signature_denominator(v); },
             [=]() -> uint8_t { return get_time_signature_denominator(); }
         ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+
         register_setting(new LSaveableSetting<uint8_t>(
             "Time Signature Numerator",
             "TimeSigs",
@@ -70,7 +71,6 @@ class SettingsRoot : public SHStorage<16, 4> {  // all top-level hosts as childr
             [=](uint8_t v) { set_time_signature_numerator(v); },
             [=]() -> uint8_t { return get_time_signature_numerator(); }
         ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-
 
         // CV Pitch settings
         #ifdef ENABLE_CV_INPUT
