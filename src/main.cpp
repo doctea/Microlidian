@@ -220,13 +220,16 @@ void setup() {
         // insect_sequencer->add_pattern(new AntTrailPattern(output_processor->nodes));
         // set up Turing Machine pattern
         // TODO: rename this, move it somewhere else, it's not really an "insect" pattern
-        insect_sequencer->add_pattern(new TuringMachinePattern(output_processor->nodes));
-        insect_sequencer->get_pattern(0)->set_path_segment("pattern_0");
-        insect_sequencer->get_pattern(0)->set_steps(16);
-        insect_sequencer->get_pattern(0)->set_output(output_processor->get_output_for_label("Melody"));
+        TuringMachinePattern *tm_pattern = new TuringMachinePattern(output_processor->nodes);
+        tm_pattern->set_path_segment("pattern_0");
+        tm_pattern->set_steps(16);
+        tm_pattern->set_output(output_processor->get_output_for_label("Melody"));
+        insect_sequencer->add_pattern(tm_pattern);
         ((MultiSequencer*)sequencer)->addSequencer(insect_sequencer);
 
         #if defined(ENABLE_PARAMETERS)
+            parameter_manager->addInput(tm_pattern);
+
             //Serial.println("..calling sequencer.getParameters()..");
             LinkedList<FloatParameter*> *params = sequencer->getParameters();
             Debug_printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());

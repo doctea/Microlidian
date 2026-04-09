@@ -51,14 +51,15 @@ class CVChordVoice : public BaseOutputProcessor {
         virtual void process() override {
             int8_t new_note = NOTE_OFF;
             if (this->pitch_input!=nullptr && this->pitch_input->supports_pitch()) {
-                VoltageParameterInput *voltage_source_input = (VoltageParameterInput*)this->pitch_input;
-                new_note = voltage_source_input->get_voltage_pitch();
+                new_note = pitch_input->get_voltage_pitch();
             }
+
             int velocity = MIDI_MAX_VELOCITY;
             if (this->velocity_input!=nullptr) {
                 velocity = constrain(((float)MIDI_MAX_VELOCITY)*(float)this->velocity_input->get_normal_value_unipolar(), 0, MIDI_MAX_VELOCITY);
                 //if (this->debug) Serial.printf("setting velocity to %i (%2.2f)\n", velocity, this->velocity_input->get_normal_value_unipolar());
             }
+
             this->chord_player.on_pre_clock(ticks, new_note, velocity);        
         }
 

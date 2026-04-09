@@ -160,16 +160,14 @@ bool process_queued_file_output() {
         return false; // no file queued
 
     if (strcmp(filename, "$$$savetree") == 0) {
-        ATOMIC() {
-            acquire_lock();
-            Serial.println("Dumping settings tree to serial...");
-            is_outputting = true; // set this early to prevent any other queued outputs from starting while we're still outputting this one
-            sl_print_tree_to_print(settings_root, Serial, 10);
-            sl_validate_tree(settings_root, Serial);  // print validation warnings at the end
-            is_outputting = false;
-            reset_queuedfile(); // clear the queue
-            release_lock();
-        }
+        acquire_lock();
+        Serial.println("Dumping settings tree to serial...");
+        is_outputting = true; // set this early to prevent any other queued outputs from starting while we're still outputting this one
+        sl_print_tree_to_print(settings_root, Serial, 10);
+        sl_validate_tree(settings_root, Serial);  // print validation warnings at the end
+        is_outputting = false;
+        reset_queuedfile(); // clear the queue
+        release_lock();
         return true;
     }
 

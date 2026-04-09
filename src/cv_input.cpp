@@ -14,6 +14,7 @@
 #include "devices/ADCPimoroni24v.h"
 
 #include "parameter_inputs/VirtualParameterInput.h"
+#include "parameter_inputs/BarLockParameterInputs.h"
 
 //#define LOOP_LENGTH_TICKS   (PPQN*BEATS_PER_BAR*BARS_PER_PHRASE)
 
@@ -77,6 +78,19 @@ void setup_parameter_inputs() {
     parameter_manager->addInput(virtpi1);
     parameter_manager->addInput(virtpi2);
     parameter_manager->addInput(virtpi3);
+
+    BarLockParameterInput *barlock1 = new BarLockParameterInput((char*)"BR-Log", BARLOCK_RISE_LOG);
+    BarLockParameterInput *barlock2 = new BarLockParameterInput((char*)"BF-Exp", BARLOCK_FALL_EXP);
+    BarLockParameterInput *barlock3 = new BarLockParameterInput((char*)"LBR", BARLOCK_LAST_BEAT_RISE);
+    BarLockParameterInput *barlock4 = new BarLockParameterInput((char*)"LBF", BARLOCK_LAST_BEAT_FALL);
+    BarLockParameterInput *barlock5 = new BarLockParameterInput((char*)"PR-Lin", BARLOCK_PHRASE_RISE);
+    BarLockParameterInput *barlock6 = new BarLockParameterInput((char*)"PF-Smooth", BARLOCK_PHRASE_FALL);
+    parameter_manager->addInput(barlock1);
+    parameter_manager->addInput(barlock2);
+    parameter_manager->addInput(barlock3);
+    parameter_manager->addInput(barlock4);
+    parameter_manager->addInput(barlock5);
+    parameter_manager->addInput(barlock6);
 
     //Serial.println("about to do setDefaultParameterConnections().."); Serial.flush();
     parameter_manager->setDefaultParameterConnections();
