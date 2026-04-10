@@ -13,6 +13,7 @@
 // midihelpers library clock handling
 #include <clock.h>
 #include <bpm.h>
+#include <profiling.h>
 //#include "midi_usb/midi_usb_rp2040.h"
 
 #include "sequencer/sequencing.h"
@@ -404,7 +405,16 @@ void read_serial_buffer() {
 bool menu_tick_pending = false;
 //uint32_t menu_tick_pending_tick = -1;
 
+// ── Profiling slots (declared at file scope so they are safe to use from the
+//    uClock ISR, which calls do_tick — function-local statics have a guard
+//    variable whose initialisation can race with the first ISR call.) ────────
+PROFILE_SLOT_DECL(p_dotick,            "do_tick [total]");
+PROFILE_SLOT_DECL(p_menu_update_ticks, "loop menu::update_ticks");
+PROFILE_SLOT_DECL(p_output_proc_loop,  "loop output_proc::loop");
+PROFILE_SLOT_DECL(p_menu_update_inputs,"loop menu::update_inputs");
+
 void do_tick(uint32_t in_ticks) {
+    PROFILE_SCOPE(p_dotick);
     #ifdef USE_UCLOCK
         ::ticks = in_ticks;
         // todo: hmm non-USE_UCLOCK mode doesn't actually use the in_ticks passed in here..?
@@ -487,7 +497,9 @@ void loop() {
         {
             if ((ticked || menu_tick_pending) && !is_locked()) {     // don't block, assume that we can make up for the missed tick next loop; much less jitter when at very very high BPMs
                 //acquire_lock();
+                PROFILE_START(p_menu_update_ticks);
                 menu->update_ticks(ticks);
+                PROFILE_STOP(p_menu_update_ticks);
                 //release_lock();
                 last_tick = ticks;
                 menu_tick_pending = false;
@@ -511,14 +523,18 @@ void loop() {
             //ATOMIC() 
             //{
             if (output_processor->is_enabled()) {
+                PROFILE_START(p_output_proc_loop);
                 output_processor->loop();
+                PROFILE_STOP(p_output_proc_loop);
             }
             //}
 
             #ifdef ENABLE_SCREEN
             if (!is_locked()) {
                 //acquire_lock();
+                PROFILE_START(p_menu_update_inputs);
                 menu->update_inputs();
+                PROFILE_STOP(p_menu_update_inputs);
                 //release_lock();
             }
             #endif

@@ -4,6 +4,7 @@
 #include "saveload_test.h"
 
 #include "core_safe.h"
+#include <profiling.h>
 
 SettingsRoot *settings_root;
 
@@ -171,6 +172,26 @@ bool process_queued_file_output() {
         return true;
     }
 
+    if (strcmp(filename, "$$$profile") == 0) {
+        // Dump profiling counters — only meaningful when ENABLE_PROFILING is set.
+        // Trigger via queue_file_output("$$$profile") or the "Dump profile" menu item.
+        acquire_lock();
+        profile_print_all(Serial);
+        reset_queuedfile();
+        release_lock();
+        return true;
+    }
+
+    if (strcmp(filename, "$$$profilereset") == 0) {
+        // Reset all profiling counters so you get a clean window of samples.
+        acquire_lock();
+        profile_reset_all();
+        Serial.println("Profile counters reset.");
+        reset_queuedfile();
+        release_lock();
+        return true;
+    }
+
     is_outputting = true;
     Serial.printf("Outputting file %s to serial...\n", filename); Serial.flush();
     debug_print_file(filename);
@@ -269,6 +290,14 @@ void load_from_slot_7() {   load_from_slot(7);}
         // option to dump the whole settings tree to serial for debugging
         menu->add(new ActionConfirmItem("Dump settings tree to serial", []() {
             queue_file_output("$$$savetree");
+        }));
+
+        // profiling — only meaningful when ENABLE_PROFILING is defined in build_flags
+        menu->add(new ActionConfirmItem("Dump profile to serial", []() {
+            queue_file_output("$$$profile");
+        }));
+        menu->add(new ActionConfirmItem("Reset profile counters", []() {
+            queue_file_output("$$$profilereset");
         }));
 
     }

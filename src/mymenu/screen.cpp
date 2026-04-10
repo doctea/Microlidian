@@ -21,10 +21,18 @@
 
 #include "SimplyAtomic.h"
 #include <atomic>
+#include <profiling.h>
 extern std::atomic<bool> started;
 //extern std::atomic<bool> menu_locked;
 extern std::atomic<bool> ticked;
 std::atomic<bool> frame_ready = false;
+
+// ── Profiling slots for Core 1 hot paths ───────────────────────────────────────────────
+// NOTE: These slots are written exclusively from Core 1 (loop1/draw_screen),
+// while profile_print_all() is triggered from Core 0.  Results are approximate
+// (no atomics), but good enough for profiling purposes.
+PROFILE_SLOT_DECL(p_draw_screen,       "draw_screen [total]");
+PROFILE_SLOT_DECL(p_cv_input_update,   "loop1 cv_input_update");
 
 #include "menu.h"
 
@@ -80,6 +88,7 @@ void update_screen_dontcare() {
 }
 
 void draw_screen() {
+    PROFILE_SCOPE(p_draw_screen);
     //if (locked || menu==nullptr) 
     //    return;
     //while (is_locked() || ticked || frame_ready) {
@@ -131,7 +140,9 @@ void loop1() {
                 acquire_lock();
                 //ATOMIC() 
                 {
-                    parameter_manager->throttled_update_cv_input__all(time_between_cv_input_updates, false, false);
+                    PROFILE_START(p_cv_input_update);
+                parameter_manager->throttled_update_cv_input__all(time_between_cv_input_updates, false, false);
+                PROFILE_STOP(p_cv_input_update);
                 }
                 release_lock();
                 last_cv_update = millis();
