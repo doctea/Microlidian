@@ -33,6 +33,17 @@ std::atomic<bool> frame_ready = false;
 // (no atomics), but good enough for profiling purposes.
 PROFILE_SLOT_DECL(p_draw_screen,       "draw_screen [total]");
 PROFILE_SLOT_DECL(p_cv_input_update,   "loop1 cv_input_update");
+// Spike thresholds for Core 1 slots (set at file-scope startup time)
+static bool _prof_screen_thresholds_init = []() {
+    PROFILE_SET_SPIKE_THRESHOLD(p_draw_screen,     19000);  // avg ~16.7ms
+    PROFILE_SET_SPIKE_THRESHOLD(p_cv_input_update, 13000);  // avg ~8.9ms
+    // No clock modulo for these — they're free-running on Core 1.
+    // spike_modulo = 96 gives the last tick Core 0 was on when this fired
+    // (approximate — cross-core, no lock), useful for rough correlation.
+    PROFILE_SET_SPIKE_MODULO(p_draw_screen,     96);
+    PROFILE_SET_SPIKE_MODULO(p_cv_input_update, 96);
+    return true;
+}();
 
 #include "menu.h"
 

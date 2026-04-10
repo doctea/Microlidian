@@ -3,6 +3,10 @@
 
 // needed for set_sys_clock_khz
 #include "pico/stdlib.h"
+// needed for irq_set_priority(), TIMER_IRQ_0..3, USBCTRL_IRQ
+#include "hardware/irq.h"
+//#include <intctl.h>
+#include "hardware/timer.h"
 
 // our app config
 #include "Config.h"
@@ -21,6 +25,10 @@
 #include "sequencer/Euclidian/Sequencer.h"
 #include "sequencer/Insects/AntTrailPattern.h"
 #include "sequencer/TuringMachine/TuringMachinePattern.h"
+
+#ifdef ENABLE_PROFILING
+    static void setup_profiling();
+#endif
 
 #ifdef ENABLE_STORAGE
     #include "storage/storage.h"
@@ -127,6 +135,7 @@ void auto_handle_start_wrapper() {
 void setup() {
     Debug_println("setup() starting");
     Debug_printf("at start of setup(), free RAM is %u\n", freeRam());
+    setup_profiling();
 
     // overclock the CPU so that we can afford all those CPU cycles drawing the UI!
     // 240mhz because, if we are to think about using the USB-Host-on-PIO thing, the system clock needs to be a multiple of 120mhz
@@ -140,6 +149,20 @@ void setup() {
 
     #ifdef USE_UCLOCK
         setup_uclock(do_tick, uClock.PPQN_24);
+
+        // Claude told me that this would help reduce the jitter i was seeing due to 
+        // " the FIFO being unable to drain while ATOMIC() holds interrupts disabled"
+        // and maybe it even die work?
+        // TODO: verify that this actually does something; move it to setup_uclock
+        // Lower the priority of ALL hardware-timer alarm IRQs below the USB IRQ.
+        // On RP2040/Cortex-M0+, USBCTRL_IRQ defaults to 0x80; timer alarms also default
+        // to 0x80 (equal priority → no preemption).  By setting timer alarms to 0xC0
+        // (lowest software level) the USB drain ISR can preempt the uClock ISR while it
+        // is spin-waiting on a full TX FIFO, eliminating the multi-ms stalls in do_tick.
+        irq_set_priority(TIMER1_IRQ_0, 0xC0);
+        irq_set_priority(TIMER1_IRQ_1, 0xC0);
+        irq_set_priority(TIMER1_IRQ_2, 0xC0);
+        irq_set_priority(TIMER1_IRQ_3, 0xC0);
     #else
         setup_cheapclock();
     #endif
@@ -409,12 +432,43 @@ bool menu_tick_pending = false;
 //    uClock ISR, which calls do_tick — function-local statics have a guard
 //    variable whose initialisation can race with the first ISR call.) ────────
 PROFILE_SLOT_DECL(p_dotick,            "do_tick [total]");
+PROFILE_SLOT_DECL(p_sequencer_ontick,  "do_tick seq::on_tick");
+PROFILE_SLOT_DECL(p_outproc_process,   "do_tick outproc::process");
+PROFILE_SLOT_DECL(p_cv_chord_process,  "do_tick cv_chord::process");
 PROFILE_SLOT_DECL(p_menu_update_ticks, "loop menu::update_ticks");
 PROFILE_SLOT_DECL(p_output_proc_loop,  "loop output_proc::loop");
 PROFILE_SLOT_DECL(p_menu_update_inputs,"loop menu::update_inputs");
 
+// Spike thresholds — set to ~2–3× observed average so only genuine outliers are
+// captured.  Tune after a fresh profile_reset_all() + profile_print_all() run.
+// Values are in microseconds.  Called from setup() so they're set before any tick fires.
+FLASHMEM static void setup_profiling() {
+    PROFILE_SET_SPIKE_THRESHOLD(p_dotick,             4000);  // avg ~1.7ms
+    PROFILE_SET_SPIKE_THRESHOLD(p_sequencer_ontick,   3000);  // avg ~1.2ms
+    PROFILE_SET_SPIKE_THRESHOLD(p_outproc_process,     400);  // avg ~140µs (fires every 16th)
+    PROFILE_SET_SPIKE_THRESHOLD(p_cv_chord_process,    400);  // avg ~130µs
+    PROFILE_SET_SPIKE_THRESHOLD(p_menu_update_ticks,  3500);  // avg ~1.8ms
+    PROFILE_SET_SPIKE_THRESHOLD(p_output_proc_loop,    500);  // avg ~83µs  — 110× outlier needs investigation
+    PROFILE_SET_SPIKE_THRESHOLD(p_menu_update_inputs,  200);  // avg ~14µs
+    // Note: thresholds for the Core 1 rendering slots (draw_screen, cv_input_update)
+    //       are set in screen.cpp since those slots are static to that translation unit.
+
+    // Spike modulo — show tick%N alongside each spike so you can see which
+    // phase of the clock cycle the outlier occurred on.  At PPQN=24:
+    //   % 6  = position within a 16th note (0..5)
+    //   % 24 = position within a beat      (0..23)
+    //   % 96 = position within a bar       (0..95)
+    PROFILE_SET_SPIKE_MODULO(p_dotick,             96);  // bar phase
+    PROFILE_SET_SPIKE_MODULO(p_sequencer_ontick,   96);  // bar phase — key for finding pattern-rotation spikes
+    PROFILE_SET_SPIKE_MODULO(p_outproc_process,     6);  // 16th phase — should always be 0
+    PROFILE_SET_SPIKE_MODULO(p_cv_chord_process,    6);  // 16th phase — bimodal split investigation
+    PROFILE_SET_SPIKE_MODULO(p_menu_update_ticks,  96);  // bar phase
+    PROFILE_SET_SPIKE_MODULO(p_output_proc_loop,   96);  // last known tick at time of spike
+}
+
 void do_tick(uint32_t in_ticks) {
     PROFILE_SCOPE(p_dotick);
+    PROFILE_SET_TICK(in_ticks);  // capture tick number for spike correlation
     #ifdef USE_UCLOCK
         ::ticks = in_ticks;
         // todo: hmm non-USE_UCLOCK mode doesn't actually use the in_ticks passed in here..?
@@ -430,15 +484,23 @@ void do_tick(uint32_t in_ticks) {
     output_wrapper->sendClock();
 
     #ifdef ENABLE_EUCLIDIAN
-        if (sequencer->is_running()) sequencer->on_tick(ticks);
+        if (sequencer->is_running()) {
+            PROFILE_START(p_sequencer_ontick);
+            sequencer->on_tick(ticks);
+            PROFILE_STOP(p_sequencer_ontick);
+        }
         if (is_bpm_on_sixteenth(ticks) && output_processor->is_enabled()) {
+            PROFILE_START(p_outproc_process);
             output_processor->process();
+            PROFILE_STOP(p_outproc_process);
         }
     #endif
 
+    PROFILE_START(p_cv_chord_process);
     cv_chord_output_1->process();
     cv_chord_output_2->process();
     cv_chord_output_3->process();
+    PROFILE_STOP(p_cv_chord_process);
 
     /*#ifdef ENABLE_CV_OUTPUT
         if (cv_output_enabled) {
@@ -511,6 +573,15 @@ void loop() {
         }
     #endif
 
+    ATOMIC()
+    {
+        if (playing && output_processor->is_enabled()) {
+            PROFILE_START(p_output_proc_loop);
+            output_processor->loop();
+            PROFILE_STOP(p_output_proc_loop);
+        }
+    }
+
     ATOMIC() 
     {
         if (playing && clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0 && micros() + loop_average >= last_ticked_at_micros + micros_per_tick) {
@@ -519,15 +590,6 @@ void loop() {
             //Serial.flush();
         } else {
             read_serial_buffer();
-
-            //ATOMIC() 
-            //{
-            if (output_processor->is_enabled()) {
-                PROFILE_START(p_output_proc_loop);
-                output_processor->loop();
-                PROFILE_STOP(p_output_proc_loop);
-            }
-            //}
 
             #ifdef ENABLE_SCREEN
             if (!is_locked()) {
