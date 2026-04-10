@@ -437,19 +437,21 @@ PROFILE_SLOT_DECL(p_outproc_process,   "do_tick outproc::process");
 PROFILE_SLOT_DECL(p_cv_chord_process,  "do_tick cv_chord::process");
 PROFILE_SLOT_DECL(p_menu_update_ticks, "loop menu::update_ticks");
 PROFILE_SLOT_DECL(p_output_proc_loop,  "loop output_proc::loop");
+PROFILE_SLOT_DECL(p_midi_drain,        "loop midi drain()");
 PROFILE_SLOT_DECL(p_menu_update_inputs,"loop menu::update_inputs");
 
 // Spike thresholds — set to ~2–3× observed average so only genuine outliers are
 // captured.  Tune after a fresh profile_reset_all() + profile_print_all() run.
 // Values are in microseconds.  Called from setup() so they're set before any tick fires.
 FLASHMEM static void setup_profiling() {
-    PROFILE_SET_SPIKE_THRESHOLD(p_dotick,             4000);  // avg ~1.7ms
-    PROFILE_SET_SPIKE_THRESHOLD(p_sequencer_ontick,   3000);  // avg ~1.2ms
-    PROFILE_SET_SPIKE_THRESHOLD(p_outproc_process,     400);  // avg ~140µs (fires every 16th)
-    PROFILE_SET_SPIKE_THRESHOLD(p_cv_chord_process,    400);  // avg ~130µs
-    PROFILE_SET_SPIKE_THRESHOLD(p_menu_update_ticks,  3500);  // avg ~1.8ms
-    PROFILE_SET_SPIKE_THRESHOLD(p_output_proc_loop,    500);  // avg ~83µs  — 110× outlier needs investigation
-    PROFILE_SET_SPIKE_THRESHOLD(p_menu_update_inputs,  200);  // avg ~14µs
+    PROFILE_SET_SPIKE_THRESHOLD(p_dotick,             2000);  // avg ~670µs post-ring-buffer
+    PROFILE_SET_SPIKE_THRESHOLD(p_sequencer_ontick,   1500);  // avg ~450µs post-ring-buffer
+    PROFILE_SET_SPIKE_THRESHOLD(p_outproc_process,     300);  // avg ~110µs (fires every 16th)
+    PROFILE_SET_SPIKE_THRESHOLD(p_cv_chord_process,    300);  // avg ~140µs
+    PROFILE_SET_SPIKE_THRESHOLD(p_menu_update_ticks,  3000);  // avg ~1.9ms
+    PROFILE_SET_SPIKE_THRESHOLD(p_output_proc_loop,    200);  // avg ~36µs post-ring-buffer
+    PROFILE_SET_SPIKE_THRESHOLD(p_midi_drain,          200);  // should now be near-zero: peek+FIFO check before each send
+    PROFILE_SET_SPIKE_THRESHOLD(p_menu_update_inputs,  200);  // avg ~15µs
     // Note: thresholds for the Core 1 rendering slots (draw_screen, cv_input_update)
     //       are set in screen.cpp since those slots are static to that translation unit.
 
@@ -461,9 +463,10 @@ FLASHMEM static void setup_profiling() {
     PROFILE_SET_SPIKE_MODULO(p_dotick,             96);  // bar phase
     PROFILE_SET_SPIKE_MODULO(p_sequencer_ontick,   96);  // bar phase — key for finding pattern-rotation spikes
     PROFILE_SET_SPIKE_MODULO(p_outproc_process,     6);  // 16th phase — should always be 0
-    PROFILE_SET_SPIKE_MODULO(p_cv_chord_process,    6);  // 16th phase — bimodal split investigation
+    PROFILE_SET_SPIKE_MODULO(p_cv_chord_process,    6);  // 16th phase
     PROFILE_SET_SPIKE_MODULO(p_menu_update_ticks,  96);  // bar phase
-    PROFILE_SET_SPIKE_MODULO(p_output_proc_loop,   96);  // last known tick at time of spike
+    PROFILE_SET_SPIKE_MODULO(p_output_proc_loop,   96);  // bar phase at time of spike
+    PROFILE_SET_SPIKE_MODULO(p_midi_drain,         96);  // bar phase — correlate with burst sends on bar boundaries
 }
 
 void do_tick(uint32_t in_ticks) {
@@ -513,6 +516,16 @@ void do_tick(uint32_t in_ticks) {
 
 void loop() {
     uint32_t mics_start = micros();
+
+    // Drain the MIDI ring buffer first, before any ATOMIC() block.
+    // All send*() calls from do_tick (ISR) and ATOMIC() regions enqueue fast into
+    // midi_queue rather than blocking on the USB TX FIFO.  Here, outside ATOMIC(),
+    // the USB drain ISR (USBCTRL_IRQ) can preempt freely so sends complete without
+    // spinning.  This is the only call site for actual USB + DIN hardware sends.
+    PROFILE_START(p_midi_drain);
+    output_wrapper->drain();
+    PROFILE_STOP(p_midi_drain);
+
     //Serial.println("loop()"); Serial.flush();
     
     //tft_print("MAIN!");
