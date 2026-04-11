@@ -9,10 +9,12 @@
 
     #include "cv_input.h"
 
-    void setup_cv_pitch_inputs () {
-        cv_chord_output_1 = new CVChordVoice("CV Pitch 1", output_wrapper, parameter_manager->getInputForName("A"), nullptr, 1);
-        cv_chord_output_2 = new CVChordVoice("CV Pitch 2", output_wrapper, parameter_manager->getInputForName("B"), nullptr, 1);
-        cv_chord_output_3 = new CVChordVoice("CV Pitch 3", output_wrapper, parameter_manager->getInputForName("C"), nullptr, 1);
+    void setup_cv_pitch_inputs(BaseOutputProcessor *output_processor) {
+
+        // @@TODO: map the appropriate sequencer outputs and get available_outputs
+        cv_chord_output_1 = new CVChordVoice("CV Pitch 1", output_processor->get_output_for_label("Chords"), output_processor->get_available_outputs(), parameter_manager->getInputForName("A"), nullptr);
+        cv_chord_output_2 = new CVChordVoice("CV Pitch 2", output_processor->get_output_for_label("Chords"), output_processor->get_available_outputs(), parameter_manager->getInputForName("B"), nullptr);
+        cv_chord_output_3 = new CVChordVoice("CV Pitch 3", output_processor->get_output_for_label("Chords"), output_processor->get_available_outputs(), parameter_manager->getInputForName("C"), nullptr);
     }
 
     void setup_cv_pitch_inputs_menu () {

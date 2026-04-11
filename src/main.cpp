@@ -224,7 +224,8 @@ void setup() {
     #ifdef ENABLE_EUCLIDIAN
 
         #ifdef ENABLE_ACCENTS
-            global_accent_source = new StepAccentSource(TIME_SIG_MAX_STEPS_PER_BAR);
+            //global_accent_source = new StepAccentSource(TIME_SIG_MAX_STEPS_PER_BAR);
+            global_accent_source = new SimpleAccentSource();
         #endif
         
         //Serial.println("setting up sequencer..");
@@ -280,7 +281,7 @@ void setup() {
     #endif
 
     #if defined(ENABLE_PARAMETERS) && defined(ENABLE_CV_INPUT)
-        setup_cv_pitch_inputs();
+        setup_cv_pitch_inputs(output_processor);
         Debug_printf("after setup_cv_pitch_inputs(), free RAM is %u\n", freeRam());
     #endif
 

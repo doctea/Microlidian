@@ -110,9 +110,6 @@ void setup_menu(bool button_high_state = HIGH) {
 
     menu->add_pinned(&top_loop_marker_panel);  // pinned position indicator
     menu->add(&posbar);                        // bpm and position indicator
-    #ifdef ENABLE_TIME_SIGNATURE
-        menu->add(&timesig_indicator);             // time signature indicator
-    #endif
     menu->add(&clock_source_selector);         // midi clock source (internal or from PC USB)
 
     // add start/stop/continue bar
@@ -122,6 +119,10 @@ void setup_menu(bool button_high_state = HIGH) {
     project_startstop->add(new ActionItem("Continue", clock_continue));
     project_startstop->add(new ActionFeedbackItem("Restart", (ActionFeedbackItem::setter_def_2)set_restart_on_next_bar_on, is_restart_on_next_bar, "Restarting..", "Restart"));
     menu->add(project_startstop);
+
+    #ifdef ENABLE_TIME_SIGNATURE
+        menu->add(&timesig_indicator);             // time signature indicator
+    #endif
 
     // debug bpm selector
     /*SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");
