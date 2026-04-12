@@ -302,13 +302,13 @@ void setup() {
             Debug_printf("after create_midi_parameter_output_menu_items(), free RAM is %u\n", freeRam()); Serial_flush();
         #endif
         //Serial.println("getting this far 2?"); Serial.flush();
-        Debug_printf("before output_wrapper->create_menu_items(), free RAM is %u\n", freeRam()); Serial_flush();
-        output_wrapper->create_menu_items();
         Debug_printf("before output_processor->create_menu_items(), free RAM is %u\n", freeRam()); Serial_flush();
         output_processor->create_menu_items();
         Debug_printf("after creating output wrapper and processor menuitems, free RAM is %u\n", freeRam()); Serial_flush();
         setup_debug_menu();
         Debug_printf("after setup_debug_menu(), free RAM is %u\n", freeRam());
+        Debug_printf("before output_wrapper->create_menu_items(), free RAM is %u\n", freeRam()); Serial_flush();
+        output_wrapper->create_menu_items();
         menu->setup_quickjump();
 
         menu->select_page(0);

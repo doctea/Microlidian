@@ -32,6 +32,8 @@ class CVChordVoice /*: public BaseOutputProcessor*/
     BaseParameterInput *pitch_input = nullptr;
     BaseParameterInput *velocity_input = nullptr;
     uint16_t colour;
+
+    bool enabled = false;
     
     char label[MENU_C_MAX];
     
@@ -43,9 +45,8 @@ class CVChordVoice /*: public BaseOutputProcessor*/
             //output_target->sendNoteOn(note, velocity, channel ); 
             if (!is_valid_note(note)) 
                 return;
-            if (note==0) {
-                Serial.println("got a note value of 0 in chord player callback?!");
-            }
+            if (!this->enabled) 
+                return;
             output_target->receive_event(1, 0, note, velocity); // event_value_1 = send a note on; event_value_2 = send a note off; event_value_3 = note value (0-127); event_value_4 = velocity value (0-127)
         },
         [=](int8_t channel, int8_t note, int8_t velocity) -> void { 
@@ -92,6 +93,13 @@ class CVChordVoice /*: public BaseOutputProcessor*/
             this->chord_player.on_pre_clock(ticks, new_note, velocity);        
         }
 
+        virtual void set_enabled(bool v) {
+            if (this->enabled && !v) {
+                this->chord_player.stop_all();
+            }
+            this->enabled = v;
+        }
+
         virtual void set_output_target(BaseOutput *output_target) {
             this->output_target = output_target;
         }
@@ -115,6 +123,11 @@ class CVChordVoice /*: public BaseOutputProcessor*/
         virtual void create_menu_items() {
             menu->add_page(this->label, this->colour);
             SubMenuItemBar *selectors = new SubMenuItemBar("Inputs");
+            selectors->add(new LambdaToggleControl(
+                "Enabled",
+                [=](bool value) { this->enabled = value; },
+                [=]() -> bool { return this->enabled; }
+            ));
             selectors->add(new ParameterInputSelectorControl<CVChordVoice>(
                 "Pitch", 
                 this, 
@@ -132,7 +145,7 @@ class CVChordVoice /*: public BaseOutputProcessor*/
                 this->velocity_input
             ));
             OutputSelectorControl<CVChordVoice> *output_selector = new OutputSelectorControl<CVChordVoice> (
-                "MIDI Output Target",
+                "Output",
                 this,
                 &CVChordVoice::set_output_target,
                 &CVChordVoice::get_output_target,
@@ -218,6 +231,14 @@ class CVChordVoice /*: public BaseOutputProcessor*/
                 "ChordVoice",
                 [=](const char* output_label) -> void { this->set_output_by_name(output_label); },
                 [=](void) -> const char* { return this->get_output_label(); }
+            ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+
+            register_setting(new LSaveableSetting<bool>(
+                "Enabled",
+                "ChordVoice",
+                &this->enabled,
+                [=](bool value) { this->set_enabled(value); },
+                [=]() -> bool { return this->enabled; }
             ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
         }
 };
