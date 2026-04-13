@@ -135,7 +135,9 @@ void auto_handle_start_wrapper() {
 void setup() {
     Debug_println("setup() starting");
     Debug_printf("at start of setup(), free RAM is %u\n", freeRam());
-    setup_profiling();
+    #ifdef ENABLE_PROFILING
+        setup_profiling();
+    #endif
 
     // overclock the CPU so that we can afford all those CPU cycles drawing the UI!
     // 240mhz because, if we are to think about using the USB-Host-on-PIO thing, the system clock needs to be a multiple of 120mhz

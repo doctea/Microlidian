@@ -35,19 +35,13 @@ void setup_saveloadlib() {
     Serial.printf("Before sl_setup_all(), free RAM is %u\n", freeRam());
     sl_setup_all(settings_root);
     Serial.printf("After sl_setup_all(), free RAM is %u\n", freeRam());
-    
+
     // for debug, try opening the file and print its contents to serial:
     // acquire_lock();
     // debug_print_file("/slots/preset-0.txt");
     // release_lock();
     
     sl_validate_tree(settings_root, Serial);  
-    // NOTE: do NOT call sl_print_tree_to_print() here during setup().
-    // Its internal Serial.flush() per-line call invokes tud_task() on RP2040/TinyUSB,
-    // which processes all USB events (including MIDI RX callbacks) mid-setup, and 
-    // appears to corrupt SPI/DMA state used by the display driver, causing the display
-    // to permanently stop updating.  Use the "Dump settings tree to serial" menu button
-    // instead (which goes through process_queued_file_output, safely deferred to loop).
     // sl_print_tree_to_print(settings_root, Serial);
     
     Serial.println("setup_saveloadlib() finished!");
@@ -128,6 +122,56 @@ bool load_from_slot(int slot) {
     } else {
         messages_log_add(String("Exists, but failed to load from slot ") + String(slot));
         //Serial.printf("Failed to load from slot %i (file %s)!\n", slot, filename); Serial.flush();
+        return false;
+    }
+}
+
+
+bool save_to_snapshot(int slot) {
+    
+    char filename[MAXFILEPATH];
+    snprintf(filename, MAXFILEPATH, SNAPSHOT_SLOT_FILEPATH_FORMAT, slot);
+
+    // acquire_lock() prevents core 1 from being interrupted mid-transaction by LittleFS flash writes
+    acquire_lock();
+
+    Serial.printf("Saving to snapshot slot %i (file %s)...\n", slot, filename); Serial.flush();
+    uint32_t micros_at_start_of_save = micros();
+    bool status = sl_save_to_file(settings_root, filename, SL_SCOPE_SNAPSHOT);
+    uint32_t micros_at_end_of_save = micros();
+    Serial.printf("Finished saving to snapshot slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save)); Serial.flush();
+
+    release_lock();
+
+    if (status) {
+        messages_log_add(String("Saved to snapshot slot ") + String(slot));
+        //Serial.printf("Saved to snapshot slot %i (file %s)!\n", slot, filename); Serial.flush();
+        return true;
+    } else {
+        messages_log_add(String("Failed to save to snapshot slot ") + String(slot));
+        //Serial.printf("Failed to save to snapshot slot %i (file %s)!\n", slot, filename); Serial.flush();
+        return false;
+    }
+}
+
+bool load_from_snapshot(int slot) {
+
+    char filename[MAXFILEPATH];
+    snprintf(filename, MAXFILEPATH, SNAPSHOT_SLOT_FILEPATH_FORMAT, slot);
+
+    acquire_lock();
+
+    Serial.printf("Loading from snapshot slot %i (file %s)...\n", slot, filename); Serial.flush();
+    bool status = sl_load_from_file(filename, SL_SCOPE_SNAPSHOT);
+    release_lock();
+
+    if (status) {
+        messages_log_add(String("Loaded from snapshot slot ") + String(slot));
+        //Serial.printf("Loaded from snapshot slot %i (file %s)!\n", slot, filename); Serial.flush();
+        return true;
+    } else {
+        messages_log_add(String("Failed to load from snapshot slot ") + String(slot));
+        //Serial.printf("Failed to load from snapshot slot %i (file %s)!\n", slot, filename); Serial.flush();
         return false;
     }
 }
@@ -245,7 +289,7 @@ void load_from_slot_7() {   load_from_slot(7);}
         for (int i = 0 ; i < sizeof(functions)/sizeof(functions_t) ; i++) {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Preset slot %i", i);
-            DualMenuItem *submenuitem = new DualMenuItem(label);
+            DualMenuItem *submenuitem = new DualMenuItem(label, false);
 
             snprintf(label, MENU_C_MAX, "Load %i", i);
             submenuitem->add(new ActionConfirmItem(label, functions[i].load, false));
@@ -261,6 +305,21 @@ void load_from_slot_7() {   load_from_slot(7);}
         system_settings_bar->add(new ActionConfirmItem("Save", &save_system_settings, false));
         menu->add(system_settings_bar);
 
+        for (int i = 0 ; i < 8 ; i++) {
+            char label[MENU_C_MAX];
+            snprintf(label, MENU_C_MAX, "Snapshot slot %i", i);
+            DualMenuItem *submenuitem = new DualMenuItem(label);
+
+            snprintf(label, MENU_C_MAX, "Load %i", i);
+            submenuitem->add(new LambdaActionConfirmItem(label, [=]() { load_from_snapshot(i); }));
+
+            snprintf(label, MENU_C_MAX, "Save %i", i);
+            submenuitem->add(new LambdaActionConfirmItem(label, [=]() { save_to_snapshot(i); }));
+
+            menu->add(submenuitem);
+        }
+
+        // todo: debug stuff to debug page
         // options to dump files to serial for debugging
         SubMenuItemBar *debug_bar = new SubMenuItemBar("Dump file to serial", true, true);
         for (int i = 0 ; i < sizeof(functions)/sizeof(functions_t) ; i++) {
@@ -292,13 +351,15 @@ void load_from_slot_7() {   load_from_slot(7);}
             queue_file_output("$$$savetree");
         }));
 
-        // profiling — only meaningful when ENABLE_PROFILING is defined in build_flags
-        menu->add(new ActionConfirmItem("Dump profile to serial", []() {
-            queue_file_output("$$$profile");
-        }));
-        menu->add(new ActionConfirmItem("Reset profile counters", []() {
-            queue_file_output("$$$profilereset");
-        }));
+        #ifdef ENABLE_PROFILING
+            // profiling — only meaningful when ENABLE_PROFILING is defined in build_flags
+            menu->add(new ActionConfirmItem("Dump profile to serial", []() {
+                queue_file_output("$$$profile");
+            }));
+            menu->add(new ActionConfirmItem("Reset profile counters", []() {
+                queue_file_output("$$$profilereset");
+            }));
+        #endif
 
     }
 #endif

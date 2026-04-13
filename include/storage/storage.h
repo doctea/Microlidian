@@ -6,6 +6,8 @@
 #include "sequencer/sequencing.h"
 #include "outputs/output_processor.h"
 
+extern bool actively_saving;
+
 #ifdef ENABLE_CV_INPUT
     #include "outputs/output_voice.h"
     #include "cv_input.h"
@@ -20,6 +22,7 @@ extern RP2040OutputWrapperClass *output_wrapper; // @@ TODO: find a suitable pla
 #define SYSTEM_SETTINGS_FILEPATH "system.txt"
 
 #define PRESET_SLOT_FILEPATH_FORMAT "slots/preset-%i.txt"
+#define SNAPSHOT_SLOT_FILEPATH_FORMAT "snapshots/snapshot-%i.txt"
 #define MAXFILEPATH 32
 
 #define FILE_READ_MODE "r"

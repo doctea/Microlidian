@@ -151,7 +151,7 @@ void loop1() {
                 acquire_lock();
                 //ATOMIC() 
                 {
-                    PROFILE_START(p_cv_input_update);
+                PROFILE_START(p_cv_input_update);
                 parameter_manager->throttled_update_cv_input__all(time_between_cv_input_updates, false, false);
                 PROFILE_STOP(p_cv_input_update);
                 }

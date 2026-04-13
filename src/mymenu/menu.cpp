@@ -65,6 +65,7 @@ FLASHMEM
 #endif*/
 void setup_menu(bool button_high_state = HIGH) {
     Debug_println(F("Starting setup_menu()..")); Serial_flush();
+    setup_menu_io_gpio_priority();  // boost IO_IRQ_BANK0 before Encoder and button ISRs attach
 
     #ifdef ENCODER_KNOB_L
         knob = new Encoder(ENCODER_KNOB_L, ENCODER_KNOB_R);
