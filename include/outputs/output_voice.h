@@ -71,7 +71,9 @@ class CVChordVoice /*: public BaseOutputProcessor*/
             this->colour = menu->get_next_colour();
             strncpy(this->label, label, MENU_C_MAX);
             this->label[MENU_C_MAX - 1] = '\0';
-            this->set_path_segment(label);
+            #ifdef ENABLE_STORAGE
+                this->set_path_segment(label);
+            #endif
         }
 
         virtual void process() {
@@ -175,6 +177,7 @@ class CVChordVoice /*: public BaseOutputProcessor*/
             return "None";
         }
 
+        #ifdef ENABLE_STORAGE
         virtual void setup_saveable_settings() override {
             SHDynamic<1, 3>::setup_saveable_settings();
 
@@ -241,4 +244,5 @@ class CVChordVoice /*: public BaseOutputProcessor*/
                 [=]() -> bool { return this->enabled; }
             ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
         }
+        #endif
 };

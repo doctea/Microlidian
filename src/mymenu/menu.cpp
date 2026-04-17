@@ -27,6 +27,8 @@
 
 #include "mymenu/menuitems_scale.h"
 
+#include "menuitems_uclock_debug.h"
+
 //DisplayTranslator *tft;
 DisplayTranslator_Configured *tft = nullptr;
 Menu *menu = nullptr; // = Menu();
@@ -110,6 +112,7 @@ void setup_menu(bool button_high_state = HIGH) {
     menu->set_messages_log(messages_log);
 
     menu->add_pinned(&top_loop_marker_panel);  // pinned position indicator
+    menu->add(new UclockDebugPanel());  // uClock debug panel
     menu->add(&posbar);                        // bpm and position indicator
     menu->add(&clock_source_selector);         // midi clock source (internal or from PC USB)
 

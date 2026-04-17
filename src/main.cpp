@@ -63,7 +63,14 @@
 #include <SimplyAtomic.h>
 
 #ifdef USE_UCLOCK_GENERIC
-    void uClockCheckTime(uint32_t micros_time);
+    void uClockCheckTime(uint32_t micros_time) {
+        static uint32_t last_micros = 0;
+        uint32_t diff = micros_time - last_micros;
+        if (diff > micros_per_tick) {
+            last_micros = micros_time;
+            uClock.handleInternalClock();
+        }
+    }
 #endif
 
 FLASHMEM void setup_parameter_outputs(IMIDICCTarget *);
@@ -98,6 +105,12 @@ void global_on_restart() {
   //send_midi_serial_stop_start();
   //behaviour_manager->on_restart();
   //Serial.println(F("<==on_restart()"));
+}
+void global_on_stop() {
+  //Serial.println(F("on_stop()==>"));
+  //clock_stop();
+  //Serial.println(F("<==on_stop()"));
+  menu->update_ticks(ticks);
 }
 
 void auto_handle_start();
@@ -151,24 +164,30 @@ void setup() {
 
     #ifdef USE_UCLOCK
         setup_uclock(do_tick, uClock.PPQN_24);
+        set_bpm(60.0); //2001f);  // just for testing to make it a little bit easier to see if clock is slipping
 
-        // Claude told me that this would help reduce the jitter i was seeing due to 
-        // " the FIFO being unable to drain while ATOMIC() holds interrupts disabled"
-        // and maybe it even die work?
-        // TODO: verify that this actually does something; move it to setup_uclock
-        // Lower the priority of ALL hardware-timer alarm IRQs below the USB IRQ.
-        // On RP2040/Cortex-M0+, USBCTRL_IRQ defaults to 0x80; timer alarms also default
-        // to 0x80 (equal priority → no preemption).  By setting timer alarms to 0xC0
-        // (lowest software level) the USB drain ISR can preempt the uClock ISR while it
-        // is spin-waiting on a full TX FIFO, eliminating the multi-ms stalls in do_tick.
-        irq_set_priority(TIMER1_IRQ_0, 0xC0);
-        irq_set_priority(TIMER1_IRQ_1, 0xC0);
-        irq_set_priority(TIMER1_IRQ_2, 0xC0);
-        irq_set_priority(TIMER1_IRQ_3, 0xC0);
+        // Priority layout on Cortex-M0+ (RP2040/RP2350): only top 2 bits count,
+        // so valid levels are 0x00 (highest) > 0x40 > 0x80 > 0xC0 (lowest).
+        //
+        // do_tick() previously blocked on the USB TX FIFO, so the timer alarm was
+        // intentionally set LOW (0xC0) to let the USB drain ISR (0x80) preempt it.
+        // Now that do_tick() writes only to a non-blocking ring buffer, that concern
+        // is gone.  Give the clock aliarms the HIGHEST priority so the tick fires as
+        // precisely as possible regardless of concurrent USB, screen, or button work.
+        //
+        //   0x00  Timer alarms (uClock + usb_timer) -- fires immediately, low jitter
+        //   0x40  IO_IRQ_BANK0  (buttons + encoder)
+        //   0x80  USBCTRL_IRQ               (default)
+        //   0xC0  (nothing assigned here now)
+        irq_set_priority(TIMER0_IRQ_0, 0x00);
+        irq_set_priority(TIMER0_IRQ_1, 0x00);
+        irq_set_priority(TIMER0_IRQ_2, 0x00);
+        irq_set_priority(TIMER0_IRQ_3, 0x00);
     #else
         setup_cheapclock();
     #endif
     set_global_restart_callback(global_on_restart);
+    set_global_stop_callback(global_on_stop);
 
     #if defined(ENABLE_CV_INPUT) && defined(ENABLE_CLOCK_INPUT_CV)
         set_check_cv_clock_ticked_callback(actual_check_cv_clock_ticked);
@@ -248,7 +267,9 @@ void setup() {
         // set up Turing Machine pattern
         // TODO: rename this, move it somewhere else, it's not really an "insect" pattern
         TuringMachinePattern *tm_pattern = new TuringMachinePattern(output_processor->nodes);
-        tm_pattern->set_path_segment("pattern_0");
+        #ifdef ENABLE_STORAGE
+            tm_pattern->set_path_segment("pattern_0");
+        #endif
         tm_pattern->set_steps(16);
         tm_pattern->set_output(output_processor->get_output_for_label("Melody"));
         insect_sequencer->add_pattern(tm_pattern);
@@ -340,7 +361,7 @@ void setup() {
         #endif
     #endif
 
-    started = true;
+    //started = true;
 
     #ifdef DEBUG_ENVELOPES
         set_bpm(10);
@@ -369,7 +390,7 @@ void setup() {
     //     add_repeating_timer_ms(5, parameter_repeating_callback, nullptr, &parameter_timer);
     // #endif
     #ifdef USE_TINYUSB
-        add_repeating_timer_us(250, usb_repeating_callback, nullptr, &usb_timer);
+        add_repeating_timer_us(100, usb_repeating_callback, nullptr, &usb_timer);
     #endif
 
 }
@@ -423,7 +444,7 @@ void read_serial_buffer() {
             }
             messages_log_add(String("got serial char: ") + c);*/
         }
-        Serial.clearWriteError();
+        //Serial.clearWriteError();
     }
     //restore_interrupts(interrupts);
 }
@@ -440,6 +461,7 @@ PROFILE_SLOT_DECL(p_outproc_process,   "do_tick outproc::process");
 PROFILE_SLOT_DECL(p_cv_chord_process,  "do_tick cv_chord::process");
 PROFILE_SLOT_DECL(p_menu_update_ticks, "loop menu::update_ticks");
 PROFILE_SLOT_DECL(p_output_proc_loop,  "loop output_proc::loop");
+PROFILE_SLOT_DECL(p_deferred_recomputes, "loop seq::deferred_recomputes");
 PROFILE_SLOT_DECL(p_midi_drain,        "loop midi drain()");
 PROFILE_SLOT_DECL(p_menu_update_inputs,"loop menu::update_inputs");
 
@@ -453,6 +475,7 @@ FLASHMEM static void setup_profiling() {
     PROFILE_SET_SPIKE_THRESHOLD(p_cv_chord_process,    300);  // avg ~140µs
     PROFILE_SET_SPIKE_THRESHOLD(p_menu_update_ticks,  3000);  // avg ~1.9ms
     PROFILE_SET_SPIKE_THRESHOLD(p_output_proc_loop,    200);  // avg ~36µs post-ring-buffer
+    PROFILE_SET_SPIKE_THRESHOLD(p_deferred_recomputes, 2000); // deferred make_euclid() for all 20 patterns; expect ~1ms per step
     PROFILE_SET_SPIKE_THRESHOLD(p_midi_drain,          200);  // should now be near-zero: peek+FIFO check before each send
     PROFILE_SET_SPIKE_THRESHOLD(p_menu_update_inputs,  200);  // avg ~15µs
     // Note: thresholds for the Core 1 rendering slots (draw_screen, cv_input_update)
@@ -469,10 +492,29 @@ FLASHMEM static void setup_profiling() {
     PROFILE_SET_SPIKE_MODULO(p_cv_chord_process,    6);  // 16th phase
     PROFILE_SET_SPIKE_MODULO(p_menu_update_ticks,  96);  // bar phase
     PROFILE_SET_SPIKE_MODULO(p_output_proc_loop,   96);  // bar phase at time of spike
+    PROFILE_SET_SPIKE_MODULO(p_deferred_recomputes, 6);  // 16th phase — should align with step boundaries
     PROFILE_SET_SPIKE_MODULO(p_midi_drain,         96);  // bar phase — correlate with burst sends on bar boundaries
 }
 
 void do_tick(uint32_t in_ticks) {
+    static uint32_t last_tick = -1;
+
+    in_ticks -= 1;
+
+    if (in_ticks == last_tick) {
+        //Serial.printf("Got duplicate tick %u, ignoring\n", in_ticks);
+        return;
+    }
+    last_tick = in_ticks;
+
+    // if (is_bpm_on_beat(in_ticks)) {
+    //     Serial.printf("DOOF!\n");
+    // }
+    //return; // with this early return, and with core1 set to do nothing, clock loses about 5ms every seconds.
+    // with early return, and without locking in draw_screen, clock loses about 2-4ms every second.
+    // without early return, and without locking in draw_screen, clock loses about 19ms every second.
+    // removing the ATOMIC()s in this function makes no apparent difference to clock drift.
+
     PROFILE_SCOPE(p_dotick);
     PROFILE_SET_TICK(in_ticks);  // capture tick number for spike correlation
     #ifdef USE_UCLOCK
@@ -489,18 +531,25 @@ void do_tick(uint32_t in_ticks) {
 
     output_wrapper->sendClock();
 
+    //return; // with early return here, clock drift drops to 3-6ms every second
+
     #ifdef ENABLE_EUCLIDIAN
+        // removing this is_running() block gives us 4-7ms clock drift every second
+        // so, this seems like a candidate for optimisation if we want to reduce clock drift.
         if (sequencer->is_running()) {
             PROFILE_START(p_sequencer_ontick);
             sequencer->on_tick(ticks);
             PROFILE_STOP(p_sequencer_ontick);
         }
+        // removing this block gives us little change: around 15ms clock drift every second.
         if (is_bpm_on_sixteenth(ticks) && output_processor->is_enabled()) {
             PROFILE_START(p_outproc_process);
             output_processor->process();
             PROFILE_STOP(p_outproc_process);
         }
     #endif
+
+    //return;   // early return here makes little difference to clock drift
 
     PROFILE_START(p_cv_chord_process);
     cv_chord_output_1->process();
@@ -518,7 +567,15 @@ void do_tick(uint32_t in_ticks) {
 }
 
 void loop() {
+    //return;   // disabling this loop() entirely only improves drift by about 10ms every second, even with ATOMICs disabled.
     uint32_t mics_start = micros();
+
+    #ifdef UCLOCK_DEBUG_LOGGING
+        // Must NOT be inside ATOMIC() — USB Serial requires USB interrupts to drain its TX
+        // buffer. The ring buffer is safe here: ISR only advances head, loop() only advances
+        // tail, both are volatile uint8_t (single-byte, so reads/writes are inherently atomic).
+        uClockDebugLogFlush();
+    #endif
 
     // Drain the MIDI ring buffer first, before any ATOMIC() block.
     // All send*() calls from do_tick (ISR) and ATOMIC() regions enqueue fast into
@@ -598,6 +655,17 @@ void loop() {
         }
     }
 
+    // Perform any make_euclid() recomputes that were deferred from the ISR on_tick path.
+    // Patterns are fully recomputed here, safely outside the ISR, well before the next step fires.
+    #ifdef ENABLE_EUCLIDIAN
+    {
+        PROFILE_START(p_deferred_recomputes);
+        //sequencer->do_deferred_recomputes();
+        sequencer->on_loop(ticks);
+        PROFILE_STOP(p_deferred_recomputes);
+    }
+    #endif
+
     ATOMIC() 
     {
         if (playing && clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0 && micros() + loop_average >= last_ticked_at_micros + micros_per_tick) {
@@ -637,7 +705,9 @@ void loop() {
         #endif
     }
 
-    process_queued_file_output();
+    #ifdef ENABLE_STORAGE
+        process_queued_file_output();
+    #endif
 
     //Serial.println("end of loop()"); Serial.flush();
 }

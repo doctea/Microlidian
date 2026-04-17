@@ -87,6 +87,7 @@ void push_display() {
     if (!frame_ready) return;
     if (is_locked()) return;
 
+    // disabling locking here makes no apparent difference to clock drift, but seems risky since if the screen update takes a long time then the next tick might come in while we're still updating the screen, which could cause all sorts of weirdness; so maybe best to leave locking enabled here just in case.
     acquire_lock();
     menu->updateDisplay();
     last_drawn = millis();
@@ -115,6 +116,7 @@ void draw_screen() {
     acquire_lock();
     //uint32_t interrupts = save_and_disable_interrupts();
     frame_ready = false;
+    // removing this ATOMIC makes no apparent difference to clock drift.
     ATOMIC() {
         menu->display();
         frame_ready = true;
@@ -129,6 +131,7 @@ void setup1() {
     while (!started) {
         delay(1);
     };
+    //while (true) {}   // with display enabled, and do_tick set to early return, clock loses around 40ms every second
 }
 
 #include "cv_output.h"
@@ -142,6 +145,7 @@ void loop1() {
         #endif
     #endif
 
+    // with draw_screen locking disabled, and with this block disabled, clock loses about 15ms every second.
     #ifdef ENABLE_CV_INPUT
         static unsigned long last_cv_update = 0;
         if (cv_input_enabled) {

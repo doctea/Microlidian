@@ -54,10 +54,18 @@ class DebugPanel : public MenuItem {
             tft->print("USB host ready: ");*/
             tft->print(tud_ready()?"yes\n":"--\n");
             tft->print("Clock type: ");
-            #if defined(USE_UCLOCK_GENERIC) && defined(USE_UCLOCK)
-                tft->println("uClock - generic");
-            #elif defined(USE_UCLOCK)
-                tft->println("uClock - hardware");
+            #ifdef USE_UCLOCK
+                #if defined(USE_UCLOCK_GENERIC)
+                    tft->print("uClock - generic");
+                #elif defined(USE_UCLOCK)
+                    tft->print("uClock - hardware");
+                #endif
+                #ifdef UCLOCK_HAS_STRICT_EXTERNAL_MODE
+                    tft->print(" (strict external mode)");
+                #else
+                    tft->print(" (non-strict external mode)");
+                #endif
+                tft->println();
             #else
                 tft->println("Software");
             #endif

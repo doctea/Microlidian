@@ -1,3 +1,6 @@
+
+#ifdef ENABLE_STORAGE
+
 #include "storage/storage.h"
 #include "saveload_settings.h"
 
@@ -362,4 +365,6 @@ void load_from_slot_7() {   load_from_slot(7);}
         #endif
 
     }
+#endif
+
 #endif

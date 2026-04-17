@@ -1,3 +1,5 @@
+#ifdef ENABLE_STORAGE
+
 #pragma once
 
 #include "saveloadlib.h"
@@ -108,3 +110,5 @@ void save_system_settings();
 void load_system_settings();
 bool save_to_slot(int slot);
 bool load_from_slot(int slot);
+
+#endif
