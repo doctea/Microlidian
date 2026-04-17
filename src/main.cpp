@@ -162,9 +162,11 @@ void setup() {
     setup_serial();
     Debug_printf("after setup_serial(), free RAM is %u\n", freeRam());
 
+    conductor = new Conductor();
+
     #ifdef USE_UCLOCK
         setup_uclock(do_tick, uClock.PPQN_24);
-        set_bpm(60.0); //2001f);  // just for testing to make it a little bit easier to see if clock is slipping
+        set_bpm(120.0); //2001f);  // just for testing to make it a little bit easier to see if clock is slipping
 
         // Priority layout on Cortex-M0+ (RP2040/RP2350): only top 2 bits count,
         // so valid levels are 0x00 (highest) > 0x40 > 0x80 > 0xC0 (lowest).
@@ -289,7 +291,7 @@ void setup() {
                 global_accent_source->make_menu_items();
             #endif
 
-            sequencer->make_menu_items(menu, COMBINE_NONE);
+            sequencer->make_menu_items(menu, 0);    // 0 = COMBINE_NONE, which TODO: we should make into a global or something to be shared amongst different menu-capable things
             menu->select_page(0);   // todo: why do we do this?
             Debug_printf("after setting up sequencer and menus, free RAM is %u\n", freeRam());
         #endif
@@ -498,8 +500,6 @@ FLASHMEM static void setup_profiling() {
 
 void do_tick(uint32_t in_ticks) {
     static uint32_t last_tick = -1;
-
-    in_ticks -= 1;
 
     if (in_ticks == last_tick) {
         //Serial.printf("Got duplicate tick %u, ignoring\n", in_ticks);

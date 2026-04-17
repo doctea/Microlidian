@@ -22,12 +22,9 @@
 
 #include "submenuitem_bar.h"
 
-#include "mymenu/menu_bpm.h"
-#include "mymenu/menu_clock_source.h"
+#include "mymenu/menu_conductor.h"
 
-#include "mymenu/menuitems_scale.h"
-
-#include "menuitems_uclock_debug.h"
+// #include "menuitems_uclock_debug.h"
 
 //DisplayTranslator *tft;
 DisplayTranslator_Configured *tft = nullptr;
@@ -49,14 +46,6 @@ Menu *menu = nullptr; // = Menu();
     Button pushButtonC = Button(); // 10ms debounce
     //extern Bounce pushButtonC;
 #endif
-
-LoopMarkerPanel top_loop_marker_panel = LoopMarkerPanel(LOOP_LENGTH_TICKS, PPQN); //, BEATS_PER_BAR, BARS_PER_PHRASE);
-
-BPMPositionIndicator posbar = BPMPositionIndicator();
-#ifdef ENABLE_TIME_SIGNATURE
-    TimeSignatureIndicator timesig_indicator = TimeSignatureIndicator();
-#endif
-ClockSourceSelectorControl clock_source_selector = ClockSourceSelectorControl("Clock source", clock_mode);
 
 DisplayTranslator_Configured displaytranslator = DisplayTranslator_Configured();
 
@@ -111,22 +100,10 @@ void setup_menu(bool button_high_state = HIGH) {
 
     menu->set_messages_log(messages_log);
 
-    menu->add_pinned(&top_loop_marker_panel);  // pinned position indicator
-    menu->add(new UclockDebugPanel());  // uClock debug panel
-    menu->add(&posbar);                        // bpm and position indicator
-    menu->add(&clock_source_selector);         // midi clock source (internal or from PC USB)
+    // Pinned loop-position bar at top
+    menu->add_pinned(new LoopMarkerPanel(LOOP_LENGTH_TICKS, PPQN));
 
-    // add start/stop/continue bar
-    SubMenuItemBar *project_startstop = new SubMenuItemBar("Transport", false);
-    project_startstop->add(new ActionItem("Start",    clock_start));
-    project_startstop->add(new ActionItem("Stop",     clock_stop));
-    project_startstop->add(new ActionItem("Continue", clock_continue));
-    project_startstop->add(new ActionFeedbackItem("Restart", (ActionFeedbackItem::setter_def_2)set_restart_on_next_bar_on, is_restart_on_next_bar, "Restarting..", "Restart"));
-    menu->add(project_startstop);
-
-    #ifdef ENABLE_TIME_SIGNATURE
-        menu->add(&timesig_indicator);             // time signature indicator
-    #endif
+    conductor->make_menu_items(menu, COMBINE_NONE);
 
     // debug bpm selector
     /*SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");

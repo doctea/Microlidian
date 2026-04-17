@@ -5,6 +5,7 @@
 #include "saveloadlib.h"
 #include "saveload_settings.h"
 
+#include "conductor.h"
 #include "sequencer/sequencing.h"
 #include "outputs/output_processor.h"
 
@@ -60,22 +61,7 @@ class SettingsRoot : public SHDynamic<16, 4> {  // all top-level hosts as childr
         register_child(sequencer);
         register_child(output_processor);
         register_child(output_wrapper);
-
-        register_setting(new LSaveableSetting<uint8_t>(
-            "Time Signature Denominator",
-            "TimeSigs",
-            nullptr,
-            [=](uint8_t v) { set_time_signature_denominator(v); },
-            [=]() -> uint8_t { return get_time_signature_denominator(); }
-        ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-
-        register_setting(new LSaveableSetting<uint8_t>(
-            "Time Signature Numerator",
-            "TimeSigs",
-            nullptr,
-            [=](uint8_t v) { set_time_signature_numerator(v); },
-            [=]() -> uint8_t { return get_time_signature_numerator(); }
-        ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+        register_child(conductor);
 
         // CV Pitch settings
         #ifdef ENABLE_CV_INPUT
