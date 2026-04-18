@@ -253,6 +253,9 @@ void setup() {
         
         //Serial.println("setting up sequencer..");
         sequencer = new MultiSequencer();
+        conductor->register_time_sig_change_callback(
+            [](uint8_t num, uint8_t den) { sequencer->notify_time_sig_changed(num, den); }
+        );
 
         // set up Euclidian Sequencer and patterns, and add to MultiSequencer
         EuclidianSequencer *euclidian_sequencer = new EuclidianSequencer(output_processor->nodes);
