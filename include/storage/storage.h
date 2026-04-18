@@ -8,6 +8,9 @@
 #include "conductor.h"
 #include "sequencer/sequencing.h"
 #include "outputs/output_processor.h"
+#ifdef ENABLE_ARRANGER
+    #include "arranger.h"
+#endif
 
 extern bool actively_saving;
 
@@ -62,6 +65,12 @@ class SettingsRoot : public SHDynamic<16, 4> {  // all top-level hosts as childr
         register_child(output_processor);
         register_child(output_wrapper);
         register_child(conductor);
+
+        #ifdef ENABLE_ARRANGER
+            if (arranger != nullptr) {
+                register_child(arranger);
+            }
+        #endif
 
         // CV Pitch settings
         #ifdef ENABLE_CV_INPUT

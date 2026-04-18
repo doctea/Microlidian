@@ -18,6 +18,9 @@
 #include <clock.h>
 #include <bpm.h>
 #include <profiling.h>
+#ifdef ENABLE_ARRANGER
+    #include <arranger.h>
+#endif
 //#include "midi_usb/midi_usb_rp2040.h"
 
 #include "sequencer/sequencing.h"
@@ -101,6 +104,12 @@ void global_on_restart() {
   //Serial.println(F("on_restart()==>"));
   clock_reset();
   last_processed_tick = -1;
+
+    #ifdef ENABLE_ARRANGER
+        if (arranger != nullptr) {
+                arranger->on_restart();
+        }
+    #endif
   
   //send_midi_serial_stop_start();
   //behaviour_manager->on_restart();
@@ -164,6 +173,19 @@ void setup() {
 
     conductor = new Conductor();
 
+    #ifdef ENABLE_ARRANGER
+        arranger = new Arranger();
+        arranger->set_chord_sink(
+            [=](const chord_identity_t &chord, bool requantise) {
+                conductor->set_chord_identity(chord, requantise);
+            }
+        );
+        // Default to progression-loop mode first; playlist mode can be enabled in settings.
+        arranger->set_playback_mode(Arranger::LOOP_SECTION);
+        arranger->set_progression_cadence(Arranger::PROGRESSION_PER_BAR);
+        arranger->on_restart();
+    #endif
+
     #ifdef USE_UCLOCK
         setup_uclock(do_tick, uClock.PPQN_24);
         set_bpm(120.0); //2001f);  // just for testing to make it a little bit easier to see if clock is slipping
@@ -226,10 +248,6 @@ void setup() {
         Debug_printf("before setup_screen(), free RAM is %u\n", freeRam());
         setup_screen(LOW);
         Debug_printf("after setup_screen(), free RAM is %u\n", freeRam());
-
-        #ifdef ENABLE_STORAGE
-            setup_storage_menu();
-        #endif
     #endif
 
     // check if the two buttons are held down, if so, enter firmware reset mode as quickly as possible!
@@ -537,6 +555,17 @@ void do_tick(uint32_t in_ticks) {
         // removing this is_running() block gives us 4-7ms clock drift every second
         // so, this seems like a candidate for optimisation if we want to reduce clock drift.
         if (sequencer->is_running()) {
+            #ifdef ENABLE_ARRANGER
+                if (arranger != nullptr) {
+                    if (is_bpm_on_bar(ticks)) {
+                        arranger->on_bar(BPM_CURRENT_BAR_OF_PHRASE);
+                    }
+                    if (is_bpm_on_phrase(ticks)) {
+                        arranger->on_end_phrase(BPM_CURRENT_PHRASE);
+                    }
+                }
+            #endif
+
             PROFILE_START(p_sequencer_ontick);
             sequencer->on_tick(ticks);
             PROFILE_STOP(p_sequencer_ontick);

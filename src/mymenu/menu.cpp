@@ -23,6 +23,13 @@
 #include "submenuitem_bar.h"
 
 #include "mymenu/menu_conductor.h"
+#ifdef ENABLE_ARRANGER
+    #include "mymenu/menu_arranger.h"
+#endif
+
+#ifdef ENABLE_STORAGE
+    #include "storage/storage.h"
+#endif
 
 // #include "menuitems_uclock_debug.h"
 
@@ -104,6 +111,14 @@ void setup_menu(bool button_high_state = HIGH) {
     menu->add_pinned(new LoopMarkerPanel(LOOP_LENGTH_TICKS, PPQN));
 
     conductor->make_menu_items(menu, COMBINE_NONE);
+
+    #ifdef ENABLE_STORAGE
+        setup_storage_menu();
+    #endif
+
+    #ifdef ENABLE_ARRANGER
+        arranger_make_menu_items(menu);
+    #endif
 
     // debug bpm selector
     /*SelectorControl<float> *bpm_selector = new SelectorControl<float>("BPM");
