@@ -192,7 +192,7 @@
 
     #include "outputs/output_processor.h"
 
-    #include "outputs/output_voice.h"
+    #include "inputs/cv_pitch_input.h"
 
     extern MIDIOutputProcessor *output_processor;
     extern CVPitchTrigger *cv_chord_output_1;

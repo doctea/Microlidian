@@ -51,7 +51,7 @@
         #include "cv_input_clock.h"
     #endif
 
-    #include "outputs/output_voice.h"
+    #include "inputs/cv_pitch_input.h"
 #endif
 
 #ifdef ENABLE_CV_OUTPUT

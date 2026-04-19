@@ -1,5 +1,5 @@
 #ifdef ENABLE_CV_INPUT
-    #include "outputs/output_voice.h"
+    #include "inputs/cv_pitch_input.h"
 
     CVPitchTrigger *cv_pitch_input_1;
     CVPitchTrigger *cv_pitch_input_2;
@@ -17,7 +17,7 @@
         cv_pitch_input_3 = new CVPitchTrigger("CV Pitch 3", output_processor->get_output_for_label("Chords"), output_processor->get_available_outputs(), parameter_manager->getInputForName("C"), nullptr);
     }
 
-    void setup_cv_pitch_inputs_menu () {
+    void setup_cv_pitch_inputs_menu() {
         cv_pitch_input_1->create_menu_items();
         cv_pitch_input_2->create_menu_items();
         cv_pitch_input_3->create_menu_items();

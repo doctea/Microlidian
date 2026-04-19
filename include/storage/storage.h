@@ -15,7 +15,7 @@
 extern bool actively_saving;
 
 #ifdef ENABLE_CV_INPUT
-    #include "outputs/output_voice.h"
+    #include "inputs/cv_pitch_input.h"
     #include "cv_input.h"
 #endif
 
