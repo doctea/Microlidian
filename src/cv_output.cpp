@@ -1,4 +1,10 @@
 #ifdef ENABLE_CV_OUTPUT
+
+    // experimental proof-of-concept of outputing CV and pitches to the DAC8574 CV output, using the same note trigger logic as the MIDI outputs
+    // not used now and not updated, but keeping around in case we later want to re-implement this sort of thing.
+
+    #include "outputs/output_processor.h"
+
     #include "cv_output.h"
 
     #include "menu.h"
@@ -189,8 +195,8 @@
     #include "outputs/output_voice.h"
 
     extern MIDIOutputProcessor *output_processor;
-    extern CVChordVoice *cv_chord_output_1;
-
+    extern CVPitchTrigger *cv_chord_output_1;
+    
     CVOutputParameter<DAC8574,float> 
         *output_a = nullptr,
         *output_b = nullptr,

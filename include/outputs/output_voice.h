@@ -1,7 +1,7 @@
 #pragma once
 
 #include "outputs/output_processor.h"
-#include "chord_player.h"
+#include "pitch_trigger_source.h"
 
 #include "bpm.h"
 
@@ -16,17 +16,17 @@
 
 #include "outputs/SeqlibSaveableSettings.h"
 
-class CVChordVoice;
-extern CVChordVoice *cv_chord_output_1;
-extern CVChordVoice *cv_chord_output_2;
-extern CVChordVoice *cv_chord_output_3;
+class CVPitchTrigger;
+extern CVPitchTrigger *cv_pitch_input_1;
+extern CVPitchTrigger *cv_pitch_input_2;
+extern CVPitchTrigger *cv_pitch_input_3;
 
 void setup_cv_pitch_inputs(BaseOutputProcessor *output_processor);
 void setup_cv_pitch_inputs_menu();
 
-class CVChordVoice /*: public BaseOutputProcessor*/ 
+class CVPitchTrigger
     #ifdef ENABLE_STORAGE
-        : virtual public SHDynamic<1, 3>  // no children; settings for this voice
+        : virtual public SHDynamic<1, 5>  // 1 child; voice settings
     #endif
     {
     BaseParameterInput *pitch_input = nullptr;
@@ -40,24 +40,28 @@ class CVChordVoice /*: public BaseOutputProcessor*/
     BaseOutput *output_target = nullptr;
     LinkedList<BaseOutput*> *available_outputs = nullptr;
 
-    ChordPlayer chord_player = ChordPlayer(
-        [=](int8_t channel, int8_t note, int8_t velocity) -> void { 
-            //output_target->sendNoteOn(note, velocity, channel ); 
+    PitchTriggerSource pitch_trigger = PitchTriggerSource(
+        [=](int8_t note, int8_t velocity) -> void {
             if (!is_valid_note(note)) 
                 return;
             if (!this->enabled) 
                 return;
             output_target->receive_event(1, 0, note, velocity); // event_value_1 = send a note on; event_value_2 = send a note off; event_value_3 = note value (0-127); event_value_4 = velocity value (0-127)
         },
-        [=](int8_t channel, int8_t note, int8_t velocity) -> void { 
+        [=](int8_t note, int8_t velocity) -> void {
             if (!is_valid_note(note)) 
                 return;
             output_target->receive_event(0, 1, note, velocity); 
+        },
+        [=](int8_t note, int8_t velocity) -> void {
+            if (!is_valid_note(note))
+                return;
+            output_target->receive_event(0, 1, note, velocity);
         }
     );
 
     public:
-        CVChordVoice(
+        CVPitchTrigger(
             const char *label, 
             BaseOutput *output_target, 
             LinkedList<BaseOutput*> *available_outputs, 
@@ -92,12 +96,12 @@ class CVChordVoice /*: public BaseOutputProcessor*/
                 //if (this->debug) Serial.printf("setting velocity to %i (%2.2f)\n", velocity, this->velocity_input->get_normal_value_unipolar());
             }
 
-            this->chord_player.on_pre_clock(ticks, new_note, velocity);        
+            this->pitch_trigger.on_pre_clock(ticks, new_note, velocity);
         }
 
         virtual void set_enabled(bool v) {
             if (this->enabled && !v) {
-                this->chord_player.stop_all();
+                this->pitch_trigger.stop_all();
             }
             this->enabled = v;
         }
@@ -130,33 +134,33 @@ class CVChordVoice /*: public BaseOutputProcessor*/
                 [=](bool value) { this->enabled = value; },
                 [=]() -> bool { return this->enabled; }
             ));
-            selectors->add(new ParameterInputSelectorControl<CVChordVoice>(
+            selectors->add(new ParameterInputSelectorControl<CVPitchTrigger>(
                 "Pitch", 
                 this, 
-                &CVChordVoice::set_parameter_input_pitch, 
-                &CVChordVoice::get_parameter_input_pitch, 
+                &CVPitchTrigger::set_parameter_input_pitch, 
+                &CVPitchTrigger::get_parameter_input_pitch, 
                 parameter_manager->get_available_pitch_inputs(), 
                 this->pitch_input
             ));
-            selectors->add(new ParameterInputSelectorControl<CVChordVoice>(
+            selectors->add(new ParameterInputSelectorControl<CVPitchTrigger>(
                 "Velocity", 
                 this, 
-                &CVChordVoice::set_parameter_input_velocity, 
-                &CVChordVoice::get_parameter_input_velocity, 
+                &CVPitchTrigger::set_parameter_input_velocity, 
+                &CVPitchTrigger::get_parameter_input_velocity, 
                 parameter_manager->available_inputs, 
                 this->velocity_input
             ));
-            OutputSelectorControl<CVChordVoice> *output_selector = new OutputSelectorControl<CVChordVoice> (
+            OutputSelectorControl<CVPitchTrigger> *output_selector = new OutputSelectorControl<CVPitchTrigger> (
                 "Output",
                 this,
-                &CVChordVoice::set_output_target,
-                &CVChordVoice::get_output_target,
+                &CVPitchTrigger::set_output_target,
+                &CVPitchTrigger::get_output_target,
                 this->available_outputs,
                 this->output_target
             );
             selectors->add(output_selector);
             menu->add(selectors, this->colour);
-            menu->add(chord_player.make_menu_items(), this->colour);
+            menu->add(pitch_trigger.make_menu_items(), this->colour);
         }
 
         virtual void set_output_by_name(const char *output_name) {
@@ -179,7 +183,7 @@ class CVChordVoice /*: public BaseOutputProcessor*/
 
         #ifdef ENABLE_STORAGE
         virtual void setup_saveable_settings() override {
-            SHDynamic<1, 3>::setup_saveable_settings();
+            SHDynamic<1, 5>::setup_saveable_settings();
 
             // register_setting(new LSaveableSetting<int8_t>(
             //     "MIDI channel",
@@ -189,7 +193,7 @@ class CVChordVoice /*: public BaseOutputProcessor*/
             //     [=]() -> int8_t { return this->channel; }
             // ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
             
-            register_child(&chord_player);
+            register_child(&pitch_trigger);
 
             // @@TODO: hmmm, do we need some way to be able to identify the target_output between sessions..?
             // but as its an IMIDINoteTarget pointer, we can't just save the pointer value... 

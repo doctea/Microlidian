@@ -570,8 +570,13 @@ void do_tick(uint32_t in_ticks) {
             sequencer->on_tick(ticks);
             PROFILE_STOP(p_sequencer_ontick);
         }
-        // removing this block gives us little change: around 15ms clock drift every second.
-        if (is_bpm_on_sixteenth(ticks) && output_processor->is_enabled()) {
+        // Tradeoff note:
+        // We intentionally process outputs on EVERY tick (not just 16th boundaries)
+        // to avoid quantized trigger latency on chord/note events.
+        // This costs more CPU, but timing feels noticeably tighter.
+        // Previous behaviour:
+        // if (is_bpm_on_sixteenth(ticks) && output_processor->is_enabled()) {
+        if (output_processor->is_enabled()) {
             PROFILE_START(p_outproc_process);
             output_processor->process();
             PROFILE_STOP(p_outproc_process);
@@ -581,9 +586,9 @@ void do_tick(uint32_t in_ticks) {
     //return;   // early return here makes little difference to clock drift
 
     PROFILE_START(p_cv_chord_process);
-    cv_chord_output_1->process();
-    cv_chord_output_2->process();
-    cv_chord_output_3->process();
+    cv_pitch_input_1->process();
+    cv_pitch_input_2->process();
+    cv_pitch_input_3->process();
     PROFILE_STOP(p_cv_chord_process);
 
     /*#ifdef ENABLE_CV_OUTPUT

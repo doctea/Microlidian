@@ -74,9 +74,9 @@ class SettingsRoot : public SHDynamic<10, 4> {  // all top-level hosts as childr
 
         // CV Pitch settings
         #ifdef ENABLE_CV_INPUT
-            register_child(cv_chord_output_1);
-            register_child(cv_chord_output_2);
-            register_child(cv_chord_output_3);
+            register_child(cv_pitch_input_1);
+            register_child(cv_pitch_input_2);
+            register_child(cv_pitch_input_3);
 
             // add the midi_cc_parameters, too!
             // these are not strictly only CV_INPUT things, as can also mix internal LFOs and Envelopes etc
