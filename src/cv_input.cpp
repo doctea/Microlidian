@@ -142,7 +142,7 @@ void setup_parameter_outputs(IMIDICCTarget *wrapper) {
             //Serial.printf("create_midi_parameter_output_menu_items processing [%i/%i] @ %p...\n", i+1, NUM_MIDI_CC_PARAMETERS, midi_cc_parameters[i]); Serial.flush();
             snprintf(label, MENU_C_MAX, "CV-to-MIDI: %s", midi_cc_parameters[i]->label);
             //Serial.printf("Created label for page '%s'\n", label); Serial.flush();
-            menu->add_page(label, C_WHITE);
+            menu->add_page(label, C_WHITE, false);
 
             /*
             // todo: CC+channel selectors now moved to MIDICCParameter#addCustomTypeControls

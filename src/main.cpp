@@ -710,13 +710,12 @@ void loop() {
             read_serial_buffer();
 
             #ifdef ENABLE_SCREEN
+            PROFILE_START(p_menu_update_inputs);
+            menu->poll_inputs();
             if (!is_locked()) {
-                //acquire_lock();
-                PROFILE_START(p_menu_update_inputs);
-                menu->update_inputs();
-                PROFILE_STOP(p_menu_update_inputs);
-                //release_lock();
+                menu->dispatch_polled_inputs();
             }
+            PROFILE_STOP(p_menu_update_inputs);
             #endif
 
             add_loop_length(micros()-mics_start);
