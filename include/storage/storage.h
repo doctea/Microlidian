@@ -45,7 +45,7 @@ bool process_queued_file_output();
     #include "saveload_test.h"
 #endif
 
-class SettingsRoot : public SHDynamic<16, 4> {  // all top-level hosts as children
+class SettingsRoot : public SHDynamic<10, 4> {  // all top-level hosts as children
     public:
     SettingsRoot() {
         this->set_path_segment("root");
