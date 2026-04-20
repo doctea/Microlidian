@@ -77,16 +77,16 @@ bool save_to_slot(int slot) {
     char filename[MAXFILEPATH];
     snprintf(filename, MAXFILEPATH, PRESET_SLOT_FILEPATH_FORMAT, slot);
 
-    // acquire_lock() prevents core 1 from being interrupted mid-transaction by LittleFS flash writes
-    acquire_lock();
-
-    Serial.printf("Saving to slot %i (file %s)...\n", slot, filename); Serial.flush();
+    Serial.printf("Saving to slot %i (file %s)...\n", slot, filename);
     uint32_t micros_at_start_of_save = micros();
-    bool status = sl_save_to_file(settings_root, filename, SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-    uint32_t micros_at_end_of_save = micros();
-    Serial.printf("Finished saving to slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save)); Serial.flush();
 
+    // Keep the lock only around LittleFS transaction to minimise UI/input stall time.
+    acquire_lock();
+    bool status = sl_save_to_file(settings_root, filename, SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
     release_lock();
+
+    uint32_t micros_at_end_of_save = micros();
+    Serial.printf("Finished saving to slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save));
 
     if (status) {
         messages_log_add(String("Saved to slot ") + String(slot));
@@ -135,16 +135,16 @@ bool save_to_snapshot(int slot) {
     char filename[MAXFILEPATH];
     snprintf(filename, MAXFILEPATH, SNAPSHOT_SLOT_FILEPATH_FORMAT, slot);
 
-    // acquire_lock() prevents core 1 from being interrupted mid-transaction by LittleFS flash writes
-    acquire_lock();
-
-    Serial.printf("Saving to snapshot slot %i (file %s)...\n", slot, filename); Serial.flush();
+    Serial.printf("Saving to snapshot slot %i (file %s)...\n", slot, filename);
     uint32_t micros_at_start_of_save = micros();
-    bool status = sl_save_to_file(settings_root, filename, SL_SCOPE_SNAPSHOT);
-    uint32_t micros_at_end_of_save = micros();
-    Serial.printf("Finished saving to snapshot slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save)); Serial.flush();
 
+    // Keep the lock only around LittleFS transaction to minimise UI/input stall time.
+    acquire_lock();
+    bool status = sl_save_to_file(settings_root, filename, SL_SCOPE_SNAPSHOT);
     release_lock();
+
+    uint32_t micros_at_end_of_save = micros();
+    Serial.printf("Finished saving to snapshot slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save));
 
     if (status) {
         messages_log_add(String("Saved to snapshot slot ") + String(slot));
@@ -162,9 +162,8 @@ bool load_from_snapshot(int slot) {
     char filename[MAXFILEPATH];
     snprintf(filename, MAXFILEPATH, SNAPSHOT_SLOT_FILEPATH_FORMAT, slot);
 
+    Serial.printf("Loading from snapshot slot %i (file %s)...\n", slot, filename);
     acquire_lock();
-
-    Serial.printf("Loading from snapshot slot %i (file %s)...\n", slot, filename); Serial.flush();
     bool status = sl_load_from_file(filename, SL_SCOPE_SNAPSHOT);
     release_lock();
 

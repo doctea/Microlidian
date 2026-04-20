@@ -59,6 +59,8 @@
 #endif
 
 #include "outputs/output_processor.h"
+#include "outputs/output_flexiarp.h"
+
 
 #include "core_safe.h"
 
@@ -294,6 +296,8 @@ void setup() {
         tm_pattern->set_output(output_processor->get_output_for_label("Melody"));
         insect_sequencer->add_pattern(tm_pattern);
         ((MultiSequencer*)sequencer)->addSequencer(insect_sequencer);
+        
+        setup_flexiarp_outputs(output_processor, output_wrapper, 4, 5);
 
         #if defined(ENABLE_PARAMETERS)
             parameter_manager->addInput(tm_pattern);
@@ -302,17 +306,19 @@ void setup() {
             LinkedList<FloatParameter*> *params = sequencer->getParameters();
             Debug_printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());
         #endif
-
+        
         Debug_printf("after setup_output_processor_parameters(), free RAM is\t%u\n", freeRam());
         #ifdef ENABLE_SCREEN
             #ifdef ENABLE_ACCENTS
                 global_accent_source->make_menu_items();
             #endif
 
+            // need to make sure all the outputs etc are added to the output_processorbefore we call this
             sequencer->make_menu_items(menu, 0);    // 0 = COMBINE_NONE, which TODO: we should make into a global or something to be shared amongst different menu-capable things
             menu->select_page(0);   // todo: why do we do this?
             Debug_printf("after setting up sequencer and menus, free RAM is %u\n", freeRam());
         #endif
+
     #endif
 
 
@@ -329,6 +335,7 @@ void setup() {
     #endif
 
     #ifdef ENABLE_PARAMETERS
+        // Canonical one-time defaults init after all inputs/outputs are registered.
         parameter_manager->setDefaultParameterConnections();
     #endif
 
@@ -434,29 +441,84 @@ void add_loop_length(int length) {
     }
 }
 
+// EXPERIMENTAL (2026-04-19): serial remote viewer commands are now queued here and
+// dispatched only when the menu lock is free (see dispatch_serial_commands below and
+// its call site in loop()). Previously read_serial_buffer() called menu->knob_*/button_*
+// directly, which could race with core1 rendering under lock and cause crashes.
+// REVERT all of the following (state vars + dispatch_serial_commands + changes inside
+// read_serial_buffer + dispatch call in loop()) if crashes persist after testing.
+int32_t serial_pending_knob_steps = 0;
+uint16_t serial_pending_back_presses = 0;
+uint16_t serial_pending_select_presses = 0;
+bool serial_pending_send_frame = false;
+bool serial_pending_toggle_live = false;
+
+const int32_t SERIAL_MAX_PENDING_KNOB_STEPS = 32;
+const uint16_t SERIAL_MAX_PENDING_BUTTON_PRESSES = 8;
+
+void dispatch_serial_commands() {
+    while (serial_pending_knob_steps < 0) {
+        menu->knob_left();
+        serial_pending_knob_steps++;
+    }
+    while (serial_pending_knob_steps > 0) {
+        menu->knob_right();
+        serial_pending_knob_steps--;
+    }
+
+    while (serial_pending_back_presses > 0) {
+        menu->button_back();
+        serial_pending_back_presses--;
+    }
+
+    while (serial_pending_select_presses > 0) {
+        menu->button_select();
+        menu->button_select_released();
+        serial_pending_select_presses--;
+    }
+
+    if (serial_pending_toggle_live) {
+        menu->send_frame_live = !menu->send_frame_live;
+        serial_pending_toggle_live = false;
+        serial_pending_send_frame = true;
+    }
+
+    if (serial_pending_send_frame) {
+        menu->send_frame = true;
+        serial_pending_send_frame = false;
+    }
+}
+
 void read_serial_buffer() {
     //uint32_t interrupts = save_and_disable_interrupts();
     if (Serial) {
         while (Serial.available()) {
             char c = Serial.read();
             if (c == 'd') {
-                menu->knob_left();
-                menu->send_frame = true;
+                serial_pending_knob_steps--;
+                if (serial_pending_knob_steps < -SERIAL_MAX_PENDING_KNOB_STEPS)
+                    serial_pending_knob_steps = -SERIAL_MAX_PENDING_KNOB_STEPS;
+                serial_pending_send_frame = true;
             } else if (c == 'f') {
-                menu->knob_right();
-                menu->send_frame = true;
+                serial_pending_knob_steps++;
+                if (serial_pending_knob_steps > SERIAL_MAX_PENDING_KNOB_STEPS)
+                    serial_pending_knob_steps = SERIAL_MAX_PENDING_KNOB_STEPS;
+                serial_pending_send_frame = true;
             } else if (c == 'a') {
-                menu->button_back();
-                menu->send_frame = true;
+                serial_pending_back_presses++;
+                if (serial_pending_back_presses > SERIAL_MAX_PENDING_BUTTON_PRESSES)
+                    serial_pending_back_presses = SERIAL_MAX_PENDING_BUTTON_PRESSES;
+                serial_pending_send_frame = true;
             } else if (c == 'b') {
-                menu->button_select();
-                menu->button_select_released();
-                menu->send_frame = true;
+                serial_pending_select_presses++;
+                if (serial_pending_select_presses > SERIAL_MAX_PENDING_BUTTON_PRESSES)
+                    serial_pending_select_presses = SERIAL_MAX_PENDING_BUTTON_PRESSES;
+                serial_pending_send_frame = true;
             } else if (c == 'e') {
-                menu->send_frame = true;
+                serial_pending_send_frame = true;
             } else if (c == 'L') {
-                menu->send_frame = true;
-                menu->send_frame_live = !menu->send_frame_live;
+                serial_pending_toggle_live = !serial_pending_toggle_live;
+                serial_pending_send_frame = true;
             }
             /*else {
                 messages_log_add(String("Wanted a char like 'd' aka value for turning the knob left = ") + String((int)'d'));
@@ -700,26 +762,31 @@ void loop() {
     }
     #endif
 
-    ATOMIC() 
+    bool skip_non_critical = false;
+    ATOMIC()
     {
-        if (playing && clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0 && micros() + loop_average >= last_ticked_at_micros + micros_per_tick) {
-            // don't process anything else this loop, since we probably don't have time before the next tick arrives
-            //Serial.printf("early return because %i + %i >= %i + %i\n", micros(), loop_average, last_ticked_at_micros, micros_per_tick);
-            //Serial.flush();
-        } else {
-            read_serial_buffer();
+        skip_non_critical = (
+            playing && clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0
+            && micros() + loop_average >= last_ticked_at_micros + micros_per_tick
+        );
+    }
 
-            #ifdef ENABLE_SCREEN
-            PROFILE_START(p_menu_update_inputs);
-            menu->poll_inputs();
-            if (!is_locked()) {
-                menu->dispatch_polled_inputs();
-            }
-            PROFILE_STOP(p_menu_update_inputs);
-            #endif
+    if (!skip_non_critical) {
+        // EXPERIMENTAL (2026-04-19): serial RX is outside ATOMIC so USB ISR is not starved
+        // during remote viewer frame streaming. REVERT to original ATOMIC block if crashy.
+        read_serial_buffer();
 
-            add_loop_length(micros()-mics_start);
+        #ifdef ENABLE_SCREEN
+        PROFILE_START(p_menu_update_inputs);
+        menu->poll_inputs();
+        if (!is_locked()) {
+            dispatch_serial_commands();
+            menu->dispatch_polled_inputs();
         }
+        PROFILE_STOP(p_menu_update_inputs);
+        #endif
+
+        add_loop_length(micros()-mics_start);
     }
 
     ATOMIC() 

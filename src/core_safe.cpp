@@ -33,22 +33,25 @@
     #include <atomic>
 
     struct Mutex {
-        mutex_t mutex;
-        std::atomic<bool> locked = false;
+        recursive_mutex_t mutex;
+        std::atomic<uint32_t> depth = 0;
         Mutex() {
-            mutex_init(&mutex);
+            recursive_mutex_init(&mutex);
         }
         public:
         void lock() {
-            mutex_enter_blocking(&mutex);
-            locked = true;
+            recursive_mutex_enter_blocking(&mutex);
+            depth.fetch_add(1, std::memory_order_relaxed);
         }
         void unlock() {
-            mutex_exit(&mutex);
-            locked = false;
+            const uint32_t current = depth.load(std::memory_order_relaxed);
+            if (current > 0) {
+                depth.store(current - 1, std::memory_order_relaxed);
+            }
+            recursive_mutex_exit(&mutex);
         }
         bool is_locked() {
-            return locked;
+            return depth.load(std::memory_order_relaxed) > 0;
         }
     };
 

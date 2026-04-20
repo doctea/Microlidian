@@ -23,7 +23,7 @@ extern bool actively_saving;
     #include "ParameterManager.h"
 #endif
 
-extern RP2040OutputWrapperClass *output_wrapper; // @@ TODO: find a suitable place to put this in a header
+#include "midi_usb/midi_usb_rp2040.h"
 
 #define SYSTEM_SETTINGS_FILEPATH "system.txt"
 

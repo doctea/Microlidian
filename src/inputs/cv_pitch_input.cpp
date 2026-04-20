@@ -5,8 +5,6 @@
     CVPitchTrigger *cv_pitch_input_2;
     CVPitchTrigger *cv_pitch_input_3;
 
-    extern RP2040DualMIDIOutputWrapper *output_wrapper;
-
     #include "cv_input.h"
 
     void setup_cv_pitch_inputs(BaseOutputProcessor *output_processor) {

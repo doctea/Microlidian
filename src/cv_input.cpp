@@ -92,10 +92,6 @@ void setup_parameter_inputs() {
     parameter_manager->addInput(barlock5);
     parameter_manager->addInput(barlock6);
 
-    //Serial.println("about to do setDefaultParameterConnections().."); Serial.flush();
-    parameter_manager->setDefaultParameterConnections();
-    //"Serial.println("just did do setDefaultParameterConnections().."); Serial.flush();
-
     tft_print("Finished setup_parameter_inputs()\n");
 }
 
@@ -205,8 +201,6 @@ FLASHMEM void setup_parameter_menu() {
         //parameter_manager->addAllParameterMenuItems(menu);
         Debug_printf("after addAllParameterMenuItems, free ram is %i\n", rp2040.getFreeHeap());
     //#endif
-
-    parameter_manager->setDefaultParameterConnections();
 
     //DirectNumberControl<int> *mixer_profile = new DirectNumberControl<int>("Mixer profiling", &parameter_manager->profile_update_mixers, parameter_manager->profile_update_mixers, (int)0, (int)1000000, nullptr);
     //menu->add(mixer_profile);

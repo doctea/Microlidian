@@ -114,14 +114,16 @@ void draw_screen() {
     //};
     //menu_locked = true;
     acquire_lock();
-    //uint32_t interrupts = save_and_disable_interrupts();
     frame_ready = false;
-    // removing this ATOMIC makes no apparent difference to clock drift.
+    // EXPERIMENTAL (2026-04-19): removed ATOMIC() wrapper around menu->display() so that
+    // USB serial TX ISR can service serial frame streaming for remote viewer.
+    // Previously this was: ATOMIC() { menu->display(); frame_ready = true; }
+    // REVERT THIS if crashes occur with serial connected and the queued serial dispatch
+    // approach in main.cpp does not fix them.
     ATOMIC() {
         menu->display();
         frame_ready = true;
     }
-    //restore_interrupts(interrupts);
     release_lock();
 
     push_display();
