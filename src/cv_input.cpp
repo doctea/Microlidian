@@ -29,7 +29,7 @@
 bool cv_input_enabled = true;
 int time_between_cv_input_updates = TIME_BETWEEN_CV_INPUT_UPDATES;
 
-ParameterManager *parameter_manager = new ParameterManager(LOOP_LENGTH_TICKS);
+ParameterManager *parameter_manager = new ParameterManager();
 
 // initialise the voltage-reading hardware/libraries and the ParameterManager
 FLASHMEM
@@ -53,7 +53,6 @@ void setup_cv_input() {
 // initialise the input voltage ParameterInputs that can be mapped to Parameters
 FLASHMEM 
 void setup_parameter_inputs() {
-    //parameter_manager = new ParameterManager();
     // add the available parameters to a list used globally and later passed to each selector menuitem
     //Serial.println(F("==== begin setup_parameter_inputs ====")); Serial_flush();
     tft_print("..setup_parameter_inputs...");
