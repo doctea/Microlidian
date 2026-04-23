@@ -166,6 +166,7 @@ void setup() {
     // overclock the CPU so that we can afford all those CPU cycles drawing the UI!
     // 240mhz because, if we are to think about using the USB-Host-on-PIO thing, the system clock needs to be a multiple of 120mhz
     set_sys_clock_khz(240000, true);
+    //set_sys_clock_khz(300000, true);  // actually seems stable
 
     ticked = false;
     started = false;
