@@ -67,6 +67,7 @@
 #include <atomic>
 #include <SimplyAtomic.h>
 
+
 #ifdef USE_UCLOCK_GENERIC
     void uClockCheckTime(uint32_t micros_time) {
         static uint32_t last_micros = 0;
@@ -298,6 +299,24 @@ void setup() {
         insect_sequencer->add_pattern(tm_pattern);
         ((MultiSequencer*)sequencer)->addSequencer(insect_sequencer);
         
+        #ifdef ENABLE_BUTTON_MATRIX
+            Debug_printf("before setup_button_matrix(), free RAM is %u\n", freeRam());
+            //setup_button_matrix();
+            menu->register_button_matrix_event_callback(0, 0, [=](int x, int y, bool pressed) {
+                // toggle locking of Euclidian patterns
+                if (!pressed) 
+                    return;
+                euclidian_sequencer->toggle_mutate_enabled();
+                menu->set_last_message(euclidian_sequencer->is_mutate_enabled() ? "Euclidian mutation enabled" : "Euclidian mutation disabled");
+            });
+            menu->register_button_matrix_event_callback(1, 0, [=](int x, int y, bool pressed) {
+                // toggle turing machine lock on/off
+                if (pressed)
+                    menu->set_last_message(tm_pattern->toggle_locked() ? "Turing Machine pattern locked" : "Turing Machine pattern unlocked");
+            });
+            Debug_printf("after setup_button_matrix(), free RAM is %u\n", freeRam());
+        #endif
+
         setup_flexiarp_outputs(output_processor, output_wrapper, 4, 5);
 
         #if defined(ENABLE_PARAMETERS)
@@ -787,8 +806,13 @@ void loop() {
         PROFILE_STOP(p_menu_update_inputs);
         #endif
 
-        add_loop_length(micros()-mics_start);
     }
+    // NOTE: must be outside the skip_non_critical block so that all loop iterations
+    // (including skipped ones) contribute to the rolling average.  If only fast
+    // "nothing skipped" loops are sampled, loop_average stays artificially small,
+    // which can cause skip_non_critical to remain permanently true after any slow
+    // operation (e.g. a preset load), permanently freezing input polling.
+    add_loop_length(micros()-mics_start);
 
     ATOMIC() 
     {

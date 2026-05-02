@@ -14,6 +14,10 @@
     #endif
 #endif
 
+#ifdef ENABLE_BUTTON_MATRIX
+    #include "include_keypad.h"
+#endif
+
 #include "mymenu/screen.h"
 #include "mymenu/menu_debug.h"
 
@@ -130,6 +134,11 @@ void draw_screen() {
 }
 
 void setup1() {
+
+    #ifdef ENABLE_BUTTON_MATRIX
+        setup_keypad();
+    #endif
+
     while (!started) {
         delay(1);
     };
@@ -215,6 +224,24 @@ void loop1() {
         }
     #endif
     */
+
+    #ifdef ENABLE_BUTTON_MATRIX
+        key_pressed_t keys = readKeys();
+        // Handle key press
+        //Serial.printf("Keys pressed - Row: %d, Col: %d\n", keys.row, keys.col);
+        // Serial.println("\nKeypad state:");
+        // if (keys.row == -1 && keys.col == -1) {
+        //     //Serial.println("No keys pressed.");
+        // } else {
+        //     menu->set_button_matrix_state(keys.col, keys.row, true);
+        // }
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
+                bool result = keys.row == x && keys.col == y;
+                menu->set_button_matrix_state(x, y, result);
+            }
+        }
+    #endif
 
     static unsigned long last_pushed = 0;
     //if (last_pushed==0) delay(5000);

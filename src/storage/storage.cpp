@@ -15,6 +15,9 @@ SettingsRoot *settings_root;
     TestSaveableObject *test_object;
 #endif
 
+int last_accessed_preset_slot = -1;
+int last_accessed_snapshot_slot = -1;
+
 void setup_saveloadlib() {
 
     settings_root = new SettingsRoot();
@@ -89,6 +92,7 @@ bool save_to_slot(int slot) {
     Serial.printf("Finished saving to slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save));
 
     if (status) {
+        last_accessed_preset_slot = slot;
         messages_log_add(String("Saved to slot ") + String(slot));
         //Serial.printf("Saved to slot %i (file %s)!\n", slot, filename); Serial.flush();
         return true;
@@ -109,7 +113,6 @@ bool load_from_slot(int slot) {
         //Serial.printf("File does not exist: %s\n", filename); Serial.flush();
         return false;
     }
-
     
     acquire_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
 
@@ -119,6 +122,7 @@ bool load_from_slot(int slot) {
     release_lock(); // @@TODO: see if this is actually necessary to prevent display updates while loading, or if we can get away with just disabling interrupts around the critical sections of the load code instead
 
     if (status) {
+        last_accessed_preset_slot = slot;
         messages_log_add(String("Loaded from slot ") + String(slot));
         //Serial.printf("Loaded from slot %i (file %s)!\n", slot, filename); Serial.flush();
         return true;
@@ -147,6 +151,7 @@ bool save_to_snapshot(int slot) {
     Serial.printf("Finished saving to snapshot slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save));
 
     if (status) {
+        last_accessed_snapshot_slot = slot;
         messages_log_add(String("Saved to snapshot slot ") + String(slot));
         //Serial.printf("Saved to snapshot slot %i (file %s)!\n", slot, filename); Serial.flush();
         return true;
@@ -168,6 +173,7 @@ bool load_from_snapshot(int slot) {
     release_lock();
 
     if (status) {
+        last_accessed_snapshot_slot = slot;
         messages_log_add(String("Loaded from snapshot slot ") + String(slot));
         //Serial.printf("Loaded from snapshot slot %i (file %s)!\n", slot, filename); Serial.flush();
         return true;
@@ -246,6 +252,13 @@ bool process_queued_file_output() {
     return true;
 }
 
+int get_last_accessed_preset_slot() {
+    return last_accessed_preset_slot;
+}
+int get_last_accessed_snapshot_slot() {
+    return last_accessed_snapshot_slot;
+}
+
 void save_to_slot_0() {     save_to_slot(0);}
 void save_to_slot_1() {     save_to_slot(1);}
 void save_to_slot_2() {     save_to_slot(2);}
@@ -288,6 +301,14 @@ void load_from_slot_7() {   load_from_slot(7);}
             { &save_to_slot_7, &load_from_slot_7 }
         };
 
+        menu->add(new CallbackMenuItem("Last accessed preset", []() -> const char* {
+            int slot = get_last_accessed_preset_slot();
+            if (slot==-1) return "Last preset: None";
+            static char label[MENU_C_MAX];
+            snprintf(label, MENU_C_MAX, "Last preset: Slot %i", slot);
+            return label;
+        }, false));
+
         for (int i = 0 ; i < sizeof(functions)/sizeof(functions_t) ; i++) {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Preset slot %i", i);
@@ -306,6 +327,14 @@ void load_from_slot_7() {   load_from_slot(7);}
         system_settings_bar->add(new ActionConfirmItem("Load", &load_system_settings, false));
         system_settings_bar->add(new ActionConfirmItem("Save", &save_system_settings, false));
         menu->add(system_settings_bar);
+
+        menu->add(new CallbackMenuItem("Last accessed snapshot", []() -> const char* {
+            int slot = get_last_accessed_snapshot_slot();
+            if (slot==-1) return "Last snapshot: None";
+            static char label[MENU_C_MAX];
+            snprintf(label, MENU_C_MAX, "Last snap: Slot %i", slot);
+            return label;
+        }, false));
 
         for (int i = 0 ; i < 8 ; i++) {
             char label[MENU_C_MAX];
