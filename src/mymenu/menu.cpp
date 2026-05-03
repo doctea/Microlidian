@@ -117,7 +117,7 @@ void setup_menu(bool button_high_state = HIGH) {
     #endif
 
     #ifdef ENABLE_ARRANGER
-        arranger_make_menu_items(menu);
+        arranger_make_menu_items(menu, false, true);
     #endif
 
     // debug bpm selector

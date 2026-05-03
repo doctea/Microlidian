@@ -205,12 +205,10 @@ public:
                          ),
                          SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
 
-        register_setting(new LSaveableSetting<bool>(
+        register_setting(new VarSetting<bool>(
                              "Enabled",
                              "ChordVoice",
-                             &this->enabled,
-                             [=](bool value) { this->set_enabled(value); },
-                             [=]() -> bool { return this->enabled; }
+                             &this->enabled
                          ),
                          SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
     }
