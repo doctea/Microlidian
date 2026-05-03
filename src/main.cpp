@@ -87,6 +87,7 @@ RP2040DualMIDIOutputWrapper *output_wrapper;
 
 std::atomic<bool> started = false;
 std::atomic<bool> ticked = false;
+std::atomic<bool> settings_loaded = false;
 
 void do_tick(uint32_t ticks);
 
@@ -231,6 +232,7 @@ void setup() {
 
     output_wrapper = new RP2040DualMIDIOutputWrapper();
     setup_output(output_wrapper, new ChosenDrumKitMIDIOutputProcessor(output_wrapper));
+    setup_flexiarp_outputs(output_processor, output_wrapper, 4, 5);
     Debug_printf("after setup_output(), free RAM is %u\n", freeRam());
 
     #ifdef ENABLE_PARAMETERS
@@ -277,7 +279,7 @@ void setup() {
         sequencer = new MultiSequencer();
 
         // set up Euclidian Sequencer and patterns, and add to MultiSequencer
-        EuclidianSequencer *euclidian_sequencer = new EuclidianSequencer(output_processor->nodes);
+        EuclidianSequencer *euclidian_sequencer = new EuclidianSequencer(output_processor->nodes, 25);
         output_processor->configure_sequencer(euclidian_sequencer);
         euclidian_sequencer->initialise_patterns();
         euclidian_sequencer->reset_patterns();
@@ -302,22 +304,29 @@ void setup() {
         #ifdef ENABLE_BUTTON_MATRIX
             Debug_printf("before setup_button_matrix(), free RAM is %u\n", freeRam());
             //setup_button_matrix();
-            menu->register_button_matrix_event_callback(0, 0, [=](int x, int y, bool pressed) {
+            menu->register_button_matrix_event_callback(0, 3, [=](int x, int y, bool pressed) {
                 // toggle locking of Euclidian patterns
                 if (!pressed) 
                     return;
                 euclidian_sequencer->toggle_mutate_enabled();
-                menu->set_last_message(euclidian_sequencer->is_mutate_enabled() ? "Euclidian mutation enabled" : "Euclidian mutation disabled");
+                if(euclidian_sequencer->is_mutate_enabled()) {
+                    menu->set_last_message("Euclidian mutation enabled", GREEN);
+                } else {
+                    menu->set_last_message("Euclidian mutation disabled", RED);
+                }
             });
-            menu->register_button_matrix_event_callback(1, 0, [=](int x, int y, bool pressed) {
+            menu->register_button_matrix_event_callback(1, 3, [=](int x, int y, bool pressed) {
                 // toggle turing machine lock on/off
-                if (pressed)
-                    menu->set_last_message(tm_pattern->toggle_locked() ? "Turing Machine pattern locked" : "Turing Machine pattern unlocked");
+                if (pressed) {
+                    if (tm_pattern->toggle_locked()) {
+                        menu->set_last_message("Turing Machine pattern locked", RED);
+                    } else {
+                        menu->set_last_message("Turing Machine pattern unlocked", GREEN);
+                    }
+                }
             });
             Debug_printf("after setup_button_matrix(), free RAM is %u\n", freeRam());
         #endif
-
-        setup_flexiarp_outputs(output_processor, output_wrapper, 4, 5);
 
         #if defined(ENABLE_PARAMETERS)
             parameter_manager->addInput(tm_pattern);
@@ -401,11 +410,14 @@ void setup() {
         // load system settings from flash, if they exist
         Serial.println("Loading system settings..."); Serial.flush();
         load_system_settings();
+        settings_loaded = true;
         Serial.println("Finished loading system settings!"); Serial.flush();
         
         #ifdef ENABLE_TESTSAVELOAD
             test_object->create_menu_items();
         #endif
+    #else
+        settings_loaded = true;
     #endif
 
     //started = true;
@@ -783,13 +795,20 @@ void loop() {
     #endif
 
     bool skip_non_critical = false;
-    ATOMIC()
-    {
-        skip_non_critical = (
-            playing && clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0
-            && micros() + loop_average >= last_ticked_at_micros + micros_per_tick
-        );
-    }
+    // ATOMIC()
+    // {
+    //     skip_non_critical = (
+    //         playing && clock_mode==CLOCK_INTERNAL && last_ticked_at_micros>0
+    //         && micros() + loop_average >= last_ticked_at_micros + micros_per_tick
+    //     );
+    // }
+
+    #ifdef ENABLE_SCREEN
+    // Always poll inputs so button durations (esp. long-press) are tracked every
+    // loop iteration regardless of skip_non_critical. poll_inputs() is cheap —
+    // it just latches pin state into pending vars; dispatch is gated below.
+    menu->poll_inputs();
+    #endif
 
     if (!skip_non_critical) {
         // EXPERIMENTAL (2026-04-19): serial RX is outside ATOMIC so USB ISR is not starved
@@ -798,7 +817,6 @@ void loop() {
 
         #ifdef ENABLE_SCREEN
         PROFILE_START(p_menu_update_inputs);
-        menu->poll_inputs();
         if (!is_locked()) {
             dispatch_serial_commands();
             menu->dispatch_polled_inputs();

@@ -42,6 +42,19 @@ void setup_saveloadlib() {
     sl_setup_all(settings_root);
     Serial.printf("After sl_setup_all(), free RAM is %u\n", freeRam());
 
+    #ifdef ENABLE_BUTTON_MATRIX
+        settings_root->register_setting(
+            new LSaveableSetting<bool>(
+                "button_matrix_enabled", 
+                "HardwareSettings",
+                (bool*)nullptr,
+                [=](bool enabled) { menu->set_keypad_enabled(enabled); },
+                [=]() { return menu->is_keypad_enabled(); }
+            ),
+            SL_SCOPE_SYSTEM
+        );
+    #endif
+
     // for debug, try opening the file and print its contents to serial:
     // acquire_lock();
     // debug_print_file("/slots/preset-0.txt");
@@ -323,6 +336,7 @@ void load_from_slot_7() {   load_from_slot(7);}
             menu->add(submenuitem);
         }
 
+        // TODO: move to the "System Settings" page
         DualMenuItem *system_settings_bar = new DualMenuItem("System settings");
         system_settings_bar->add(new ActionConfirmItem("Load", &load_system_settings, false));
         system_settings_bar->add(new ActionConfirmItem("Save", &save_system_settings, false));
