@@ -25,6 +25,7 @@
 #include "mymenu/menu_conductor.h"
 #ifdef ENABLE_ARRANGER
     #include "mymenu/menu_arranger.h"
+    #include "mymenu/menuitems_progression.h"
 #endif
 
 #ifdef ENABLE_STORAGE
@@ -109,6 +110,11 @@ void setup_menu(bool button_high_state = HIGH) {
 
     // Pinned loop-position bar at top
     menu->add_pinned(new LoopMarkerPanel(LOOP_LENGTH_TICKS, PPQN));
+
+    // #ifdef ENABLE_ARRANGER
+    //     // Pinned arranger song-position panel (playlist / plays / section / bar)
+    //     menu->add_pinned(new ProgressionPinnedMenuItem());
+    // #endif
 
     conductor->make_menu_items(menu, COMBINE_NONE);
 

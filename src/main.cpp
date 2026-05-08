@@ -637,9 +637,22 @@ void do_tick(uint32_t in_ticks) {
     if (is_restart_on_next_bar() && is_bpm_on_bar(ticks)) {
         //if (debug) Serial.println(F("do_tick(): about to global_on_restart"));
         global_on_restart();
-
+        // After clock_reset() ticks=0. Without this, uClock's next callback fires do_tick(0)
+        // which is not caught by the duplicate guard (last_tick==N) and on_bar(0) fires twice.
+        last_tick = 0;
         set_restart_on_next_bar(false);
     }
+
+    #ifdef ENABLE_ARRANGER
+        if (arranger != nullptr) {
+            if (is_bpm_on_bar(ticks)) {
+                arranger->on_bar(BPM_CURRENT_BAR_OF_PHRASE);
+            }
+            if (is_bpm_on_phrase(ticks)) {
+                arranger->on_end_phrase(BPM_CURRENT_PHRASE);
+            }
+        }
+    #endif
 
     output_wrapper->sendClock();
 
@@ -649,17 +662,6 @@ void do_tick(uint32_t in_ticks) {
         // removing this is_running() block gives us 4-7ms clock drift every second
         // so, this seems like a candidate for optimisation if we want to reduce clock drift.
         if (sequencer->is_running()) {
-            #ifdef ENABLE_ARRANGER
-                if (arranger != nullptr) {
-                    if (is_bpm_on_bar(ticks)) {
-                        arranger->on_bar(BPM_CURRENT_BAR_OF_PHRASE);
-                    }
-                    if (is_bpm_on_phrase(ticks)) {
-                        arranger->on_end_phrase(BPM_CURRENT_PHRASE);
-                    }
-                }
-            #endif
-
             PROFILE_START(p_sequencer_ontick);
             sequencer->on_tick(ticks);
             PROFILE_STOP(p_sequencer_ontick);

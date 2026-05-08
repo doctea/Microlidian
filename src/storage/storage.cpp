@@ -295,7 +295,7 @@ void load_from_slot_7() {   load_from_slot(7);}
 #ifdef ENABLE_SCREEN
     void setup_storage_menu() {
         menu->remember_opened_page(
-            menu->add_page("Storage")
+            menu->add_page("Storage: Presets")
         );
 
         typedef void(*function)();
@@ -336,12 +336,10 @@ void load_from_slot_7() {   load_from_slot(7);}
             menu->add(submenuitem);
         }
 
-        // TODO: move to the "System Settings" page
-        DualMenuItem *system_settings_bar = new DualMenuItem("System settings");
-        system_settings_bar->add(new ActionConfirmItem("Load", &load_system_settings, false));
-        system_settings_bar->add(new ActionConfirmItem("Save", &save_system_settings, false));
-        menu->add(system_settings_bar);
-
+        //// Snapshots storage page
+        menu->remember_opened_page(
+            menu->add_page("Storage: Snapshots")
+        );
         menu->add(new CallbackMenuItem("Last accessed snapshot", []() -> const char* {
             int slot = get_last_accessed_snapshot_slot();
             if (slot==-1) return "Last snapshot: None";
@@ -363,6 +361,13 @@ void load_from_slot_7() {   load_from_slot(7);}
 
             menu->add(submenuitem);
         }
+
+        menu->add_page("Storage: System settings"); // @@TODO: move storage of the system settings to its own page instead of tucking it away in the storage page
+        // TODO: move to the "System Settings" page
+        DualMenuItem *system_settings_bar = new DualMenuItem("System settings");
+        system_settings_bar->add(new ActionConfirmItem("Load", &load_system_settings, false));
+        system_settings_bar->add(new ActionConfirmItem("Save", &save_system_settings, false));
+        menu->add(system_settings_bar);
 
         // todo: debug stuff to debug page
         // options to dump files to serial for debugging
