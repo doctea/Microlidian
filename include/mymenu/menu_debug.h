@@ -106,6 +106,7 @@ void setup_debug_menu() {
     ////*/
 
     menu->add_page("Debug");
+    menu->remember_opened_page();
 
     //ObjectNumberControl<Menu,int> *text_size_control = new ObjectNumberControl<Menu,int>("Text size", menu, &Menu::set_default_textsize, &Menu::get_default_textsize, nullptr, false);
     LambdaNumberControl<int8_t> *text_size_control = new LambdaNumberControl<int8_t>(
