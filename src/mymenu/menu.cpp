@@ -106,7 +106,7 @@ void setup_menu(bool button_high_state = HIGH) {
 
     menu->set_screen_height_cutoff(0.5f);
 
-    menu->set_messages_log(messages_log);
+    menu->set_messages_log(&message_log);
 
     // Pinned loop-position bar at top
     menu->add_pinned(new LoopMarkerPanel(LOOP_LENGTH_TICKS, PPQN));

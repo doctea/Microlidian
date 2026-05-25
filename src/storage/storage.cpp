@@ -33,6 +33,10 @@ void setup_saveloadlib() {
         messages_log_add("LittleFS: Initialised OK so must be formatted!");
     }
 
+    // pre-allocate RAM for saveloadlib, this saves us about 15KB in memory allocator overhead/fragmentation?
+    static SL_Arena<72 * 1024> arena; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
+    sl_set_setting_arena(&arena);
+
     Serial.printf("Before sl_register_root(), free RAM is %u\n", freeRam());
     sl_register_root(settings_root);
     Serial.printf("After sl_register_root(), free RAM is %u\n", freeRam());
@@ -41,6 +45,9 @@ void setup_saveloadlib() {
     Serial.printf("Before sl_setup_all(), free RAM is %u\n", freeRam());
     sl_setup_all(settings_root);
     Serial.printf("After sl_setup_all(), free RAM is %u\n", freeRam());
+    Serial.printf("Arena usage: %u / %u bytes (%.1f%%)\n",
+                  (unsigned)arena.bytes_used(), (unsigned)arena.bytes_capacity(),
+                  100.0f * arena.bytes_used() / arena.bytes_capacity());
 
     #ifdef ENABLE_BUTTON_MATRIX
         settings_root->register_setting(
@@ -80,7 +87,7 @@ void save_system_settings() {
 }
 void load_system_settings() {
     if (!LittleFS.exists(SYSTEM_SETTINGS_FILEPATH)) {
-        messages_log_add(String("System settings file does not exist: ") + String(SYSTEM_SETTINGS_FILEPATH));
+        messages_log_add_fmt("System settings file does not exist: %s", SYSTEM_SETTINGS_FILEPATH);
         return;
     }
     acquire_lock();
@@ -106,11 +113,11 @@ bool save_to_slot(int slot) {
 
     if (status) {
         last_accessed_preset_slot = slot;
-        messages_log_add(String("Saved to slot ") + String(slot));
+        messages_log_add_fmt("Saved to slot %i", slot);
         //Serial.printf("Saved to slot %i (file %s)!\n", slot, filename); Serial.flush();
         return true;
     } else {
-        messages_log_add(String("Failed to save to slot ") + String(slot));
+        messages_log_add_fmt("Failed to save to slot %i", slot);
         //Serial.printf("Failed to save to slot %i (file %s)!\n", slot, filename); Serial.flush();
         return false;
     }
@@ -122,7 +129,7 @@ bool load_from_slot(int slot) {
     snprintf(filename, MAXFILEPATH, PRESET_SLOT_FILEPATH_FORMAT, slot);
 
     if (!LittleFS.exists(filename)) {
-        messages_log_add(String("File does not exist: ") + String(filename));
+        messages_log_add_fmt("File does not exist: %s", filename);
         //Serial.printf("File does not exist: %s\n", filename); Serial.flush();
         return false;
     }
@@ -136,11 +143,11 @@ bool load_from_slot(int slot) {
 
     if (status) {
         last_accessed_preset_slot = slot;
-        messages_log_add(String("Loaded from slot ") + String(slot));
+        messages_log_add_fmt("Loaded from slot %i", slot);
         //Serial.printf("Loaded from slot %i (file %s)!\n", slot, filename); Serial.flush();
         return true;
     } else {
-        messages_log_add(String("Exists, but failed to load from slot ") + String(slot));
+        messages_log_add_fmt("Exists, but failed to load from slot %i", slot);
         //Serial.printf("Failed to load from slot %i (file %s)!\n", slot, filename); Serial.flush();
         return false;
     }
@@ -165,11 +172,11 @@ bool save_to_snapshot(int slot) {
 
     if (status) {
         last_accessed_snapshot_slot = slot;
-        messages_log_add(String("Saved to snapshot slot ") + String(slot));
+        messages_log_add_fmt("Saved to snapshot slot %i", slot);
         //Serial.printf("Saved to snapshot slot %i (file %s)!\n", slot, filename); Serial.flush();
         return true;
     } else {
-        messages_log_add(String("Failed to save to snapshot slot ") + String(slot));
+        messages_log_add_fmt("Failed to save to snapshot slot %i", slot);
         //Serial.printf("Failed to save to snapshot slot %i (file %s)!\n", slot, filename); Serial.flush();
         return false;
     }
@@ -187,11 +194,11 @@ bool load_from_snapshot(int slot) {
 
     if (status) {
         last_accessed_snapshot_slot = slot;
-        messages_log_add(String("Loaded from snapshot slot ") + String(slot));
+        messages_log_add_fmt("Loaded from snapshot slot %i", slot);
         //Serial.printf("Loaded from snapshot slot %i (file %s)!\n", slot, filename); Serial.flush();
         return true;
     } else {
-        messages_log_add(String("Failed to load from snapshot slot ") + String(slot));
+        messages_log_add_fmt("Failed to load from snapshot slot %i", slot);
         //Serial.printf("Failed to load from snapshot slot %i (file %s)!\n", slot, filename); Serial.flush();
         return false;
     }
