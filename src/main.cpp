@@ -44,6 +44,9 @@
         #include "mymenu/menuitems_accent.h"
     #endif
 #endif
+#ifdef ENABLE_REMOTE_VIEWER
+    #include "remote_viewer_serial.h"
+#endif
 
 #ifdef ENABLE_CV_INPUT
     #include "cv_input.h"
@@ -473,94 +476,16 @@ void add_loop_length(int length) {
     }
 }
 
-// EXPERIMENTAL (2026-04-19): serial remote viewer commands are now queued here and
-// dispatched only when the menu lock is free (see dispatch_serial_commands below and
-// its call site in loop()). Previously read_serial_buffer() called menu->knob_*/button_*
-// directly, which could race with core1 rendering under lock and cause crashes.
-// REVERT all of the following (state vars + dispatch_serial_commands + changes inside
-// read_serial_buffer + dispatch call in loop()) if crashes persist after testing.
-int32_t serial_pending_knob_steps = 0;
-uint16_t serial_pending_back_presses = 0;
-uint16_t serial_pending_select_presses = 0;
-bool serial_pending_send_frame = false;
-bool serial_pending_toggle_live = false;
-
-const int32_t SERIAL_MAX_PENDING_KNOB_STEPS = 32;
-const uint16_t SERIAL_MAX_PENDING_BUTTON_PRESSES = 8;
-
 void dispatch_serial_commands() {
-    while (serial_pending_knob_steps < 0) {
-        menu->knob_left();
-        serial_pending_knob_steps++;
-    }
-    while (serial_pending_knob_steps > 0) {
-        menu->knob_right();
-        serial_pending_knob_steps--;
-    }
-
-    while (serial_pending_back_presses > 0) {
-        menu->button_back();
-        serial_pending_back_presses--;
-    }
-
-    while (serial_pending_select_presses > 0) {
-        menu->button_select();
-        menu->button_select_released();
-        serial_pending_select_presses--;
-    }
-
-    if (serial_pending_toggle_live) {
-        menu->send_frame_live = !menu->send_frame_live;
-        serial_pending_toggle_live = false;
-        serial_pending_send_frame = true;
-    }
-
-    if (serial_pending_send_frame) {
-        menu->send_frame = true;
-        serial_pending_send_frame = false;
-    }
+    #ifdef ENABLE_REMOTE_VIEWER
+    dispatch_viewer_commands();
+    #endif
 }
 
 void read_serial_buffer() {
-    //uint32_t interrupts = save_and_disable_interrupts();
-    if (Serial) {
-        while (Serial.available()) {
-            char c = Serial.read();
-            if (c == 'd') {
-                serial_pending_knob_steps--;
-                if (serial_pending_knob_steps < -SERIAL_MAX_PENDING_KNOB_STEPS)
-                    serial_pending_knob_steps = -SERIAL_MAX_PENDING_KNOB_STEPS;
-                serial_pending_send_frame = true;
-            } else if (c == 'f') {
-                serial_pending_knob_steps++;
-                if (serial_pending_knob_steps > SERIAL_MAX_PENDING_KNOB_STEPS)
-                    serial_pending_knob_steps = SERIAL_MAX_PENDING_KNOB_STEPS;
-                serial_pending_send_frame = true;
-            } else if (c == 'a') {
-                serial_pending_back_presses++;
-                if (serial_pending_back_presses > SERIAL_MAX_PENDING_BUTTON_PRESSES)
-                    serial_pending_back_presses = SERIAL_MAX_PENDING_BUTTON_PRESSES;
-                serial_pending_send_frame = true;
-            } else if (c == 'b') {
-                serial_pending_select_presses++;
-                if (serial_pending_select_presses > SERIAL_MAX_PENDING_BUTTON_PRESSES)
-                    serial_pending_select_presses = SERIAL_MAX_PENDING_BUTTON_PRESSES;
-                serial_pending_send_frame = true;
-            } else if (c == 'e') {
-                serial_pending_send_frame = true;
-            } else if (c == 'L') {
-                serial_pending_toggle_live = !serial_pending_toggle_live;
-                serial_pending_send_frame = true;
-            }
-            /*else {
-                messages_log_add(String("Wanted a char like 'd' aka value for turning the knob left = ") + String((int)'d'));
-                messages_log_add(String("got serial char: ") + String((int)c));
-            }
-            messages_log_add(String("got serial char: ") + c);*/
-        }
-        //Serial.clearWriteError();
-    }
-    //restore_interrupts(interrupts);
+    #ifdef ENABLE_REMOTE_VIEWER
+    read_viewer_serial();
+    #endif
 }
 
 bool menu_tick_pending = false;
