@@ -78,6 +78,22 @@ void setup_parameter_inputs() {
     parameter_manager->addInput(virtpi2);
     parameter_manager->addInput(virtpi3);
 
+    #ifdef ENABLE_EXTENDED_VIRTUAL_INPUTS
+        #define EXTENDED_VIRTUALS_AS_LIGHTWEIGHT true   // 9k free RAM with true.. crash on startup with false :/ 
+
+        // Additional random sources at different S&H rates (lightweight = no display/controls)
+        parameter_manager->addInput(new VirtualParameterInput((char*)"Rand beat",   "Rands", RAND, 4.0f, 0.0f, PPQN,                    EXTENDED_VIRTUALS_AS_LIGHTWEIGHT));
+        parameter_manager->addInput(new VirtualParameterInput((char*)"Rand bar",    "Rands", RAND, 4.0f, 0.0f, PPQN*BEATS_PER_BAR,      EXTENDED_VIRTUALS_AS_LIGHTWEIGHT));
+        parameter_manager->addInput(new VirtualParameterInput((char*)"Rand 2bar",   "Rands", RAND, 4.0f, 0.0f, PPQN*BEATS_PER_BAR*2,    EXTENDED_VIRTUALS_AS_LIGHTWEIGHT));
+        parameter_manager->addInput(new VirtualParameterInput((char*)"Rand phrase", "Rands", RAND, 4.0f, 0.0f, PPQN*BEATS_PER_PHRASE,   EXTENDED_VIRTUALS_AS_LIGHTWEIGHT));
+        // Additional LFO sources at different speeds
+        parameter_manager->addInput(new VirtualParameterInput((char*)"LFO 1bar",    "E-LFOs", LFO_LOCKED, 1.0f,  0.0f, 0, EXTENDED_VIRTUALS_AS_LIGHTWEIGHT));
+        parameter_manager->addInput(new VirtualParameterInput((char*)"LFO 2bar",    "E-LFOs", LFO_LOCKED, 2.0f,  0.0f, 0, EXTENDED_VIRTUALS_AS_LIGHTWEIGHT));
+        parameter_manager->addInput(new VirtualParameterInput((char*)"LFO Phrase",  "E-LFOs", LFO_LOCKED, 4.0f,  0.0f, 0, EXTENDED_VIRTUALS_AS_LIGHTWEIGHT));
+        parameter_manager->addInput(new VirtualParameterInput((char*)"LFO 2xPhrase","E-LFOs", LFO_LOCKED, 8.0f,  0.0f, 0, EXTENDED_VIRTUALS_AS_LIGHTWEIGHT));
+        parameter_manager->addInput(new VirtualParameterInput((char*)"LFO 4xPhrase","E-LFOs", LFO_LOCKED, 16.0f, 0.0f, 0, EXTENDED_VIRTUALS_AS_LIGHTWEIGHT));
+    #endif
+
     BarLockParameterInput *barlock1 = new BarLockParameterInput((char*)"BR-Log", BARLOCK_RISE_LOG);
     BarLockParameterInput *barlock2 = new BarLockParameterInput((char*)"BF-Exp", BARLOCK_FALL_EXP);
     BarLockParameterInput *barlock3 = new BarLockParameterInput((char*)"LBR", BARLOCK_LAST_BEAT_RISE);
