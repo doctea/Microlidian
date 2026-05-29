@@ -583,6 +583,8 @@ void do_tick(uint32_t in_ticks) {
 
     //return; // with early return here, clock drift drops to 3-6ms every second
 
+    parameter_manager->tick_sh();
+
     #ifdef ENABLE_EUCLIDIAN
         // removing this is_running() block gives us 4-7ms clock drift every second
         // so, this seems like a candidate for optimisation if we want to reduce clock drift.
