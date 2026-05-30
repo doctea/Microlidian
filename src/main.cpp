@@ -335,7 +335,7 @@ void setup() {
             parameter_manager->addInput(tm_pattern);
 
             //Serial.println("..calling sequencer.getParameters()..");
-            LinkedList<FloatParameter*> *params = sequencer->getParameters();
+            ParameterList *params = sequencer->getParameters();
             Debug_printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());
         #endif
         
