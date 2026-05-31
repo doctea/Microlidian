@@ -430,7 +430,9 @@ void setup() {
     #endif
 
     #ifdef ENABLE_SCREEN
-        menu->set_last_message((String("Started up, free RAM is ") + String(freeRam())).c_str());
+        char startup_msg[48];
+        snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM is %u", (unsigned)freeRam());
+        menu->set_last_message(startup_msg);
     #endif
 
     Debug_printf("at end of setup(), free RAM is %u\n", freeRam());

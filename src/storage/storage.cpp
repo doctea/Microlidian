@@ -42,7 +42,12 @@ void setup_saveloadlib() {
     Serial.printf("After sl_register_root(), free RAM is %u\n", freeRam());
 
     // cascade setup of all saveable settings starting from root
+    // Serial.printf("\n=== BEFORE SettingsRoot::setup_saveable_settings() (top-level child registration), free RAM is %u\n", freeRam());
+    // settings_root->setup_saveable_settings();
+    // Serial.printf("=== AFTER SettingsRoot::setup_saveable_settings(), free RAM is %u\n\n", freeRam());
+    
     Serial.printf("Before sl_setup_all(), free RAM is %u\n", freeRam());
+    // sl_setup_all will recursively call setup_saveable_settings on each child
     sl_setup_all(settings_root);
     Serial.printf("After sl_setup_all(), free RAM is %u\n", freeRam());
     Serial.printf("Arena usage: %u / %u bytes (%.1f%%)\n",
