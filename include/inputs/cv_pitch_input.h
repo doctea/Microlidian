@@ -79,9 +79,9 @@ public:
         this->colour = menu->get_next_colour();
         strncpy(this->label, label, MENU_C_MAX);
         this->label[MENU_C_MAX - 1] = '\0';
-#ifdef ENABLE_STORAGE
-        this->set_path_segment(label);
-#endif
+        #ifdef ENABLE_STORAGE
+            this->set_path_segment(label);
+        #endif
     }
 
     virtual void process() {
@@ -166,50 +166,50 @@ public:
         return "None";
     }
 
-#ifdef ENABLE_STORAGE
-    virtual void setup_saveable_settings() override {
-        SHDynamic<1, 5>::setup_saveable_settings();
+    #ifdef ENABLE_STORAGE
+        virtual void setup_saveable_settings() override {
+            SHDynamic<1, 5>::setup_saveable_settings();
 
-        register_child(this->trigger_core.get_pitch_trigger());
+            register_child(this->trigger_core.get_pitch_trigger());
 
-        register_setting(
-            CVPitchInputWiring::make_group_and_name_parameter_input_setting<CVPitchTrigger>(
-                "Pitch Parameter Input",
-                "ModInputs",
-                this,
-                &CVPitchTrigger::set_parameter_input_pitch,
-                &CVPitchTrigger::get_parameter_input_pitch,
-                ""
-            ),
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT
-        );
+            register_setting(
+                CVPitchInputWiring::make_group_and_name_parameter_input_setting<CVPitchTrigger>(
+                    "Pitch Parameter Input",
+                    "ModInputs",
+                    this,
+                    &CVPitchTrigger::set_parameter_input_pitch,
+                    &CVPitchTrigger::get_parameter_input_pitch,
+                    ""
+                ),
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT
+            );
 
-        register_setting(
-            CVPitchInputWiring::make_group_and_name_parameter_input_setting<CVPitchTrigger>(
-                "Velocity Parameter Input",
-                "ModInputs",
-                this,
-                &CVPitchTrigger::set_parameter_input_velocity,
-                &CVPitchTrigger::get_parameter_input_velocity,
-                ""
-            ),
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT
-        );
+            register_setting(
+                CVPitchInputWiring::make_group_and_name_parameter_input_setting<CVPitchTrigger>(
+                    "Velocity Parameter Input",
+                    "ModInputs",
+                    this,
+                    &CVPitchTrigger::set_parameter_input_velocity,
+                    &CVPitchTrigger::get_parameter_input_velocity,
+                    ""
+                ),
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT
+            );
 
-        register_setting(new LOutputSaveableSetting(
-                             "MIDI Output Target",
-                             "ChordVoice",
-                             [=](const char *output_label) -> void { this->set_output_by_name(output_label); },
-                             [=](void) -> const char * { return this->get_output_label(); }
-                         ),
-                         SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LOutputSaveableSetting(
+                                "MIDI Output Target",
+                                "ChordVoice",
+                                [=](const char *output_label) -> void { this->set_output_by_name(output_label); },
+                                [=](void) -> const char * { return this->get_output_label(); }
+                            ),
+                            SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
 
-        register_setting(new VarSetting<bool>(
-                             "Enabled",
-                             "ChordVoice",
-                             &this->enabled
-                         ),
-                         SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-    }
-#endif
+            register_setting(new VarSetting<bool>(
+                                "Enabled",
+                                "ChordVoice",
+                                &this->enabled
+                            ),
+                            SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+        }
+    #endif
 };

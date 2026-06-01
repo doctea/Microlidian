@@ -92,11 +92,11 @@ void push_display() {
     if (is_locked()) return;
 
     // disabling locking here makes no apparent difference to clock drift, but seems risky since if the screen update takes a long time then the next tick might come in while we're still updating the screen, which could cause all sorts of weirdness; so maybe best to leave locking enabled here just in case.
-    acquire_lock();
+    // acquire_lock();
     menu->updateDisplay();
     last_drawn = millis();
     frame_ready = false;
-    release_lock();
+    // release_lock();
 }
 
 void update_screen_dontcare() {
