@@ -59,6 +59,9 @@ void setup_screen(bool pressed_state) {
         pinMode(ENCODER_KNOB_R, INPUT_PULLUP);
         pinMode(PIN_BUTTON_A, INPUT);
         pinMode(PIN_BUTTON_B, INPUT);
+        #ifdef PIN_BUTTON_C
+            pinMode(PIN_BUTTON_C, INPUT);
+        #endif
 
         tft_print((char*)"Ready!");
         tft_clear();

@@ -171,7 +171,8 @@ void setup() {
     // overclock the CPU so that we can afford all those CPU cycles drawing the UI!
     // 240mhz because, if we are to think about using the USB-Host-on-PIO thing, the system clock needs to be a multiple of 120mhz
     // set_sys_clock_khz(240000, true);
-    set_sys_clock_khz(300000, true);  // actually seems stable
+    // set_sys_clock_khz(300000, true);  // actually seems stable
+    set_sys_clock_khz(240000, false);
 
     ticked = false;
     started = false;
@@ -204,7 +205,7 @@ void setup() {
         // do_tick() previously blocked on the USB TX FIFO, so the timer alarm was
         // intentionally set LOW (0xC0) to let the USB drain ISR (0x80) preempt it.
         // Now that do_tick() writes only to a non-blocking ring buffer, that concern
-        // is gone.  Give the clock aliarms the HIGHEST priority so the tick fires as
+        // is gone.  Give the clock alarms the HIGHEST priority so the tick fires as
         // precisely as possible regardless of concurrent USB, screen, or button work.
         //
         //   0x00  Timer alarms (uClock + usb_timer) -- fires immediately, low jitter
@@ -255,7 +256,7 @@ void setup() {
     #ifdef ENABLE_SCREEN
         //delay(1000);    // see if giving 1 second to calm down will help reliability of screen initialisation... it does not. :(
         Debug_printf("before setup_screen(), free RAM is %u\n", freeRam());
-        setup_screen(LOW);
+        setup_screen(BUTTON_ACTIVE_ON_STATE);
         Debug_printf("after setup_screen(), free RAM is %u\n", freeRam());
     #endif
 
@@ -430,6 +431,9 @@ void setup() {
     #endif
 
     #ifdef ENABLE_SCREEN
+
+        menu->setProfileEnable(true);
+
         char startup_msg[48];
         snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM is %u", (unsigned)freeRam());
         menu->set_last_message(startup_msg);
@@ -628,6 +632,8 @@ void do_tick(uint32_t in_ticks) {
 void loop() {
     //return;   // disabling this loop() entirely only improves drift by about 10ms every second, even with ATOMICs disabled.
     uint32_t mics_start = micros();
+
+    if (Serial) Serial.printf("digitalRead(PIN_BUTTON_A)=%d, digitalRead(PIN_BUTTON_B)=%d, digitalRead(PIN_BUTTON_C)=%d\n", digitalRead(PIN_BUTTON_A), digitalRead(PIN_BUTTON_B), digitalRead(PIN_BUTTON_C));    
 
     #ifdef UCLOCK_DEBUG_LOGGING
         // Must NOT be inside ATOMIC() — USB Serial requires USB interrupts to drain its TX

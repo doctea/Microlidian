@@ -23,14 +23,17 @@
 
 #ifdef ENABLE_SCREEN
     #define ENCODER_STEP_DIVISOR    4
-    #define PIN_BUTTON_A    D1   // pin to receive encoder button
     #ifdef BUILD_BREADBOARD
-        #define PIN_BUTTON_B    D9   // pin to receive back button    //;; breadboard version has DC on D0, and back button on D9
-        //#define PIN_BUTTON_C    26  // pin to receive right-hand / save button
-        #define ENCODER_KNOB_L  D2   // pin to receive left-encoder pulses
-        #define ENCODER_KNOB_R  D3   // pin to receive right-encoder pulses
+        #define BUTTON_ACTIVE_ON_STATE HIGH
+        #define PIN_BUTTON_A    D25   // pin to receive encoder button - D25 is also LED on the olimex board!
+        #define PIN_BUTTON_B    D26   // pin to receive back button    //;; breadboard version has DC on D0, and back button on D9
+        #define PIN_BUTTON_C    D27  // pin to receive right-hand / save button
+        #define ENCODER_KNOB_L  D28   // pin to receive left-encoder pulses
+        #define ENCODER_KNOB_R  D29   // pin to receive right-encoder pulses
     #endif
     #ifdef BUILD_PCB
+        #define BUTTON_ACTIVE_ON_STATE LOW
+        #define PIN_BUTTON_A    D1   // pin to receive encoder button 
         #define PIN_BUTTON_B    D0   // pin to receive back button
         //#define PIN_BUTTON_C    26  // pin to receive right-hand / save button
         #define ENCODER_KNOB_L  D3   // pin to receive left-encoder pulses

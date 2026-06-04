@@ -34,7 +34,7 @@ void setup_saveloadlib() {
     }
 
     // pre-allocate RAM for saveloadlib, this saves us about 15KB in memory allocator overhead/fragmentation?
-    static SL_Arena<73 * 1024> arena; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
+    static SL_Arena<73 * 1024> arena PSRAM; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
     sl_set_setting_arena(&arena);
 
     Serial.printf("Before sl_register_root(), free RAM is %u\n", freeRam());
