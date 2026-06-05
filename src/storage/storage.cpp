@@ -9,6 +9,14 @@
 #include "core_safe.h"
 #include <profiling.h>
 
+#ifndef PSRAM_IF_AVAILABLE
+    #if RP2350_PSRAM_CS
+        #define PSRAM_IF_AVAILABLE PSRAM
+    #else
+        #define PSRAM_IF_AVAILABLE // empty
+    #endif
+#endif
+
 SettingsRoot *settings_root;
 
 #ifdef ENABLE_TESTSAVELOAD
@@ -34,7 +42,7 @@ void setup_saveloadlib() {
     }
 
     // pre-allocate RAM for saveloadlib, this saves us about 15KB in memory allocator overhead/fragmentation?
-    static SL_Arena<73 * 1024> arena PSRAM; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
+    static SL_Arena<73 * 1024> arena PSRAM_IF_AVAILABLE; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
     sl_set_setting_arena(&arena);
 
     Serial.printf("Before sl_register_root(), free RAM is %u\n", freeRam());

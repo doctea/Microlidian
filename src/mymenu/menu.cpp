@@ -155,15 +155,15 @@ void setup_menu(bool button_high_state = HIGH) {
     // this is where euclidian menu was originally set up
     
     // enable encoder and separate buttons
-    #ifdef PIN_BUTTON_A
-        pinMode(PIN_BUTTON_A, INPUT_PULLDOWN);
-    #endif
-    #ifdef PIN_BUTTON_B
-        pinMode(PIN_BUTTON_B, INPUT_PULLDOWN);
-    #endif
-    #ifdef PIN_BUTTON_C
-        pinMode(PIN_BUTTON_C, INPUT_PULLUP);
-    #endif
+    // #ifdef PIN_BUTTON_A
+    //     pinMode(PIN_BUTTON_A, INPUT_PULLDOWN);
+    // #endif
+    // #ifdef PIN_BUTTON_B
+    //     pinMode(PIN_BUTTON_B, INPUT_PULLDOWN);
+    // #endif
+    // #ifdef PIN_BUTTON_C
+    //     pinMode(PIN_BUTTON_C, INPUT_PULLUP);
+    // #endif
 
     Debug_printf(F("Exiting setup_menu"));
     Serial_flush();

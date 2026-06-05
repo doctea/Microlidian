@@ -267,9 +267,15 @@ void setup() {
         if (pushButtonA.read() && pushButtonB.read()) {
             reset_upload_firmware();
         }
+        #ifdef PIN_BUTTON_C
+            pushButtonC.update();
+        #endif
 
         pushButtonA.resetStateChange();
         pushButtonB.resetStateChange();
+        #ifdef PIN_BUTTON_C
+            pushButtonC.resetStateChange();
+        #endif
     #endif
 
     #ifdef ENABLE_EUCLIDIAN
@@ -633,7 +639,7 @@ void loop() {
     //return;   // disabling this loop() entirely only improves drift by about 10ms every second, even with ATOMICs disabled.
     uint32_t mics_start = micros();
 
-    if (Serial) Serial.printf("digitalRead(PIN_BUTTON_A)=%d, digitalRead(PIN_BUTTON_B)=%d, digitalRead(PIN_BUTTON_C)=%d\n", digitalRead(PIN_BUTTON_A), digitalRead(PIN_BUTTON_B), digitalRead(PIN_BUTTON_C));    
+    // if (Serial) Serial.printf("digitalRead(PIN_BUTTON_A)=%d, digitalRead(PIN_BUTTON_B)=%d, digitalRead(PIN_BUTTON_C)=%d\n", digitalRead(PIN_BUTTON_A), digitalRead(PIN_BUTTON_B), digitalRead(PIN_BUTTON_C));    
 
     #ifdef UCLOCK_DEBUG_LOGGING
         // Must NOT be inside ATOMIC() — USB Serial requires USB interrupts to drain its TX
