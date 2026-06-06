@@ -437,9 +437,9 @@ void setup() {
     #endif
 
     #ifdef ENABLE_SCREEN
-
-        menu->setProfileEnable(true);
-
+        #ifdef ENABLE_PROFILE_ON_STARTUP
+            menu->setProfileEnable(true);    // enable the FPS + RAM display on startup
+        #endif
         char startup_msg[48];
         snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM is %u", (unsigned)freeRam());
         menu->set_last_message(startup_msg);
