@@ -79,7 +79,10 @@ void setup_parameter_inputs() {
     parameter_manager->addInput(virtpi3);
 
     #ifdef ENABLE_EXTENDED_VIRTUAL_INPUTS
-        #define EXTENDED_VIRTUALS_AS_LIGHTWEIGHT true   // 9k free RAM with true.. crash on startup with false :/ 
+        #ifndef EXTENDED_VIRTUALS_AS_LIGHTWEIGHT
+            #warning "EXTENDED_VIRTUALS_AS_LIGHTWEIGHT not defined - extended virtual inputs will be fully featured with display and controls, which may cause out-of-memory crashes on some hardware.  Define EXTENDED_VIRTUALS_AS_LIGHTWEIGHT to true to make them lightweight and avoid crashes, at the cost of no display or controls for these inputs."
+            #define EXTENDED_VIRTUALS_AS_LIGHTWEIGHT true   // 9k free RAM with true.. crash on startup with false :/ 
+        #endif
 
         // Additional random sources at different S&H rates (lightweight = no display/controls)
         parameter_manager->addInput(new VirtualParameterInput((char*)"Rand beat",   "Rands", RAND, 4.0f, 0.0f, PPQN,                    EXTENDED_VIRTUALS_AS_LIGHTWEIGHT));

@@ -335,13 +335,17 @@ void load_from_slot_7() {   load_from_slot(7);}
             { &save_to_slot_7, &load_from_slot_7 }
         };
 
-        menu->add(new CallbackMenuItem("Last accessed preset", []() -> const char* {
-            int slot = get_last_accessed_preset_slot();
-            if (slot==-1) return "Last preset: None";
-            static char label[MENU_C_MAX];
-            snprintf(label, MENU_C_MAX, "Last preset: Slot %i", slot);
-            return label;
-        }, false));
+        menu->add(new CallbackMenuItem(
+            "Last accessed preset", 
+            []() -> const char* {
+                int slot = get_last_accessed_preset_slot();
+                if (slot==-1) return "Last preset: None";
+                static char label[MENU_C_MAX];
+                snprintf(label, MENU_C_MAX, "Last preset: Slot %i", slot);
+                return label;
+            }, 
+            false
+        ));
 
         for (int i = 0 ; i < sizeof(functions)/sizeof(functions_t) ; i++) {
             char label[MENU_C_MAX];
