@@ -30,20 +30,30 @@ class DebugPanel : public MenuItem {
     public:
         DebugPanel() : MenuItem("Debug") {
             this->selectable = false;
+            IF_MENU_PERF_PARTIAL_UPDATES(this->add_redraw_policy(REDRAW_ON_CUSTOM));
         }
+
+        #if MENU_PERF_PARTIAL_UPDATES
+            virtual bool check_needs_redraw_custom(bool selected, bool opened) override {
+                static unsigned long last_redraw_time = 0;
+                unsigned long now = millis();
+                if (now - last_redraw_time > 1000) { // redraw at most once per second
+                    last_redraw_time = now;
+                    return true;
+                }
+                return false;
+            }
+        #endif
 
         virtual int display(Coord pos, bool selected, bool opened) override {
             unsigned long time = millis()/1000;
             tft->setCursor(pos.x,pos.y);
             header("Statistics:", pos, selected, opened);
-            #ifdef ENABLE_PARAMETERS
-                tft->printf("Parameters: %i\n", parameter_manager->available_parameters->size());
+            #ifdef RP2350_PSRAM_CS
+                tft->printf("Free RAM: %u bytes, PSRAM free heap: %u bytes\n", freeRam(), rp2040.getFreePSRAMHeap());
+            #else
+                tft->printf("Free RAM: %u bytes\n", freeRam());
             #endif
-            #ifdef ENABLE_STORAGE
-                SL_TreeCounts sl_counts = sl_count_tree(SL_ROOT);
-                tft->printf("Save tree: %u nodes %u settings ~%lu KB\n", sl_counts.nodes, sl_counts.settings, (unsigned long)sl_counts.bytes/1024);
-            #endif
-            tft->printf("Free RAM: %u bytes\n", freeRam());
             tft->printf("Uptime: %02uh %02um %02us\n", time/60/60, (time/60)%60, (time)%60);
             tft->print("Serial: ");
             tft->print(Serial?"connected\n":"not connected\n");
@@ -53,6 +63,18 @@ class DebugPanel : public MenuItem {
             tft->print(tud_mounted()?"yes\n":"--\n");       // not expected to work: https://github.com/hathach/tinyusb/issues/2478#issuecomment-2094344075
             tft->print("USB host ready: ");*/
             tft->print(tud_ready()?"yes\n":"--\n");
+            #ifdef ENABLE_PARAMETERS
+                tft->printf("Parameters: %i\n", parameter_manager->available_parameters->size());
+            #endif
+            #ifdef PARAMETER_INPUTS_USE_CALLBACKS
+                tft->printf("Parameter inputs: %i (callback mode)\n", parameter_manager->available_inputs->size());
+            #else
+                tft->printf("Parameter inputs: %i (polling mode)\n", parameter_manager->available_inputs->size());
+            #endif
+            #ifdef ENABLE_STORAGE
+                SL_TreeCounts sl_counts = sl_count_tree(SL_ROOT);
+                tft->printf("Save tree: %u nodes %u settings ~%lu KB\n", sl_counts.nodes, sl_counts.settings, (unsigned long)sl_counts.bytes/1024);
+            #endif
             tft->print("Clock type: ");
             #ifdef USE_UCLOCK
                 #if defined(USE_UCLOCK_GENERIC)
