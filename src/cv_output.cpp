@@ -232,12 +232,6 @@
         output_a->set_slot_0_amount(1.0);
         output_a->set_slot_0_input(parameter_manager->getInputForName("LFO sync"));
 
-        /*LinkedList<FloatParameter*> list = new LinkedList<FloatParameter*>();
-        list->add(output_a);
-        list->add(output_b);
-        list->add(output_c);
-        list->add(output_d);*/
-
         parameter_manager->addParameter(output_a);
         parameter_manager->addParameter(output_b);
         parameter_manager->addParameter(output_c);
