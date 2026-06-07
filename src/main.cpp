@@ -417,6 +417,13 @@ void setup() {
         setup_saveloadlib();
         Serial.println("Finished setting up saveloadlib!"); Serial.flush();
 
+        parameter_manager->save_system_settings_callback = []() -> bool {
+            return save_system_settings();
+        };
+        parameter_manager->load_system_settings_callback = []() -> bool {
+            return load_system_settings();
+        };
+
         // load system settings from flash, if they exist
         Serial.println("Loading system settings..."); Serial.flush();
         load_system_settings();

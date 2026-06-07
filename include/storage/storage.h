@@ -101,8 +101,8 @@ extern SettingsRoot *settings_root;
     void setup_storage_menu();
 #endif
 
-void save_system_settings();
-void load_system_settings();
+bool save_system_settings();
+bool load_system_settings();
 bool save_to_slot(int slot);
 bool load_from_slot(int slot);
 

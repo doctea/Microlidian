@@ -11,7 +11,7 @@
 #include "colours.h"
 #include "submenuitem.h"
 
-#ifdef BUILD_PCB
+#ifdef BUILD_MICROLIDIAN_PCB
     #include "devices/ADCPimoroni24v.h"
 #elif defined(BUILD_MEGALIDIAN_BREADBOARD)
     #include "voltage_sources/ArduinoPinVoltageSource.h"
@@ -46,8 +46,8 @@ void setup_cv_input() {
     Wire.begin();
 
     #ifdef ENABLE_CV_INPUT
-        #ifdef BUILD_PCB
-            parameter_manager->addADCDevice(new ADCPimoroni24v(ENABLE_CV_INPUT, &Wire, 5.0));
+        #ifdef BUILD_MICROLIDIAN_PCB
+            parameter_manager->addADCDevice(new ADCPimoroni24v(ENABLE_CV_INPUT, &Wire, -5.0, 5.0));
         #elif defined(BUILD_MEGALIDIAN_BREADBOARD)
             parameter_manager->addVoltageSource(new ArduinoPinVoltageSource(0, A0, -5.0f, 5.0f, true, true));
             parameter_manager->addVoltageSource(new ArduinoPinVoltageSource(1, A1, -5.0f, 5.0f, true, true));

@@ -42,7 +42,7 @@ void setup_saveloadlib() {
     }
 
     // pre-allocate RAM for saveloadlib, this saves us about 15KB in memory allocator overhead/fragmentation?
-    static SL_Arena<73 * 1024> arena PSRAM_IF_AVAILABLE; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
+    static SL_Arena<74 * 1024> arena PSRAM_IF_AVAILABLE; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
     sl_set_setting_arena(&arena);
 
     Serial.printf("Before sl_register_root(), free RAM is %u\n", freeRam());
@@ -88,7 +88,7 @@ void setup_saveloadlib() {
 }
 
 // save/load system settings
-void save_system_settings() {
+bool save_system_settings() {
     acquire_lock();
     bool status = sl_save_to_file(settings_root, SYSTEM_SETTINGS_FILEPATH, SL_SCOPE_SYSTEM);
     release_lock();
@@ -97,15 +97,17 @@ void save_system_settings() {
     } else {
         messages_log_add("Failed to save system settings");
     }
+    return status;
 }
-void load_system_settings() {
+bool load_system_settings() {
     if (!LittleFS.exists(SYSTEM_SETTINGS_FILEPATH)) {
         messages_log_add_fmt("System settings file does not exist: %s", SYSTEM_SETTINGS_FILEPATH);
-        return;
+        return false;
     }
     acquire_lock();
     bool status = sl_load_from_file(SYSTEM_SETTINGS_FILEPATH, SL_SCOPE_SYSTEM);
     release_lock();
+    return status;
 }
 
 bool save_to_slot(int slot) {
@@ -392,8 +394,8 @@ void load_from_slot_7() {   load_from_slot(7);}
         menu->remember_opened_page(-1, true);
         // TODO: move to the "System Settings" page
         DualMenuItem *system_settings_bar = new DualMenuItem("System settings");
-        system_settings_bar->add(new ActionConfirmItem("Load", &load_system_settings, false));
-        system_settings_bar->add(new ActionConfirmItem("Save", &save_system_settings, false));
+        system_settings_bar->add(new LambdaActionConfirmItem("Load", []() -> bool { return load_system_settings(); }, false));
+        system_settings_bar->add(new LambdaActionConfirmItem("Save", []() -> bool { return save_system_settings(); }, false));
         menu->add(system_settings_bar);
 
         // todo: debug stuff to debug page
