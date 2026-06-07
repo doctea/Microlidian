@@ -143,15 +143,15 @@ void auto_handle_start_wrapper() {
     #define F(X) X
 #endif
 
-// #ifdef ENABLE_PARAMETERS
-//   repeating_timer_t parameter_timer;
-//   bool parameter_repeating_callback(repeating_timer_t *rt) {
-//     if (started) {
-//       parameter_manager->throttled_update_cv_input__all(5, false, false);
-//     }
-//     return true;
-//   }
-// #endif
+#if defined(PROCESS_PARAMETERS_ON_CORE_0) && defined(ENABLE_PARAMETERS)
+  repeating_timer_t parameter_timer;
+  bool parameter_repeating_callback(repeating_timer_t *rt) {
+    if (started) {
+      parameter_manager->throttled_update_cv_input__all(PARAMETERS_MS_BETWEEN_UPDATES, false, false);
+    }
+    return true;
+  }
+#endif
 
 #ifdef USE_TINYUSB
   repeating_timer_t usb_timer;
@@ -467,9 +467,9 @@ void setup() {
     started = true;
 
     // set up repeating timers to process tasks
-    // #ifdef ENABLE_PARAMETERS
-    //     add_repeating_timer_ms(5, parameter_repeating_callback, nullptr, &parameter_timer);
-    // #endif
+    #if defined(PROCESS_PARAMETERS_ON_CORE_0) && defined(ENABLE_PARAMETERS)
+        add_repeating_timer_ms(5, parameter_repeating_callback, nullptr, &parameter_timer);
+    #endif
     #ifdef USE_TINYUSB
         add_repeating_timer_us(100, usb_repeating_callback, nullptr, &usb_timer);
     #endif

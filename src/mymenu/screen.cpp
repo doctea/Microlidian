@@ -163,8 +163,8 @@ void loop1() {
         #endif
     #endif
 
-    // with draw_screen locking disabled, and with this block disabled, clock loses about 15ms every second.
-    #ifdef ENABLE_CV_INPUT
+    #if !defined(PROCESS_PARAMETERS_ON_CORE_0) && defined(ENABLE_PARAMETERS)
+        // process parameters on core 1 instead of core 0; should actually probably move this into an interrupt
         static unsigned long last_cv_update = 0;
         if (cv_input_enabled) {
             if (parameter_manager->ready_for_next_update() && !is_locked()) {
