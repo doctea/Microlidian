@@ -317,7 +317,7 @@ void load_from_slot_7() {   load_from_slot(7);}
 #ifdef ENABLE_SCREEN
     void setup_storage_menu() {
         menu->remember_opened_page(
-            menu->add_page("Storage: Presets"),
+            menu->add_page("Presets", C_WHITE, true, "Storage"),
             true
         );
 
@@ -365,7 +365,7 @@ void load_from_slot_7() {   load_from_slot(7);}
 
         //// Snapshots storage page
         menu->remember_opened_page(
-            menu->add_page("Storage: Snapshots"),
+            menu->add_page("Snapshots", C_WHITE, true, "Storage"),
             true
         );
         menu->add(new CallbackMenuItem("Last accessed snapshot", []() -> const char* {
@@ -390,7 +390,7 @@ void load_from_slot_7() {   load_from_slot(7);}
             menu->add(submenuitem);
         }
 
-        menu->add_page("Storage: System settings"); // @@TODO: move storage of the system settings to its own page instead of tucking it away in the storage page
+        menu->add_page("Storage", C_WHITE, true, "Settings"); // @@TODO: move storage of the system settings to its own page instead of tucking it away in the storage page
         menu->remember_opened_page(-1, true);
         // TODO: move to the "System Settings" page
         DualMenuItem *system_settings_bar = new DualMenuItem("System settings");

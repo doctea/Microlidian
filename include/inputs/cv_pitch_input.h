@@ -116,7 +116,7 @@ public:
     }
 
     virtual void create_menu_items() {
-        menu->add_page(this->label, this->colour);
+        menu->add_page(this->label, this->colour, true, "CV Input");
         SubMenuItemBar *selectors = new SubMenuItemBar("Inputs");
         selectors->add(new LambdaToggleControl(
             "Enabled",
