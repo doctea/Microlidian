@@ -120,18 +120,18 @@ void draw_screen() {
         //delay(MENU_MS_BETWEEN_REDRAW/8);
     //};
     //menu_locked = true;
-    acquire_lock();
+    // acquire_lock();
     frame_ready = false;
     // EXPERIMENTAL (2026-04-19): removed ATOMIC() wrapper around menu->display() so that
     // USB serial TX ISR can service serial frame streaming for remote viewer.
     // Previously this was: ATOMIC() { menu->display(); frame_ready = true; }
     // REVERT THIS if crashes occur with serial connected and the queued serial dispatch
     // approach in main.cpp does not fix them.
-    ATOMIC() {
+    // ATOMIC() {
         menu->display();
         frame_ready = true;
-    }
-    release_lock();
+    // }
+    // release_lock();
 
     push_display();
 }

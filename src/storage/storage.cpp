@@ -42,7 +42,11 @@ void setup_saveloadlib() {
     }
 
     // pre-allocate RAM for saveloadlib, this saves us about 15KB in memory allocator overhead/fragmentation?
-    static SL_Arena<74 * 1024> arena PSRAM_IF_AVAILABLE; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
+    #ifdef RP2350_PSRAM_CS
+        static SL_Arena<80 * 1024> arena PSRAM_IF_AVAILABLE; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
+    #else
+        static SL_Arena<76 * 1024> arena PSRAM_IF_AVAILABLE; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
+    #endif
     sl_set_setting_arena(&arena);
 
     Serial.printf("Before sl_register_root(), free RAM is %u\n", freeRam());
@@ -115,7 +119,11 @@ bool save_to_slot(int slot) {
     char filename[MAXFILEPATH];
     snprintf(filename, MAXFILEPATH, PRESET_SLOT_FILEPATH_FORMAT, slot);
 
+    FSInfo info;
+    LittleFS.info(info);
+
     Serial.printf("Saving to slot %i (file %s)...\n", slot, filename);
+    Serial.printf("Disk space used is %u/%u\n", info.usedBytes, info.totalBytes);
     uint32_t micros_at_start_of_save = micros();
 
     // Keep the lock only around LittleFS transaction to minimise UI/input stall time.
@@ -124,15 +132,21 @@ bool save_to_slot(int slot) {
     release_lock();
 
     uint32_t micros_at_end_of_save = micros();
-    Serial.printf("Finished saving to slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save));
+    Serial.printf("Finished saving to slot %i (file %s) in %u us: return status was %i\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save), status);
 
     if (status) {
         last_accessed_preset_slot = slot;
         messages_log_add_fmt("Saved to slot %i", slot);
+        #ifdef ENABLE_SCREEN
+            menu->set_last_message("Saved!", GREEN);
+        #endif
         //Serial.printf("Saved to slot %i (file %s)!\n", slot, filename); Serial.flush();
         return true;
     } else {
         messages_log_add_fmt("Failed to save to slot %i", slot);
+        #ifdef ENABLE_SCREEN
+            menu->set_last_message("Failed saving!", RED);
+        #endif
         //Serial.printf("Failed to save to slot %i (file %s)!\n", slot, filename); Serial.flush();
         return false;
     }
@@ -240,12 +254,12 @@ bool process_queued_file_output() {
     if (is_outputting) 
         return false; // still outputting previous file, don't start a new one yet
 
+    if (queued_filename[0] == '\0') 
+        return false; // no file queued
+
     char filename[MAXFILEPATH];
     strncpy(filename, queued_filename, MAXFILEPATH);
     filename[MAXFILEPATH-1] = '\0'; // ensure null termination
-
-    if (filename[0] == '\0') 
-        return false; // no file queued
 
     if (strcmp(filename, "$$$savetree") == 0) {
         acquire_lock();
@@ -390,7 +404,7 @@ void load_from_slot_7() {   load_from_slot(7);}
             menu->add(submenuitem);
         }
 
-        menu->add_page("Storage", C_WHITE, true, "Settings"); // @@TODO: move storage of the system settings to its own page instead of tucking it away in the storage page
+        menu->add_page("System", C_WHITE, true, "Storage"); // @@TODO: move storage of the system settings to its own page instead of tucking it away in the storage page
         menu->remember_opened_page(-1, true);
         // TODO: move to the "System Settings" page
         DualMenuItem *system_settings_bar = new DualMenuItem("System settings");

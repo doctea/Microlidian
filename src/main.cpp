@@ -114,9 +114,11 @@ void global_on_restart() {
 
     #ifdef ENABLE_ARRANGER
         if (arranger != nullptr) {
-                arranger->on_restart();
+            arranger->on_restart();
         }
     #endif
+
+    output_processor->on_restart();
   
   //send_midi_serial_stop_start();
   //behaviour_manager->on_restart();
@@ -303,9 +305,9 @@ void setup() {
         // set up Turing Machine pattern
         // TODO: rename this, move it somewhere else, it's not really an "insect" pattern
         TuringMachinePattern *tm_pattern = new TuringMachinePattern(output_processor->nodes);
-        #ifdef ENABLE_STORAGE
-            tm_pattern->set_path_segment("pattern_0");
-        #endif
+        // #ifdef ENABLE_STORAGE
+        //     tm_pattern->set_path_segment("pattern_0");
+        // #endif
         tm_pattern->set_steps(16);
         tm_pattern->set_output(output_processor->get_output_for_label("Melody"));
         insect_sequencer->add_pattern(tm_pattern);
@@ -448,7 +450,11 @@ void setup() {
             menu->setProfileEnable(true);    // enable the FPS + RAM display on startup
         #endif
         char startup_msg[48];
-        snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM is %u", (unsigned)freeRam());
+        #ifdef RP2350_PSRAM_CS
+            snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM is %u, free ext RAM is %u", (unsigned)freeRam(), (unsigned)rp2040.getFreePSRAMHeap());
+        #else
+            snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM is %u", (unsigned)freeRam());
+        #endif
         menu->set_last_message(startup_msg);
     #endif
 
@@ -619,6 +625,12 @@ void do_tick(uint32_t in_ticks) {
         // Previous behaviour:
         // if (is_bpm_on_sixteenth(ticks) && output_processor->is_enabled()) {
         if (output_processor->is_enabled()) {
+            if (is_bpm_on_phrase(ticks)) {
+                output_processor->on_phrase(BPM_CURRENT_PHRASE);
+            }
+            if (is_bpm_on_bar(ticks)) {
+                output_processor->on_bar(BPM_CURRENT_BAR);
+            }
             PROFILE_START(p_outproc_process);
             output_processor->process();
             PROFILE_STOP(p_outproc_process);
