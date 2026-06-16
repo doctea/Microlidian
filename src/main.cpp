@@ -43,6 +43,12 @@
     #ifdef ENABLE_ACCENTS
         #include "mymenu/menuitems_accent.h"
     #endif
+    #ifndef SEQUENCER_PAGES_COMBINE
+        #define SEQUENCER_PAGES_COMBINE 0
+    #endif
+    #ifndef OUTPUT_PROCESSOR_PAGES_COMBINE
+        #define OUTPUT_PROCESSOR_PAGES_COMBINE false
+    #endif
 #endif
 #ifdef ENABLE_REMOTE_VIEWER
     #include "remote_viewer_serial.h"
@@ -355,7 +361,7 @@ void setup() {
             #endif
 
             // need to make sure all the outputs etc are added to the output_processorbefore we call this
-            sequencer->make_menu_items(menu, 0);    // 0 = COMBINE_NONE, which TODO: we should make into a global or something to be shared amongst different menu-capable things
+            sequencer->make_menu_items(menu, SEQUENCER_PAGES_COMBINE);    // 0 = COMBINE_NONE, which TODO: we should make into a global or something to be shared amongst different menu-capable things
             menu->select_page(0);   // todo: why do we do this?
             Debug_printf("after setting up sequencer and menus, free RAM is %u\n", freeRam());
         #endif
@@ -394,7 +400,7 @@ void setup() {
         #endif
         //Serial.println("getting this far 2?"); Serial.flush();
         Debug_printf("before output_processor->create_menu_items(), free RAM is %u\n", freeRam()); Serial_flush();
-        output_processor->create_menu_items();
+        output_processor->create_menu_items(OUTPUT_PROCESSOR_PAGES_COMBINE);
         Debug_printf("after creating output wrapper and processor menuitems, free RAM is %u\n", freeRam()); Serial_flush();
         setup_debug_menu();
         Debug_printf("after setup_debug_menu(), free RAM is %u\n", freeRam());

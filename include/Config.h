@@ -30,6 +30,9 @@
         #define PIN_BUTTON_C    D27   // pin to receive right-hand / save button
         #define ENCODER_KNOB_L  D28   // pin to receive left-encoder pulses
         #define ENCODER_KNOB_R  D29   // pin to receive right-encoder pulses
+
+        #define SEQUENCER_PAGES_COMBINE Euclidian::CombinePageOption::COMBINE_LOCKS_WITH_CIRCLE | Euclidian::CombinePageOption::COMBINE_MODULATION_WITH_MUTATION | Euclidian::CombinePageOption::COMBINE_PATTERN_MODULATION_WITH_PATTERN
+        #define OUTPUT_PROCESSOR_PAGES_COMBINE true
     #endif
     #ifdef BUILD_MICROLIDIAN_PCB
         #define BUTTON_ACTIVE_ON_STATE HIGH
@@ -38,6 +41,9 @@
         //#define PIN_BUTTON_C    26  // pin to receive right-hand / save button
         #define ENCODER_KNOB_L  D3   // pin to receive left-encoder pulses
         #define ENCODER_KNOB_R  D2   // pin to receive right-encoder pulses
+
+        #define SEQUENCER_PAGES_COMBINE 0
+        #define OUTPUT_PROCESSOR_PAGES_COMBINE 0
     #endif
 #endif
 
