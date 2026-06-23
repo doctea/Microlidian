@@ -29,7 +29,7 @@ extern bool debug_flag, debug_stress_sequencer_load;
 class DebugPanel : public MenuItem {
     public:
         DebugPanel() : MenuItem("Debug") {
-            this->selectable = false;
+            this->flags.selectable = false;
             IF_MENU_PERF_PARTIAL_UPDATES(this->add_redraw_policy(REDRAW_ON_CUSTOM));
         }
 
@@ -49,7 +49,7 @@ class DebugPanel : public MenuItem {
             unsigned long time = millis()/1000;
             tft->setCursor(pos.x,pos.y);
             header("Statistics:", pos, selected, opened);
-            #ifdef RP2350_PSRAM_CS
+            #ifdef ENABLE_PSRAM
                 tft->printf("Free RAM: %u bytes, PSRAM free heap: %u bytes\n", freeRam(), rp2040.getFreePSRAMHeap());
             #else
                 tft->printf("Free RAM: %u bytes\n", freeRam());

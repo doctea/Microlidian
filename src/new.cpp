@@ -10,7 +10,11 @@
 
 #include "Arduino.h"
 
-#ifdef RP2350_PSRAM_CS
+
+#ifdef ENABLE_PSRAM
+
+#warning "ENABLE_PSRAM is defined, so new/delete will use EXTMEM instead of RAM2.  Make sure you have a PSRAM chip connected to the RP2350!"
+
 #include "psram.h"
 
 #define RESERVE_RAM2 65536        // keep 64k of RAM2 reserved

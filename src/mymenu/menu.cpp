@@ -63,7 +63,7 @@ DisplayTranslator_Configured displaytranslator = DisplayTranslator_Configured();
 FLASHMEM 
 #endif*/
 void setup_menu(bool button_high_state = HIGH) {
-    Debug_println(F("Starting setup_menu()..")); Serial_flush();
+    Debug_println("Starting setup_menu().."); Serial_flush();
     setup_menu_io_gpio_priority();  // boost IO_IRQ_BANK0 before Encoder and button ISRs attach
 
     #ifdef ENCODER_KNOB_L
@@ -165,7 +165,7 @@ void setup_menu(bool button_high_state = HIGH) {
     //     pinMode(PIN_BUTTON_C, INPUT_PULLUP);
     // #endif
 
-    Debug_printf(F("Exiting setup_menu"));
+    Debug_printf("Exiting setup_menu");
     Serial_flush();
 
     /*menu->add(&test_item_1);

@@ -10,6 +10,8 @@ void debug_free_ram();
 void reset_rp2040();
 void reset_upload_firmware();
 
+// #define ENABLE_DEBUG_SERIAL
+
 #define Serial_println(X)   if(Serial)Serial.println(X)
 #define Serial_printf(...)  if(Serial)Serial.printf(__VA_ARGS__)
 #define Serial_print(X)     if(Serial)Serial.print(X)

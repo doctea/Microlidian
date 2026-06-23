@@ -10,7 +10,7 @@
 #include <profiling.h>
 
 #ifndef PSRAM_IF_AVAILABLE
-    #if RP2350_PSRAM_CS
+    #if ENABLE_PSRAM
         #define PSRAM_IF_AVAILABLE PSRAM
     #else
         #define PSRAM_IF_AVAILABLE // empty
@@ -42,11 +42,12 @@ void setup_saveloadlib() {
     }
 
     // pre-allocate RAM for saveloadlib, this saves us about 15KB in memory allocator overhead/fragmentation?
-    #ifdef RP2350_PSRAM_CS
+    #ifdef ENABLE_PSRAM
         static SL_Arena<80 * 1024> arena PSRAM_IF_AVAILABLE; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
     #else
-        static SL_Arena<76 * 1024> arena PSRAM_IF_AVAILABLE; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
+        static SL_Arena<73 * 1024> arena; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
     #endif
+    Serial.printf("SL_Arena capacity is %u bytes, free RAM is %u\n", (unsigned)arena.bytes_capacity(), freeRam());
     sl_set_setting_arena(&arena);
 
     Serial.printf("Before sl_register_root(), free RAM is %u\n", freeRam());

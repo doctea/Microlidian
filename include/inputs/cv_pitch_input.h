@@ -36,7 +36,7 @@ class CVPitchTrigger
     char label[MENU_C_MAX];
 
     BaseOutput *output_target = nullptr;
-    LinkedList<BaseOutput *> *available_outputs = nullptr;
+    GenericList<BaseOutput *> *available_outputs = nullptr;
 
     CVPitchTriggerCore trigger_core = CVPitchTriggerCore(
         [=](int8_t note, int8_t velocity) -> void {
@@ -68,7 +68,7 @@ public:
     CVPitchTrigger(
         const char *label,
         BaseOutput *output_target,
-        LinkedList<BaseOutput *> *available_outputs,
+        GenericList<BaseOutput *> *available_outputs,
         BaseParameterInput *initial_pitch_input,
         BaseParameterInput *initial_velocity_input
     ) {
@@ -143,7 +143,7 @@ public:
             this->available_outputs,
             this->output_target
         );
-        output_selector->go_back_on_select = true;
+        output_selector->flags.go_back_on_select = true;
         selectors->add(output_selector);
         menu->add(selectors, this->colour);
         menu->add(this->trigger_core.get_pitch_trigger()->make_menu_items(), this->colour);

@@ -162,11 +162,15 @@ void auto_handle_start_wrapper() {
 #endif
 
 #ifdef USE_TINYUSB
-  repeating_timer_t usb_timer;
-  bool usb_repeating_callback(repeating_timer_t *rt) {
-    while(USBMIDI.read()) {}
-    return true;
-  }
+    extern mutex_t __usb_mutex;
+    repeating_timer_t usb_timer;
+    bool usb_repeating_callback(repeating_timer_t *rt) {
+        // if (mutex_try_enter(&__usb_mutex, NULL)) {
+            while(USBMIDI.read()) {}
+            // mutex_exit(&__usb_mutex);
+        // }    
+        return true;
+    }
 #endif
 
 void setup() {
@@ -456,7 +460,7 @@ void setup() {
             menu->setProfileEnable(true);    // enable the FPS + RAM display on startup
         #endif
         char startup_msg[48];
-        #ifdef RP2350_PSRAM_CS
+        #ifdef ENABLE_PSRAM
             snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM is %u, free ext RAM is %u", (unsigned)freeRam(), (unsigned)rp2040.getFreePSRAMHeap());
         #else
             snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM is %u", (unsigned)freeRam());
