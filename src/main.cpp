@@ -459,7 +459,7 @@ void setup() {
         #ifdef ENABLE_PROFILE_ON_STARTUP
             menu->setProfileEnable(true);    // enable the FPS + RAM display on startup
         #endif
-        char startup_msg[48];
+        char startup_msg[64];
         #ifdef ENABLE_PSRAM
             snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM is %u, free ext RAM is %u", (unsigned)freeRam(), (unsigned)rp2040.getFreePSRAMHeap());
         #else
