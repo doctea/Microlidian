@@ -461,9 +461,9 @@ void setup() {
         #endif
         char startup_msg[64];
         #ifdef ENABLE_PSRAM
-            snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM is %u, free ext RAM is %u", (unsigned)freeRam(), (unsigned)rp2040.getFreePSRAMHeap());
+            snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM %uK, free extRAM %uMB", (unsigned)freeRam()/1024, (unsigned)rp2040.getFreePSRAMHeap() / (1024 * 1024));
         #else
-            snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM is %u", (unsigned)freeRam());
+            snprintf(startup_msg, sizeof(startup_msg), "Started up, free RAM %uK", (unsigned)freeRam()/1024);
         #endif
         menu->set_last_message(startup_msg);
     #endif
