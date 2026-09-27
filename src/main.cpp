@@ -152,13 +152,13 @@ void auto_handle_start_wrapper() {
 #endif
 
 #if defined(PROCESS_PARAMETERS_ON_CORE_0) && defined(ENABLE_PARAMETERS)
-  repeating_timer_t parameter_timer;
-  bool parameter_repeating_callback(repeating_timer_t *rt) {
-    if (started) {
-      parameter_manager->throttled_update_cv_input__all(PARAMETERS_MS_BETWEEN_UPDATES, false, false);
+    repeating_timer_t parameter_timer;
+    bool parameter_repeating_callback(repeating_timer_t *rt) {
+        if (started) {
+            parameter_manager->throttled_update_cv_input__all(PARAMETERS_MS_BETWEEN_UPDATES, false, false);
+        }
+        return true;
     }
-    return true;
-  }
 #endif
 
 #ifdef USE_TINYUSB
@@ -235,7 +235,6 @@ void setup() {
     set_global_stop_callback(global_on_stop); 
 
     #if defined(ENABLE_CV_INPUT) && defined(ENABLE_CLOCK_INPUT_CV)
-        set_check_cv_clock_ticked_callback(actual_check_cv_clock_ticked);
         set_clock_mode_changed_callback(clock_mode_changed);
     #endif
 
@@ -702,7 +701,15 @@ void loop() {
     //     #endif
     // #endif
 
-    ATOMIC() 
+    #ifdef ENABLE_CLOCK_INPUT_CV
+        if (clock_mode == CLOCK_EXTERNAL_CV) {
+            uint32_t cv_clock_observed_at_us;
+            if (take_cv_clock_tick(cv_clock_observed_at_us))
+                clock_receive_external_pulse_at(CLOCK_EXTERNAL_CV, cv_clock_observed_at_us);
+        }
+    #endif
+
+    ATOMIC()
     {
         ticked = update_clock_ticks();
     }

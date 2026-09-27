@@ -20,7 +20,7 @@ void clock_mode_changed(ClockMode old_mode, ClockMode new_mode) {
     #endif
 }
 
-bool actual_check_cv_clock_ticked() {
+bool take_cv_clock_tick(uint32_t &observed_at_us) {
     static uint32_t last_checked_time;
     static bool already_high = false;
     //Serial.println("actual_check_cv_clock_ticked");
@@ -31,6 +31,7 @@ bool actual_check_cv_clock_ticked() {
     //Serial.printf("\tgot value %3.3f\n", parameter_manager->voltage_sources->get(0)->get_voltage()); 
     if (!already_high && v >= 3.0) {
         already_high = true;
+        observed_at_us = micros();
         //Serial.printf("%u: rise, got value %3.3f, ticking!\n", millis(), v);
         last_checked_time = millis();
         return true;
