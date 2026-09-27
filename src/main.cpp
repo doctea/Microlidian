@@ -352,6 +352,10 @@ void setup() {
         #if defined(ENABLE_PARAMETERS)
             parameter_manager->addInput(tm_pattern);
 
+            #ifdef ENABLE_SHUFFLE
+                parameter_manager->addParameters(shuffle_pattern_wrapper.getParameters());
+            #endif
+
             //Serial.println("..calling sequencer.getParameters()..");
             ParameterList *params = sequencer->getParameters();
             Debug_printf("after setting up sequencer parameters, free RAM is %u\n", freeRam());

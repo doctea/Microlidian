@@ -118,6 +118,10 @@ void setup_menu(bool button_high_state = HIGH) {
 
     conductor->make_menu_items(menu, COMBINE_NONE);
 
+    #ifdef ENABLE_SHUFFLE
+        setup_menu_shuffle();
+    #endif
+
     #ifdef ENABLE_STORAGE
         setup_storage_menu();
     #endif
