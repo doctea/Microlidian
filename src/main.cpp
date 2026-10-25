@@ -300,7 +300,7 @@ void setup() {
         sequencer = new MultiSequencer();
 
         // set up Euclidian Sequencer and patterns, and add to MultiSequencer
-        EuclidianSequencer *euclidian_sequencer = new EuclidianSequencer(output_processor->nodes, 25);
+        EuclidianSequencer *euclidian_sequencer = new EuclidianSequencer(output_processor->nodes, 25, NUM_GLOBAL_DENSITY_GROUPS);
         output_processor->configure_sequencer(euclidian_sequencer);
         euclidian_sequencer->initialise_patterns();
         euclidian_sequencer->reset_patterns();
