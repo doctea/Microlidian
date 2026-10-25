@@ -75,6 +75,7 @@
 
 #include <atomic>
 #include <SimplyAtomic.h>
+#include "midi_usb/usb_midi_tx.h"
 
 
 #ifdef USE_UCLOCK_GENERIC
@@ -93,6 +94,11 @@ FLASHMEM void create_midi_parameter_output_menu_items();
 
 // todo: move this elsewhere?
 RP2040DualMIDIOutputWrapper *output_wrapper;
+
+#ifdef USE_TINYUSB
+    // USBMIDITxQueue usb_midi_tx_queue;
+    std::atomic<bool> g_usbmidi_tx_busy{false};
+#endif
 
 std::atomic<bool> started = false;
 std::atomic<bool> ticked = false;
@@ -161,17 +167,17 @@ void auto_handle_start_wrapper() {
     }
 #endif
 
-#ifdef USE_TINYUSB
-    extern mutex_t __usb_mutex;
-    repeating_timer_t usb_timer;
-    bool usb_repeating_callback(repeating_timer_t *rt) {
-        // if (mutex_try_enter(&__usb_mutex, NULL)) {
-            while(USBMIDI.read()) {}
-            // mutex_exit(&__usb_mutex);
-        // }    
-        return true;
-    }
-#endif
+// #ifdef USE_TINYUSB
+//     extern mutex_t __usb_mutex;
+//     repeating_timer_t usb_timer;
+//     bool usb_repeating_callback(repeating_timer_t *rt) {
+//         // if (mutex_try_enter(&__usb_mutex, NULL)) {
+//             while(USBMIDI.read()) {}
+//             // mutex_exit(&__usb_mutex);
+//         // }    
+//         return true;
+//     }
+// #endif
 
 void setup() {
     Debug_println("setup() starting");
@@ -185,6 +191,13 @@ void setup() {
     // set_sys_clock_khz(240000, true);
     // set_sys_clock_khz(300000, true);  // actually seems stable
     set_sys_clock_khz(240000, false);
+
+    #ifdef USE_TINYUSB
+        // usb_midi_tx_queue.begin();
+        setup_serial();
+        setup_usb();
+        setup_midi();
+    #endif
 
     ticked = false;
     started = false;
@@ -300,7 +313,12 @@ void setup() {
         sequencer = new MultiSequencer();
 
         // set up Euclidian Sequencer and patterns, and add to MultiSequencer
-        EuclidianSequencer *euclidian_sequencer = new EuclidianSequencer(output_processor->nodes, 25, NUM_GLOBAL_DENSITY_GROUPS);
+        EuclidianSequencer *euclidian_sequencer = new EuclidianSequencer(
+            output_processor->nodes,
+            // "Pattern ",
+            25, 
+            NUM_GLOBAL_DENSITY_GROUPS
+        );
         output_processor->configure_sequencer(euclidian_sequencer);
         euclidian_sequencer->initialise_patterns();
         euclidian_sequencer->reset_patterns();
@@ -489,9 +507,10 @@ void setup() {
     #if defined(PROCESS_PARAMETERS_ON_CORE_0) && defined(ENABLE_PARAMETERS)
         add_repeating_timer_ms(5, parameter_repeating_callback, nullptr, &parameter_timer);
     #endif
-    #ifdef USE_TINYUSB
-        add_repeating_timer_us(100, usb_repeating_callback, nullptr, &usb_timer);
-    #endif
+    // #ifdef USE_TINYUSB
+    //      this causes problems when we try and send+receive USB MIDI data and USB serial data simultaneously -- have to do it in loop() outside of interrupt instead!
+    //     add_repeating_timer_us(100, usb_repeating_callback, nullptr, &usb_timer);
+    // #endif
 
 }
 
@@ -672,6 +691,17 @@ void loop() {
     uint32_t mics_start = micros();
 
     // if (Serial) Serial.printf("digitalRead(PIN_BUTTON_A)=%d, digitalRead(PIN_BUTTON_B)=%d, digitalRead(PIN_BUTTON_C)=%d\n", digitalRead(PIN_BUTTON_A), digitalRead(PIN_BUTTON_B), digitalRead(PIN_BUTTON_C));    
+
+    #ifdef USE_TINYUSB
+        // Service USB + pending SysEx responses even if config mode is active.
+        TinyUSB_Device_Task();
+        // usb_midi_tx_queue.drain(usb_midi, g_usbmidi_tx_busy);
+        for (uint32_t read_count = 0; read_count < 64 && usb_midi.available(); ++read_count) {
+            USBMIDI.read();
+        }
+        // usb_midi_tx_queue.drain(usb_midi, g_usbmidi_tx_busy);
+        // process_pending_sysex_responses();
+    #endif
 
     #ifdef UCLOCK_DEBUG_LOGGING
         // Must NOT be inside ATOMIC() — USB Serial requires USB interrupts to drain its TX
