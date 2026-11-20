@@ -114,6 +114,9 @@ void setup_serial() {
 
         while(!Serial) {};
     #endif
+    #ifdef ENABLE_SERIAL_OUTPUT_QUEUE
+        foundling::serial_output().begin();
+    #endif
 }
 
 // call this when global clock should be reset
@@ -151,9 +154,6 @@ void auto_handle_start_wrapper() {
 }
 
 #ifdef WAIT_FOR_SERIAL
-    #define Debug_println(X)    if(Serial)Serial.println(X)
-    #define Debug_printf(...)   if(Serial)Serial.printf(__VA_ARGS__)
-    #define Debug_print(X)      if(Serial)Serial.print(X)
     #define F(X) X
 #endif
 
@@ -446,9 +446,9 @@ void setup() {
 
     // setup the saveloadlib tree
     #ifdef ENABLE_STORAGE
-        Serial.println("Setting up saveloadlib..."); Serial.flush();
+        Serial_println("Setting up saveloadlib..."); Serial_flush();
         setup_saveloadlib();
-        Serial.println("Finished setting up saveloadlib!"); Serial.flush();
+        Serial_println("Finished setting up saveloadlib!"); Serial_flush();
 
         parameter_manager->save_system_settings_callback = []() -> bool {
             return save_system_settings();
@@ -458,10 +458,10 @@ void setup() {
         };
 
         // load system settings from flash, if they exist
-        Serial.println("Loading system settings..."); Serial.flush();
+        Serial_println("Loading system settings..."); Serial_flush();
         load_system_settings();
         settings_loaded = true;
-        Serial.println("Finished loading system settings!"); Serial.flush();
+        Serial_println("Finished loading system settings!"); Serial_flush();
         
         #ifdef ENABLE_TESTSAVELOAD
             test_object->create_menu_items();
@@ -701,6 +701,9 @@ void loop() {
         }
         // usb_midi_tx_queue.drain(usb_midi, g_usbmidi_tx_busy);
         // process_pending_sysex_responses();
+    #endif
+    #ifdef ENABLE_SERIAL_OUTPUT_QUEUE
+        foundling::serial_output().drain();
     #endif
 
     #ifdef UCLOCK_DEBUG_LOGGING

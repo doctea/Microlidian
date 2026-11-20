@@ -1,3 +1,5 @@
+#include <shared_debug.h>
+
 #ifndef FLASHMEM
     #define FLASHMEM
     //#define F(x) { x }

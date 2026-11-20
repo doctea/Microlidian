@@ -163,7 +163,7 @@ void setup_parameter_outputs(IMIDICCTarget *wrapper) {
         char label[MENU_C_MAX];
         for (int i = 0 ; i < NUM_MIDI_CC_PARAMETERS ; i++) {
             if (midi_cc_parameters[i]==nullptr) {
-                Serial.printf("WARNING: midi_cc_parameters[%i] is nullptr!\n"); 
+                Warn_printf("WARNING: midi_cc_parameters[%i] is nullptr!\n");
                 continue;
             }
 

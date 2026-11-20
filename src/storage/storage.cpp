@@ -1,6 +1,7 @@
 
 #ifdef ENABLE_STORAGE
 
+#include "Config.h"
 #include "storage/storage.h"
 #include "saveload_settings.h"
 
@@ -47,23 +48,23 @@ void setup_saveloadlib() {
     #else
         static SL_Arena<73 * 1024> arena; // 70KB was *just* enough on 2026-05-25, so let's give ourselves 2kb overhead for future
     #endif
-    Serial.printf("SL_Arena capacity is %u bytes, free RAM is %u\n", (unsigned)arena.bytes_capacity(), freeRam());
+    Serial_printf("SL_Arena capacity is %u bytes, free RAM is %u\n", (unsigned)arena.bytes_capacity(), freeRam());
     sl_set_setting_arena(&arena);
 
-    Serial.printf("Before sl_register_root(), free RAM is %u\n", freeRam());
+    Serial_printf("Before sl_register_root(), free RAM is %u\n", freeRam());
     sl_register_root(settings_root);
-    Serial.printf("After sl_register_root(), free RAM is %u\n", freeRam());
+    Serial_printf("After sl_register_root(), free RAM is %u\n", freeRam());
 
     // cascade setup of all saveable settings starting from root
     // Serial.printf("\n=== BEFORE SettingsRoot::setup_saveable_settings() (top-level child registration), free RAM is %u\n", freeRam());
     // settings_root->setup_saveable_settings();
     // Serial.printf("=== AFTER SettingsRoot::setup_saveable_settings(), free RAM is %u\n\n", freeRam());
     
-    Serial.printf("Before sl_setup_all(), free RAM is %u\n", freeRam());
+    Serial_printf("Before sl_setup_all(), free RAM is %u\n", freeRam());
     // sl_setup_all will recursively call setup_saveable_settings on each child
     sl_setup_all(settings_root);
-    Serial.printf("After sl_setup_all(), free RAM is %u\n", freeRam());
-    Serial.printf("Arena usage: %u / %u bytes (%.1f%%)\n",
+    Serial_printf("After sl_setup_all(), free RAM is %u\n", freeRam());
+    Serial_printf("Arena usage: %u / %u bytes (%.1f%%)\n",
                   (unsigned)arena.bytes_used(), (unsigned)arena.bytes_capacity(),
                   100.0f * arena.bytes_used() / arena.bytes_capacity());
 
@@ -88,7 +89,7 @@ void setup_saveloadlib() {
     sl_validate_tree(settings_root, Serial);  
     // sl_print_tree_to_print(settings_root, Serial);
     
-    Serial.println("setup_saveloadlib() finished!");
+    Serial_println("setup_saveloadlib() finished!");
     
 }
 
@@ -123,8 +124,8 @@ bool save_to_slot(int slot) {
     FSInfo info;
     LittleFS.info(info);
 
-    Serial.printf("Saving to slot %i (file %s)...\n", slot, filename);
-    Serial.printf("Disk space used is %u/%u\n", info.usedBytes, info.totalBytes);
+    Serial_printf("Saving to slot %i (file %s)...\n", slot, filename);
+    Serial_printf("Disk space used is %u/%u\n", info.usedBytes, info.totalBytes);
     uint32_t micros_at_start_of_save = micros();
 
     // Keep the lock only around LittleFS transaction to minimise UI/input stall time.
@@ -133,7 +134,7 @@ bool save_to_slot(int slot) {
     release_lock();
 
     uint32_t micros_at_end_of_save = micros();
-    Serial.printf("Finished saving to slot %i (file %s) in %u us: return status was %i\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save), status);
+    Serial_printf("Finished saving to slot %i (file %s) in %u us: return status was %i\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save), status);
 
     if (status) {
         last_accessed_preset_slot = slot;
@@ -189,7 +190,7 @@ bool save_to_snapshot(int slot) {
     char filename[MAXFILEPATH];
     snprintf(filename, MAXFILEPATH, SNAPSHOT_SLOT_FILEPATH_FORMAT, slot);
 
-    Serial.printf("Saving to snapshot slot %i (file %s)...\n", slot, filename);
+    Serial_printf("Saving to snapshot slot %i (file %s)...\n", slot, filename);
     uint32_t micros_at_start_of_save = micros();
 
     // Keep the lock only around LittleFS transaction to minimise UI/input stall time.
@@ -198,7 +199,7 @@ bool save_to_snapshot(int slot) {
     release_lock();
 
     uint32_t micros_at_end_of_save = micros();
-    Serial.printf("Finished saving to snapshot slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save));
+    Serial_printf("Finished saving to snapshot slot %i (file %s) in %u us\n", slot, filename, (micros_at_end_of_save - micros_at_start_of_save));
 
     if (status) {
         last_accessed_snapshot_slot = slot;
@@ -217,7 +218,7 @@ bool load_from_snapshot(int slot) {
     char filename[MAXFILEPATH];
     snprintf(filename, MAXFILEPATH, SNAPSHOT_SLOT_FILEPATH_FORMAT, slot);
 
-    Serial.printf("Loading from snapshot slot %i (file %s)...\n", slot, filename);
+    Serial_printf("Loading from snapshot slot %i (file %s)...\n", slot, filename);
     acquire_lock();
     bool status = sl_load_from_file(filename, SL_SCOPE_SNAPSHOT);
     release_lock();
@@ -288,7 +289,7 @@ bool process_queued_file_output() {
         // Reset all profiling counters so you get a clean window of samples.
         acquire_lock();
         profile_reset_all();
-        Serial.println("Profile counters reset.");
+        Serial_println("Profile counters reset.");
         reset_queuedfile();
         release_lock();
         return true;

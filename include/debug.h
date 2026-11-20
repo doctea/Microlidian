@@ -10,33 +10,11 @@ void debug_free_ram();
 void reset_rp2040();
 void reset_upload_firmware();
 
-// #define ENABLE_DEBUG_SERIAL
-
-#define Serial_println(X)   if(Serial)Serial.println(X)
-#define Serial_printf(...)  if(Serial)Serial.printf(__VA_ARGS__)
-#define Serial_print(X)     if(Serial)Serial.print(X)
-
-#ifndef Serial_flush
-    #ifdef SERIAL_FLUSH_REALLY
-        #define Serial_flush() if(Serial)Serial.flush()
-    #else
-        #define Serial_flush() {}
-    #endif
+#if defined(WAIT_FOR_SERIAL) && !defined(ENABLE_DEBUG_SERIAL)
+    #define ENABLE_DEBUG_SERIAL
 #endif
-#ifndef Debug_printf
-    #ifndef F
-        #define F(x) x
-    #endif
-    #ifdef ENABLE_DEBUG_SERIAL
-        #define Debug_println(X)    if(Serial)Serial.println(X)
-        #define Debug_printf(...)   if(Serial)Serial.printf(__VA_ARGS__)
-        #define Debug_print(X)      if(Serial)Serial.print(X)
-    #else
-        #define Debug_println(X)    {}
-        #define Debug_printf(...)     {}
-        #define Debug_print(X)      {}
-    #endif
-#endif
+
+#include <shared_debug.h>
 
 #include "menu_messages.h"
 

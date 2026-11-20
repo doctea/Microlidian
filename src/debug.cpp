@@ -13,7 +13,7 @@
 
   void debug_free_ram() {
     //Serial.println(F("debug_free_ram() not implemented on Teensy"));
-    if (Serial) Serial.printf(F("debug_free_ram: %i\n"), freeRam());
+    Serial_printf(F("debug_free_ram: %i\n"), freeRam());
   }
 
   FLASHMEM void reset_teensy() {
@@ -21,7 +21,7 @@
       #define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
       #define CPU_RESTART_VAL 0x5FA0004
       #define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
-      if (Serial) Serial.println(F("Restarting!\n")); Serial_flush();
+      Serial_println(F("Restarting!\n")); Serial_flush();
       CPU_RESTART;
       //Serial.println(F("Restarted?!"); Serial_flush();
   }
@@ -32,8 +32,8 @@
     return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
   }
   void debug_free_ram() {
-    if (Serial) Serial.print(F("Free RAM is "));
-    if (Serial) Serial.println(freeRam());
+    Serial_print(F("Free RAM is "));
+    Serial_println(freeRam());
   }
 #elif defined(ARDUINO_ARCH_RP2040)
   #include "pico/stdlib.h"  // not sure if we need this?
@@ -78,16 +78,16 @@
     return rp2040.getFreeHeap();
   }
   void debug_free_ram() {
-    if (Serial) Serial.print(F("Free RAM: "));
-    if (Serial) Serial.println(freeRam());
+    Serial_print(F("Free RAM: "));
+    Serial_println(freeRam());
   }
 #else
   int freeRam () {  
     return 1337
   }
   void debug_free_ram() {
-    if (Serial) Serial.print(F("Free RAM: not implemented on this platform"));
-    if (Serial) Serial.println(freeRam());
+    Serial_print(F("Free RAM: not implemented on this platform"));
+    Serial_println(freeRam());
   }
 #endif
 
